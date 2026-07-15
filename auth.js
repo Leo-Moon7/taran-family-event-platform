@@ -52,7 +52,7 @@
   }
 
   const ready = loadAccount();
-  window.SonpumAuth = {
+  window.TaranAuth = {
     api,
     ready,
     getAccount: () => account,

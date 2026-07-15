@@ -1,6 +1,6 @@
 (function () {
   function bootBlog() {
-  const posts = window.memoa_BLOG_POSTS || [];
+  const posts = window.taran_BLOG_POSTS || [];
   const localBlogImages = [
     "assets/images/venue-hotel.webp",
     "assets/images/venue-hanjeongsik.webp",
@@ -162,14 +162,14 @@
     const post = bySlug.get(slug) || posts[0];
     if (!post) return;
 
-    document.title = `${post.title} | 메모아`;
+    document.title = `${post.title} | 따란`;
     const description = document.querySelector("meta[name='description']");
     if (description) description.setAttribute("content", post.excerpt);
 
     articleRoot.innerHTML = `
       <a class="text-link" href="articles.html">← 준비백과 목록</a>
       <header class="blog-article-header">
-        <p class="eyebrow">${escapeHtml(post.category)} · memoa 준비백과</p>
+        <p class="eyebrow">${escapeHtml(post.category)} · taran 준비백과</p>
         <h1>${escapeHtml(post.title)}</h1>
         <p>${escapeHtml(post.excerpt)}</p>
         <div class="blog-card-meta"><span>작성일 ${escapeHtml(post.date)}</span><span>읽는 시간 ${escapeHtml(post.readTime)}</span><span>${escapeHtml(post.category)}</span></div>
@@ -232,5 +232,5 @@
     renderArticle();
   }
 
-  Promise.resolve(window.memoaContentReady).finally(bootBlog);
+  Promise.resolve(window.taranContentReady).finally(bootBlog);
 })();

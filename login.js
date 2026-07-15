@@ -12,7 +12,7 @@ authTabs.forEach(tab => tab.addEventListener("click", () => selectAuthTab(tab.da
 if (new URLSearchParams(window.location.search).get("mode") === "register") selectAuthTab("register");
 
 function returnPath() {
-  return window.SonpumAuth.safeReturnPath(new URLSearchParams(window.location.search).get("return") || "account.html");
+  return window.TaranAuth.safeReturnPath(new URLSearchParams(window.location.search).get("return") || "account.html");
 }
 
 loginForm.addEventListener("submit", async event => {
@@ -20,7 +20,7 @@ loginForm.addEventListener("submit", async event => {
   const error = document.querySelector("#login-error");
   error.textContent = "";
   try {
-    await window.SonpumAuth.api("/api/auth/login", {
+    await window.TaranAuth.api("/api/auth/login", {
       method: "POST",
       body: JSON.stringify({ email: document.querySelector("#login-email").value.trim(), password: document.querySelector("#login-password").value })
     });
@@ -44,7 +44,7 @@ registerForm.addEventListener("submit", async event => {
     return;
   }
   try {
-    await window.SonpumAuth.api("/api/auth/register", {
+    await window.TaranAuth.api("/api/auth/register", {
       method: "POST",
       body: JSON.stringify({ display_name: document.querySelector("#register-name").value.trim(), email: document.querySelector("#register-email").value.trim(), password })
     });

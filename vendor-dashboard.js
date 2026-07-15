@@ -2,7 +2,7 @@ const vendorParams = new URLSearchParams(window.location.search);
 const vendorVenueId = vendorParams.get("id") || window.publicVenueData[0].id;
 const vendorVenue = window.publicVenueData.find(item => item.id === vendorVenueId);
 let vendorClaims = [];
-try { vendorClaims = JSON.parse(localStorage.getItem("sonpum-haebang-claims") || "[]"); } catch (_) { vendorClaims = []; }
+try { vendorClaims = JSON.parse(localStorage.getItem("taran-provider-claims") || "[]"); } catch (_) { vendorClaims = []; }
 let vendorClaim = vendorClaims.find(item => item.venueId === vendorVenueId);
 
 const statusBox = document.querySelector("#vendor-status");
@@ -76,9 +76,9 @@ document.querySelector("#vendor-editor").addEventListener("submit", event => {
     ownerStatus: "claimed"
   };
   let allEdits = {};
-  try { allEdits = JSON.parse(localStorage.getItem("sonpum-haebang-vendor-edits") || "{}"); } catch (_) { allEdits = {}; }
+  try { allEdits = JSON.parse(localStorage.getItem("taran-provider-edits") || "{}"); } catch (_) { allEdits = {}; }
   allEdits[vendorVenue.id] = edits;
-  localStorage.setItem("sonpum-haebang-vendor-edits", JSON.stringify(allEdits));
+  localStorage.setItem("taran-provider-edits", JSON.stringify(allEdits));
   document.querySelector("#vendor-message").textContent = "저장되었습니다. 공개 페이지를 새로 열면 변경 내용을 확인할 수 있습니다.";
 });
 
@@ -86,7 +86,7 @@ document.querySelector("#premium-interest").addEventListener("click", () => {
   if (!vendorClaim || vendorClaim.status !== "approved") return;
   vendorClaim.adInterest = true;
   vendorClaim.premiumInterest = true;
-  localStorage.setItem("sonpum-haebang-claims", JSON.stringify(vendorClaims));
+  localStorage.setItem("taran-provider-claims", JSON.stringify(vendorClaims));
   document.querySelector("#vendor-plan-name").textContent = "Basic + 광고 관심";
   document.querySelector("#vendor-plan-copy").textContent = "무료 수정 권한은 승인됐고, Premium 광고 상담 관심이 표시되어 있습니다.";
   document.querySelector("#vendor-message").textContent = "Premium 상담 관심 상태로 표시했습니다. 실제 결제나 신청 전송은 발생하지 않습니다.";

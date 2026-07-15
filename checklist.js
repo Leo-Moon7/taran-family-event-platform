@@ -39,14 +39,14 @@ function renderChecklist() {
 
 async function saveChecklist() {
   const state = checklistState();
-  localStorage.setItem("sonpum-checklist", JSON.stringify(state));
-  const account = window.SonpumAuth.getAccount();
+  localStorage.setItem("taran-checklist", JSON.stringify(state));
+  const account = window.TaranAuth.getAccount();
   if (!account) {
     document.querySelector("#checklist-save-status").textContent = "현재 브라우저에 임시 저장 중";
     return;
   }
   try {
-    await window.SonpumAuth.api("/api/member/state/checklist", { method: "PUT", body: JSON.stringify({ state }) });
+    await window.TaranAuth.api("/api/member/state/checklist", { method: "PUT", body: JSON.stringify({ state }) });
     document.querySelector("#checklist-save-status").textContent = "계정에 자동 저장됨";
   } catch (_) {
     document.querySelector("#checklist-save-status").textContent = "저장 연결을 확인해주세요";
@@ -65,17 +65,17 @@ eventDateInput.addEventListener("change", () => { renderChecklist(); scheduleChe
 document.querySelector("#checklist-reset").addEventListener("click", () => { checklistInputs.forEach(input => { input.checked = false; }); renderChecklist(); scheduleChecklistSave(); });
 
 (async function initializeChecklist() {
-  const account = await window.SonpumAuth.ready;
+  const account = await window.TaranAuth.ready;
   document.querySelector("#checklist-login-link").hidden = Boolean(account);
   document.querySelector(".checklist-login-cta").hidden = Boolean(account);
   if (account) {
     try {
-      const saved = await window.SonpumAuth.api("/api/member/state/checklist");
+      const saved = await window.TaranAuth.api("/api/member/state/checklist");
       applyChecklistState(saved.state);
       document.querySelector("#checklist-save-status").textContent = "계정에 자동 저장됨";
       return;
     } catch (_) {}
   }
-  try { applyChecklistState(JSON.parse(localStorage.getItem("sonpum-checklist") || "{}")); } catch (_) { applyChecklistState({}); }
+  try { applyChecklistState(JSON.parse(localStorage.getItem("taran-checklist") || "{}")); } catch (_) { applyChecklistState({}); }
   document.querySelector("#checklist-save-status").textContent = "현재 브라우저에 임시 저장 중";
 })();

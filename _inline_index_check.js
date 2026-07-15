@@ -13,23 +13,23 @@
         parents: "부모님 행사",
         home: "가족 모임"
       };
-      const event = document.querySelector("#jp-event");
-      const guests = document.querySelector("#jp-guests");
-      const budget = document.querySelector("#jp-budget");
-      const region = document.querySelector("#jp-region");
-      const result = document.querySelector("#jp-estimate-result");
-      const note = document.querySelector("#jp-estimate-note");
-      const form = document.querySelector("#jp-calculator-form");
+      const event = document.querySelector("#taran-event");
+      const guests = document.querySelector("#taran-guests");
+      const budget = document.querySelector("#taran-budget");
+      const region = document.querySelector("#taran-region");
+      const result = document.querySelector("#taran-estimate-result");
+      const note = document.querySelector("#taran-estimate-note");
+      const form = document.querySelector("#taran-calculator-form");
       const stepLabels = Array.from(form.querySelectorAll("[data-step]"));
-      const stepTitle = document.querySelector("#memoa-step-title");
-      const stepCount = document.querySelector("#memoa-step-count");
-      const stepHelp = document.querySelector("#memoa-step-help");
+      const stepTitle = document.querySelector("#taran-step-title");
+      const stepCount = document.querySelector("#taran-step-count");
+      const stepHelp = document.querySelector("#taran-step-help");
       const prevButton = form.querySelector("[data-step-prev]");
       const nextButton = form.querySelector("[data-step-next]");
       const submitButton = form.querySelector("[data-step-submit]");
       const choiceGrid = document.createElement("div");
-      choiceGrid.className = "memoa-step-choice-grid";
-      form.insertBefore(choiceGrid, form.querySelector(".memoa-step-actions"));
+      choiceGrid.className = "taran-step-choice-grid";
+      form.insertBefore(choiceGrid, form.querySelector(".taran-step-actions"));
       const stepCopy = [
         ["어떤 행사를 준비하시나요?", "행사 종류를 선택하세요."],
         ["어느 지역에서 준비하시나요?", "희망 지역을 선택하세요."],
@@ -72,10 +72,10 @@
         Array.from(select.options).forEach(option => {
           const button = document.createElement("button");
           button.type = "button";
-          button.className = "memoa-choice-card";
+          button.className = "taran-choice-card";
           button.classList.toggle("is-selected", option.value === select.value);
           button.dataset.value = option.value;
-          const help = select.id === "jp-event" ? eventOptionHelp[option.value] : "";
+          const help = select.id === "taran-event" ? eventOptionHelp[option.value] : "";
           button.innerHTML = `<span>${option.textContent}</span>${help ? `<small>${help}</small>` : ""}`;
           button.addEventListener("click", () => {
             select.value = option.value;

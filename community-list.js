@@ -1,5 +1,5 @@
 (function () {
-  const posts = window.memoa_COMMUNITY_POSTS || [];
+  const posts = window.taran_COMMUNITY_POSTS || [];
   const listRoot = document.querySelector(".community-thread-list");
   if (!listRoot || !posts.length) return;
 

@@ -1,15 +1,15 @@
-window.memoaContentConfig = window.memoaContentConfig || {
-  siteId: "memoa",
+window.taranContentConfig = window.taranContentConfig || {
+  siteId: "taran",
   supabaseUrl: "",
   supabaseAnonKey: "",
   tables: {
-    siteCopy: "memoa_site_copy",
-    providers: "memoa_providers",
-    articles: "memoa_articles",
-    banners: "memoa_banners",
-    customers: "memoa_customers",
-    adminEvents: "memoa_admin_events",
-    revisions: "memoa_content_revisions",
-    adminProfiles: "memoa_admin_profiles"
+    siteCopy: "taran_site_copy",
+    providers: "taran_providers",
+    articles: "taran_articles",
+    banners: "taran_banners",
+    customers: "taran_customers",
+    adminEvents: "taran_admin_events",
+    revisions: "taran_content_revisions",
+    adminProfiles: "taran_admin_profiles"
   }
 };

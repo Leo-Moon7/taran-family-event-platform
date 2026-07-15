@@ -4,7 +4,7 @@ const claimVenue = window.publicVenueData.find(item => item.id === claimVenueId)
 
 document.querySelector("#claim-venue-name").textContent = claimVenue.name;
 document.querySelector("#claim-venue-meta").textContent = `${claimVenue.region} · ${claimVenue.area} · ${claimVenue.type}`;
-document.querySelector("#claim-login-link").href = window.SonpumAuth.loginUrl(`claim.html${window.location.search}`);
+document.querySelector("#claim-login-link").href = window.TaranAuth.loginUrl(`claim.html${window.location.search}`);
 
 const claimPhone = document.querySelector("#claim-phone");
 const businessNumber = document.querySelector("#claim-business-number");
@@ -53,7 +53,7 @@ document.querySelector("#claim-form").addEventListener("submit", event => {
   }
 
   let claims = [];
-  try { claims = JSON.parse(localStorage.getItem("sonpum-haebang-claims") || "[]"); } catch (_) { claims = []; }
+  try { claims = JSON.parse(localStorage.getItem("taran-provider-claims") || "[]"); } catch (_) { claims = []; }
   const request = {
     id: `claim-${claimVenue.id}`,
     venueId: claimVenue.id,
@@ -67,7 +67,7 @@ document.querySelector("#claim-form").addEventListener("submit", event => {
   };
   const previousIndex = claims.findIndex(item => item.venueId === claimVenue.id);
   if (previousIndex >= 0) claims[previousIndex] = request; else claims.push(request);
-  localStorage.setItem("sonpum-haebang-claims", JSON.stringify(claims));
+  localStorage.setItem("taran-provider-claims", JSON.stringify(claims));
 
   document.querySelector("#claim-form").hidden = true;
   document.querySelector(".claim-side").hidden = true;

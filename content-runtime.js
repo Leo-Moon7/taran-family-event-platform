@@ -1,11 +1,11 @@
 (function () {
-  const storageKey = "memoa-admin-overrides-preview";
-  const config = window.memoaContentConfig || {};
+  const storageKey = "taran-admin-overrides-preview";
+  const config = window.taranContentConfig || {};
   const tables = {
-    siteCopy: "memoa_site_copy",
-    providers: "memoa_providers",
-    articles: "memoa_articles",
-    banners: "memoa_banners",
+    siteCopy: "taran_site_copy",
+    providers: "taran_providers",
+    articles: "taran_articles",
+    banners: "taran_banners",
     ...(config.tables || {})
   };
 
@@ -183,7 +183,7 @@
   async function readOnlineOverrides() {
     if (!hasDbConfig()) return null;
     try {
-      const siteId = config.siteId || "memoa";
+      const siteId = config.siteId || "taran";
       const [copyRows, providerRows, articleRows, bannerRows] = await Promise.all([
         fetchTable(tables.siteCopy, { site_id: `eq.${siteId}`, status: "eq.published" }),
         fetchTable(tables.providers, { status: "eq.published" }),
@@ -246,13 +246,13 @@
 
   function bannerTargets(placement) {
     const placementSelectors = {
-      "home-point": ".memoa-wide-banner",
+      "home-point": ".taran-wide-banner",
       "directory-bottom": ".directory-ad-placeholder",
       "article-top": ".blog-inline-ad-card, .guide-ad-slot",
       "calculator-top": ".calculator-affiliate-placeholder"
     };
     const selectors = [
-      `[data-memoa-banner-placement="${placement}"]`,
+      `[data-taran-banner-placement="${placement}"]`,
       placementSelectors[placement]
     ].filter(Boolean);
     return selectors.flatMap(selector => Array.from(document.querySelectorAll(selector)));
@@ -272,7 +272,7 @@
       .filter(item => item && item.status === "published")
       .sort((a, b) => a.sortOrder - b.sortOrder);
 
-    window.memoaBanners = banners;
+    window.taranBanners = banners;
     if (!banners.length) return;
 
     const apply = () => {
@@ -283,7 +283,7 @@
         if (!targets.length) return;
         usedPlacements.add(banner.placement);
         targets.forEach(target => {
-          target.setAttribute("data-memoa-managed-banner", banner.id);
+          target.setAttribute("data-taran-managed-banner", banner.id);
           target.innerHTML = `
             <div class="cms-public-banner-copy">
               ${banner.eyebrow ? `<span class="cms-public-banner-eyebrow">${escapeHtml(banner.eyebrow)}</span>` : ""}
@@ -312,18 +312,18 @@
       upsertByKey(window.publicDirectoryData, providers, "id");
     }
 
-    if (window.memoa_BLOG_POSTS) {
-      upsertByKey(window.memoa_BLOG_POSTS, articles, "slug");
+    if (window.taran_BLOG_POSTS) {
+      upsertByKey(window.taran_BLOG_POSTS, articles, "slug");
     }
 
     applySiteCopy(overrides);
     applyBanners(overrides);
-    window.memoaResolvedContentOverrides = overrides;
-    document.dispatchEvent(new CustomEvent("memoa:content-ready", { detail: overrides }));
+    window.taranResolvedContentOverrides = overrides;
+    document.dispatchEvent(new CustomEvent("taran:content-ready", { detail: overrides }));
   }
 
-  window.memoaContentReady = (async function bootContent() {
-    const fileOverrides = window.memoaContentOverrides || emptyOverrides();
+  window.taranContentReady = (async function bootContent() {
+    const fileOverrides = window.taranContentOverrides || emptyOverrides();
     const onlineOverrides = await readOnlineOverrides();
     const previewOverrides = readPreviewOverrides();
     const overrides = mergeOverrides(fileOverrides, onlineOverrides, previewOverrides);

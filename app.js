@@ -3,14 +3,14 @@ const reviewCoverage = window.reviewCoverageData || { regions: [] };
 const formatWon = value => `${Math.round(value).toLocaleString("ko-KR")}원`;
 
 function setupNationwideRegions() {
-  window.memoaSetupRegionSelects(
+  window.taranSetupRegionSelects(
     document.querySelector("#region-province"),
     document.querySelector("#region")
   );
 }
 
 function regionMatches(venue, province, district) {
-  const resolved = window.memoaResolveRegion(venue.region);
+  const resolved = window.taranResolveRegion(venue.region);
   return (province === "all" || resolved.province === province) &&
     (district === "all" || resolved.district === district);
 }
@@ -33,7 +33,7 @@ function spaceMatches(venue, spaceType) {
 
 function reviewCountFor(province, district) {
   return reviewCoverage.regions.reduce((total, item) => {
-    const resolved = window.memoaResolveRegion(item.name);
+    const resolved = window.taranResolveRegion(item.name);
     const matches = (province === "all" || resolved.province === province) &&
       (district === "all" || resolved.district === district);
     return total + (matches ? Number(item.sourceCount || 0) : 0);
@@ -63,7 +63,7 @@ function renderVenues(items, province = "all", district = "all") {
       </div>
       <div class="venue-body">
         <h3>${venue.name}</h3>
-        <div class="venue-meta">${window.memoaRegionLabel(venue.region)} ${venue.area} · 보증 ${venue.minGuests}명 · 최대 ${venue.capacity}명</div>
+        <div class="venue-meta">${window.taranRegionLabel(venue.region)} ${venue.area} · 보증 ${venue.minGuests}명 · 최대 ${venue.capacity}명</div>
         <div class="tag-list">${venue.tags.map(tag => `<span>${tag}</span>`).join("")}</div>
         <div class="venue-price"><div><span>성인 1인 예상</span><br><strong>${formatWon(venue.price)}</strong></div><span>최종 갱신 ${venue.verifiedAt}</span></div>
       </div>

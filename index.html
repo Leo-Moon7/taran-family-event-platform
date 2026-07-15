@@ -1,39 +1,40 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="ko">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="메모아(memoa)는 가족행사에 필요한 장소, 업체, 비용, 일정, 체크리스트와 실제 경험 정보를 한곳에서 제공하는 프리미엄 가족행사 큐레이션 플랫폼입니다.">
+  <meta name="description" content="따란(T'ARAN)는 가족행사에 필요한 장소, 업체, 비용, 일정, 체크리스트와 실제 경험 정보를 한곳에서 제공하는 프리미엄 가족행사 큐레이션 플랫폼입니다.">
   <meta name="theme-color" content="#FAF6F0">
-  <title>메모아 memoa | 프리미엄 가족행사 큐레이션</title>
+  <title>따란 taran | 프리미엄 가족행사 큐레이션</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="upgrade.css?v=79">
+  <script src="scripts/core/storage.js"></script>
 </head>
-<body class="memoa-home jobplanet-home">
-  <header class="site-header jp-header memoa-header">
-    <a class="brand memoa-brand" href="index.html" aria-label="메모아 홈">
-      <span>메모아</span><small>memoa</small>
+<body class="taran-home taran-home">
+  <header class="site-header taran-header taran-header">
+    <a class="brand taran-brand" href="index.html" aria-label="따란 홈">
+      <span>따란</span><small>T'ARAN</small>
     </a>
     <nav aria-label="주요 메뉴"></nav>
   </header>
 
-  <main class="jp-main memoa-main">
-    <section class="memoa-guide-hero" aria-labelledby="memoa-hero-title">
-      <div class="memoa-hero-copy">
-        <span class="memoa-badge">프리미엄 가족행사 큐레이션</span>
-        <h1 id="memoa-hero-title">가족의 중요한 날,<br>더 쉽고 완벽하게 준비하세요.</h1>
+  <main class="taran-main taran-main">
+    <section class="taran-guide-hero" aria-labelledby="taran-hero-title">
+      <div class="taran-hero-copy">
+        <span class="taran-badge">프리미엄 가족행사 큐레이션</span>
+        <h1 id="taran-hero-title">가족의 중요한 날,<br>더 쉽고 완벽하게 준비하세요.</h1>
         <p>행사 종류와 조건을 입력하면 장소, 업체, 예상 비용과 준비 일정을 한 번에 확인할 수 있어요.</p>
       </div>
 
-      <form class="memoa-condition-panel memoa-step-form" id="jp-calculator-form" aria-label="행사 조건 입력">
-        <div class="memoa-step-head">
-          <span id="memoa-step-count">1 / 5</span>
-          <strong id="memoa-step-title">어떤 행사를 준비하시나요?</strong>
-          <p id="memoa-step-help">행사 종류를 먼저 고르면 다음 조건을 이어서 선택할 수 있어요.</p>
+      <form class="taran-condition-panel taran-step-form" id="taran-calculator-form" aria-label="행사 조건 입력">
+        <div class="taran-step-head">
+          <span id="taran-step-count">1 / 5</span>
+          <strong id="taran-step-title">어떤 행사를 준비하시나요?</strong>
+          <p id="taran-step-help">행사 종류를 먼저 고르면 다음 조건을 이어서 선택할 수 있어요.</p>
         </div>
         <label data-step="0">
           <span>행사 종류</span>
-          <select id="jp-event">
+          <select id="taran-event">
             <option value="kids" selected>아이 행사</option>
             <option value="wedding">결혼·커플</option>
             <option value="parents">부모님 행사</option>
@@ -42,7 +43,7 @@
         </label>
         <label data-step="1">
           <span>지역</span>
-          <select id="jp-region">
+          <select id="taran-region">
             <option value="">전체 지역</option>
             <option value="서울특별시">서울특별시</option>
             <option value="경기도">경기도</option>
@@ -56,7 +57,7 @@
         </label>
         <label data-step="2">
           <span>날짜·예정 월</span>
-          <select id="jp-date">
+          <select id="taran-date">
             <option value="undecided">날짜 미정</option>
             <option value="2026-08">2026년 8월</option>
             <option value="2026-09">2026년 9월</option>
@@ -66,7 +67,7 @@
         </label>
         <label data-step="3">
           <span>예상 인원</span>
-          <select id="jp-guests">
+          <select id="taran-guests">
             <option value="under10">10명 이하</option>
             <option value="10to30" selected>10~30명</option>
             <option value="30to50">30~50명</option>
@@ -75,64 +76,64 @@
         </label>
         <label data-step="4">
           <span>예산 범위</span>
-          <select id="jp-budget">
+          <select id="taran-budget">
             <option value="under100">100만원 이하</option>
             <option value="100to300" selected>100~300만원</option>
             <option value="300to500">300~500만원</option>
             <option value="over500">500만원 이상</option>
           </select>
         </label>
-        <div class="memoa-step-actions">
-          <button type="button" class="memoa-step-back" data-step-prev>이전</button>
-          <button type="button" class="memoa-step-next" data-step-next>다음</button>
-          <button type="submit" class="memoa-step-submit" data-step-submit>조건에 맞는 행사 찾기</button>
+        <div class="taran-step-actions">
+          <button type="button" class="taran-step-back" data-step-prev>이전</button>
+          <button type="button" class="taran-step-next" data-step-next>다음</button>
+          <button type="submit" class="taran-step-submit" data-step-submit>조건에 맞는 행사 찾기</button>
         </div>
       </form>
 
-      <div class="memoa-estimate-strip" aria-live="polite">
+      <div class="taran-estimate-strip" aria-live="polite">
         <div>
           <span>예상 비용 범위</span>
-          <strong id="jp-estimate-result">120만원 ~ 260만원</strong>
+          <strong id="taran-estimate-result">120만원 ~ 260만원</strong>
         </div>
-        <p id="jp-estimate-note">아이 행사 기준으로 장소, 기본 식사, 준비 항목 일부를 포함한 대략적인 범위입니다.</p>
-        <div class="memoa-estimate-actions">
+        <p id="taran-estimate-note">아이 행사 기준으로 장소, 기본 식사, 준비 항목 일부를 포함한 대략적인 범위입니다.</p>
+        <div class="taran-estimate-actions">
           <a href="calculator.html">상세 계산</a>
           <a href="checklist.html">체크리스트 만들기</a>
         </div>
       </div>
     </section>
 
-    <section class="memoa-category-section" aria-labelledby="memoa-category-title" data-reveal>
-      <div class="memoa-section-head">
+    <section class="taran-category-section" aria-labelledby="taran-category-title" data-reveal>
+      <div class="taran-section-head">
         <div>
-          <span class="memoa-eyebrow">popular events</span>
-          <h2 id="memoa-category-title">어떤 날을 준비하시나요?</h2>
+          <span class="taran-eyebrow">popular events</span>
+          <h2 id="taran-category-title">어떤 날을 준비하시나요?</h2>
         </div>
         <a href="venues.html">업체 전체보기 →</a>
       </div>
-      <div class="memoa-category-grid">
-        <a class="memoa-category-card" href="venues.html?event=kids">
+      <div class="taran-category-grid">
+        <a class="taran-category-card" href="venues.html?event=kids">
           <img src="assets/images/venue-partyroom.webp" alt="">
           <span>아이</span>
           <strong>아이의 첫 번째 생일</strong>
           <p>백일, 돌잔치, 키즈 생일파티에 맞는 공간과 준비 항목을 확인합니다.</p>
           <small>대표 서비스 · 장소, 스냅, 돌상, 답례품</small>
         </a>
-        <a class="memoa-category-card" href="venues.html?event=parents">
+        <a class="taran-category-card" href="venues.html?event=parents">
           <img src="assets/images/venue-hanjeongsik.webp" alt="">
           <span>부모님</span>
           <strong>부모님의 특별한 생신</strong>
           <p>환갑, 칠순, 팔순, 퇴임식에 어울리는 룸과 가족 동선을 비교합니다.</p>
           <small>대표 서비스 · 한정식, 스냅, 감사패, 케이크</small>
         </a>
-        <a class="memoa-category-card" href="venues.html?event=wedding">
+        <a class="taran-category-card" href="venues.html?event=wedding">
           <img src="assets/images/venue-garden.webp" alt="">
           <span>결혼·커플</span>
           <strong>두 가족이 처음 만나는 날</strong>
           <p>상견례, 스몰웨딩, 브라이덜 샤워를 위한 분위기와 예산을 정리합니다.</p>
           <small>대표 서비스 · 가든, 파인다이닝, 플라워, 영상</small>
         </a>
-        <a class="memoa-category-card" href="venues.html?event=home">
+        <a class="taran-category-card" href="venues.html?event=home">
           <img src="assets/images/venue-hotel.webp" alt="">
           <span>가족 모임</span>
           <strong>우리 가족만의 작은 파티</strong>
@@ -142,30 +143,30 @@
       </div>
     </section>
 
-    <section class="jp-section memoa-partner-section" aria-labelledby="memoa-partner-title" data-reveal>
-      <div class="memoa-section-head">
+    <section class="taran-section taran-partner-section" aria-labelledby="taran-partner-title" data-reveal>
+      <div class="taran-section-head">
         <div>
-          <span class="memoa-eyebrow">curated partners</span>
-          <h2 id="memoa-partner-title">조건에 맞는 장소와 업체를 먼저 보여드려요.</h2>
+          <span class="taran-eyebrow">curated partners</span>
+          <h2 id="taran-partner-title">조건에 맞는 장소와 업체를 먼저 보여드려요.</h2>
         </div>
         <a href="venues.html">업체 전체보기 →</a>
       </div>
-      <div class="jp-tip-line memoa-tip-line"><b>TIP</b> 같은 날짜라도 인원, 공간 형태, 포함 항목에 따라 견적이 크게 달라질 수 있어요.</div>
-      <div class="jp-card-row jp-partner-row memoa-partner-row">
-        <a href="venues.html?event=kids" class="jp-mini-card memoa-mini-card">
-          <span class="jp-card-badge">아이 행사</span>
+      <div class="taran-tip-line taran-tip-line"><b>TIP</b> 같은 날짜라도 인원, 공간 형태, 포함 항목에 따라 견적이 크게 달라질 수 있어요.</div>
+      <div class="taran-card-row taran-partner-row taran-partner-row">
+        <a href="venues.html?event=kids" class="taran-mini-card taran-mini-card">
+          <span class="taran-card-badge">아이 행사</span>
           <h3>돌·백일 장소 비교</h3>
           <p>10~30명 · 프라이빗 룸 · 유모차 동선</p>
           <small>보증 인원, 주차, 가족 대기 공간을 먼저 확인합니다.</small>
         </a>
-        <a href="venues.html?event=parents" class="jp-mini-card memoa-mini-card">
-          <span class="jp-card-badge">부모님</span>
+        <a href="venues.html?event=parents" class="taran-mini-card taran-mini-card">
+          <span class="taran-card-badge">부모님</span>
           <h3>환갑·칠순 생신 모임</h3>
           <p>20~50명 · 한정식 · 가족 룸</p>
           <small>룸 크기, 코스 구성, 조용한 분위기를 비교합니다.</small>
         </a>
-        <a href="venues.html?event=wedding" class="jp-mini-card memoa-mini-card">
-          <span class="jp-card-badge">결혼 준비</span>
+        <a href="venues.html?event=wedding" class="taran-mini-card taran-mini-card">
+          <span class="taran-card-badge">결혼 준비</span>
           <h3>스몰웨딩·상견례</h3>
           <p>30~80명 · 단독 대관 · 스타일링</p>
           <small>대관료, 식사, 플라워 포함 여부를 함께 봅니다.</small>
@@ -173,14 +174,14 @@
       </div>
     </section>
 
-    <section class="memoa-process-section" aria-labelledby="memoa-process-title" data-reveal>
-      <div class="memoa-section-head">
+    <section class="taran-process-section" aria-labelledby="taran-process-title" data-reveal>
+      <div class="taran-section-head">
         <div>
-          <span class="memoa-eyebrow">how it works</span>
-          <h2 id="memoa-process-title">행사 준비, 이렇게 이어집니다.</h2>
+          <span class="taran-eyebrow">how it works</span>
+          <h2 id="taran-process-title">행사 준비, 이렇게 이어집니다.</h2>
         </div>
       </div>
-      <div class="memoa-process-grid">
+      <div class="taran-process-grid">
         <article>
           <span>01</span>
           <strong>행사 조건 입력</strong>
@@ -204,15 +205,15 @@
       </div>
     </section>
 
-    <section class="memoa-quote-section" aria-labelledby="memoa-quote-title" data-reveal>
-      <div class="memoa-section-head">
+    <section class="taran-quote-section" aria-labelledby="taran-quote-title" data-reveal>
+      <div class="taran-section-head">
         <div>
-          <span class="memoa-eyebrow">cost examples</span>
-          <h2 id="memoa-quote-title">우리 가족 예산이 어떻게 나뉘는지 먼저 확인하세요.</h2>
+          <span class="taran-eyebrow">cost examples</span>
+          <h2 id="taran-quote-title">우리 가족 예산이 어떻게 나뉘는지 먼저 확인하세요.</h2>
         </div>
         <a href="contribute.html">견적 공유하기 →</a>
       </div>
-      <div class="memoa-quote-grid">
+      <div class="taran-quote-grid">
         <article>
           <span>공유 견적 예시</span>
           <strong>돌잔치 · 24명 · 프라이빗 룸</strong>
@@ -267,28 +268,28 @@
       </div>
     </section>
 
-    <section class="jp-section memoa-article-section" aria-labelledby="memoa-article-title" data-reveal>
-      <div class="memoa-section-head">
+    <section class="taran-section taran-article-section" aria-labelledby="taran-article-title" data-reveal>
+      <div class="taran-section-head">
         <div>
-          <span class="memoa-eyebrow">memoa guide</span>
-          <h2 id="memoa-article-title">처음 준비하는 가족이 먼저 읽으면 좋은 글</h2>
+          <span class="taran-eyebrow">taran guide</span>
+          <h2 id="taran-article-title">처음 준비하는 가족이 먼저 읽으면 좋은 글</h2>
         </div>
         <a href="articles.html">준비백과 전체보기 →</a>
       </div>
-      <div class="memoa-article-grid">
-        <a href="article-contract-questions.html" class="memoa-article-card is-featured">
+      <div class="taran-article-grid">
+        <a href="article-contract-questions.html" class="taran-article-card is-featured">
           <img src="assets/images/editorial-checklist.webp" alt="">
           <span>장소 계약</span>
           <strong>돌잔치 장소 계약 전 꼭 물어볼 12가지</strong>
           <p>보증 인원, 대관료, 주차, 반입비처럼 실제 비용과 진행에 영향을 주는 질문을 계약 전에 정리합니다.</p>
         </a>
-        <a href="articles.html" class="memoa-article-card">
+        <a href="articles.html" class="taran-article-card">
           <img src="assets/images/editorial-parking.webp" alt="">
           <span>체크리스트</span>
           <strong>행사 100일 전부터 준비할 것</strong>
           <p>날짜가 가까워질수록 놓치기 쉬운 준비 순서를 한눈에 확인하세요.</p>
         </a>
-        <a href="calculator.html" class="memoa-article-card">
+        <a href="calculator.html" class="taran-article-card">
           <img src="assets/images/venue-hanjeongsik.webp" alt="">
           <span>예산</span>
           <strong>우리 가족 행사 예산 감 잡기</strong>
@@ -297,14 +298,14 @@
       </div>
     </section>
 
-    <section class="jp-section jp-review-picks memoa-life-section" aria-labelledby="memoa-life-title" data-reveal>
-      <div class="memoa-section-head">
+    <section class="taran-section taran-review-picks taran-life-section" aria-labelledby="taran-life-title" data-reveal>
+      <div class="taran-section-head">
         <div>
-          <span class="memoa-eyebrow">life cycle</span>
-          <h2 id="memoa-life-title">소중한 순간이 오래 기억되도록</h2>
+          <span class="taran-eyebrow">life cycle</span>
+          <h2 id="taran-life-title">소중한 순간이 오래 기억되도록</h2>
         </div>
       </div>
-      <div class="jp-image-card-grid memoa-life-grid">
+      <div class="taran-image-card-grid taran-life-grid">
         <a href="venues.html?event=wedding"><img src="assets/images/venue-garden.webp" alt=""><span>새로운 시작</span><strong>결혼 준비</strong><p>스몰웨딩, 상견례, 브라이덜 샤워를 한 번에 둘러보세요.</p></a>
         <a href="venues.html?event=kids"><img src="assets/images/venue-partyroom.webp" alt=""><span>우리 아이</span><strong>백일·돌·키즈파티</strong><p>아이 컨디션과 가족 동선을 기준으로 공간을 찾습니다.</p></a>
         <a href="venues.html?event=parents"><img src="assets/images/venue-hanjeongsik.webp" alt=""><span>부모님</span><strong>환갑·칠순·퇴임식</strong><p>가족이 편하게 모일 수 있는 생신 공간을 비교합니다.</p></a>
@@ -312,15 +313,15 @@
       </div>
     </section>
 
-    <section class="jp-section jp-community-section memoa-community-section" aria-labelledby="memoa-community-title" data-reveal>
-      <div class="memoa-section-head">
+    <section class="taran-section taran-community-section taran-community-section" aria-labelledby="taran-community-title" data-reveal>
+      <div class="taran-section-head">
         <div>
-          <span class="memoa-eyebrow">community</span>
-          <h2 id="memoa-community-title">다른 가족들은 어떻게 준비하고 있을까요?</h2>
+          <span class="taran-eyebrow">community</span>
+          <h2 id="taran-community-title">다른 가족들은 어떻게 준비하고 있을까요?</h2>
         </div>
         <a href="community.html">커뮤니티 전체보기 →</a>
       </div>
-      <div class="jp-post-grid memoa-post-grid">
+      <div class="taran-post-grid taran-post-grid">
         <a href="community.html"><p>보증 인원 30명인데 실제 참석은 24명일 것 같아요. 계약해도 괜찮을까요?</p><span>댓글 12 · 조회 9766</span></a>
         <a href="community.html"><p>25명 한정식 룸 기준으로 받은 견적, 이 정도면 평균인가요?</p><span>댓글 9 · 조회 6771</span></a>
         <a href="community.html"><p>어두운 한정식 룸이면 스냅 작가에게 어떤 사진을 요청해야 하나요?</p><span>댓글 25 · 조회 5346</span></a>
@@ -328,24 +329,24 @@
       </div>
     </section>
 
-    <aside class="jp-wide-banner memoa-wide-banner" aria-label="정보 공유 안내" data-reveal>
+    <aside class="taran-wide-banner taran-wide-banner" aria-label="정보 공유 안내" data-reveal>
       <div>
-        <span>memoa point</span>
+        <span>T'ARAN 포인트</span>
         <strong>견적서나 업체 정보를 공유하면 포인트를 쌓고, 이후 기프티콘 교환 혜택으로 이어갈 수 있어요.</strong>
         <p>개인정보는 가린 뒤 공유하도록 안내하고, 자료는 업체 조건 업데이트 후 보관하지 않는 기준으로 운영합니다.</p>
       </div>
       <a href="contribute.html">정보 공유하기</a>
     </aside>
 
-    <section class="memoa-manifesto" aria-labelledby="memoa-manifesto-title" data-reveal>
-      <span class="memoa-eyebrow">brand story</span>
-      <h2 id="memoa-manifesto-title">가장 축하받아야 할 날이,<br>가장 고단한 숙제가 되지 않도록</h2>
-      <p>흩어진 정보는 메모아가 모으겠습니다. 당신은 그저, 사랑하는 이들과 온전하게 추억을 모으기만 하세요.</p>
-      <a href="about.html">메모아 이야기 보기 →</a>
+    <section class="taran-manifesto" aria-labelledby="taran-manifesto-title" data-reveal>
+      <span class="taran-eyebrow">brand story</span>
+      <h2 id="taran-manifesto-title">가장 축하받아야 할 날이,<br>가장 고단한 숙제가 되지 않도록</h2>
+      <p>흩어진 정보는 따란가 모으겠습니다. 당신은 그저, 사랑하는 이들과 온전하게 추억을 모으기만 하세요.</p>
+      <a href="about.html">따란 이야기 보기 →</a>
     </section>
   </main>
 
-  <footer class="jp-footer memoa-footer">
+  <footer class="taran-footer taran-footer">
     <nav>
       <a href="about.html">서비스 소개</a>
       <a href="terms.html">이용약관</a><a href="privacy.html">개인정보처리방침</a>
@@ -353,7 +354,7 @@
       <a href="contact.html">고객 문의</a>
       <a href="partners.html">파트너 문의</a>
     </nav>
-    <p><strong>메모아 memoa</strong> 가족의 중요한 날을 위한 장소, 업체, 비용, 일정 정보를 모읍니다.</p>
+    <p><strong>따란 taran</strong> 가족의 중요한 날을 위한 장소, 업체, 비용, 일정 정보를 모읍니다.</p>
     <small>표시된 정보와 가격은 변동될 수 있으며 예약 전 업체에 최종 확인해야 합니다.</small>
   </footer>
 
@@ -379,23 +380,23 @@
         parents: "부모님 행사",
         home: "가족 모임"
       };
-      const event = document.querySelector("#jp-event");
-      const guests = document.querySelector("#jp-guests");
-      const budget = document.querySelector("#jp-budget");
-      const region = document.querySelector("#jp-region");
-      const result = document.querySelector("#jp-estimate-result");
-      const note = document.querySelector("#jp-estimate-note");
-      const form = document.querySelector("#jp-calculator-form");
+      const event = document.querySelector("#taran-event");
+      const guests = document.querySelector("#taran-guests");
+      const budget = document.querySelector("#taran-budget");
+      const region = document.querySelector("#taran-region");
+      const result = document.querySelector("#taran-estimate-result");
+      const note = document.querySelector("#taran-estimate-note");
+      const form = document.querySelector("#taran-calculator-form");
       const stepLabels = Array.from(form.querySelectorAll("[data-step]"));
-      const stepTitle = document.querySelector("#memoa-step-title");
-      const stepCount = document.querySelector("#memoa-step-count");
-      const stepHelp = document.querySelector("#memoa-step-help");
+      const stepTitle = document.querySelector("#taran-step-title");
+      const stepCount = document.querySelector("#taran-step-count");
+      const stepHelp = document.querySelector("#taran-step-help");
       const prevButton = form.querySelector("[data-step-prev]");
       const nextButton = form.querySelector("[data-step-next]");
       const submitButton = form.querySelector("[data-step-submit]");
       const choiceGrid = document.createElement("div");
-      choiceGrid.className = "memoa-step-choice-grid";
-      form.insertBefore(choiceGrid, form.querySelector(".memoa-step-actions"));
+      choiceGrid.className = "taran-step-choice-grid";
+      form.insertBefore(choiceGrid, form.querySelector(".taran-step-actions"));
       const stepCopy = [
         ["어떤 행사를 준비하시나요?", "행사 종류를 선택하세요."],
         ["어느 지역에서 준비하시나요?", "희망 지역을 선택하세요."],
@@ -438,10 +439,10 @@
         Array.from(select.options).forEach(option => {
           const button = document.createElement("button");
           button.type = "button";
-          button.className = "memoa-choice-card";
+          button.className = "taran-choice-card";
           button.classList.toggle("is-selected", option.value === select.value);
           button.dataset.value = option.value;
-          const help = select.id === "jp-event" ? eventOptionHelp[option.value] : "";
+          const help = select.id === "taran-event" ? eventOptionHelp[option.value] : "";
           button.innerHTML = `<span>${option.textContent}</span>${help ? `<small>${help}</small>` : ""}`;
           button.addEventListener("click", () => {
             select.value = option.value;

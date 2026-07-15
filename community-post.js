@@ -1,5 +1,5 @@
 (function () {
-  const posts = window.memoa_COMMUNITY_POSTS || [];
+  const posts = window.taran_COMMUNITY_POSTS || [];
   const params = new URLSearchParams(window.location.search);
   const id = params.get("id") || posts[0]?.id;
   const post = posts.find((item) => item.id === id) || posts[0];
@@ -33,7 +33,7 @@
   const views = pseudoViews(post.id);
   const recommend = Math.max(2, Math.round(commentCount / 2));
 
-  document.title = `${post.title} | 메모아 커뮤니티`;
+  document.title = `${post.title} | 따란 커뮤니티`;
 
   root.innerHTML = `
     <article class="community-reader-card">

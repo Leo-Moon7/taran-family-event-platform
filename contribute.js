@@ -1,5 +1,5 @@
-const contributionKey = "nopoom-contributions";
-const approvedPointKey = "nopoom-approved-points";
+const contributionKey = "taran-contributions";
+const approvedPointKey = "taran-approved-points";
 
 const form = document.querySelector("#contribution-form");
 const preview = document.querySelector("#point-preview");

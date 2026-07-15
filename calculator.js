@@ -269,14 +269,14 @@ function renderFlow() {
 
 async function saveCalculator() {
   const state = calculatorState();
-  localStorage.setItem("sonpum-calculator", JSON.stringify(state));
-  const account = window.SonpumAuth.getAccount();
+  localStorage.setItem("taran-calculator", JSON.stringify(state));
+  const account = window.TaranAuth.getAccount();
   if (!account) {
     document.querySelector("#calculator-save-status").textContent = "현재 브라우저에 임시 저장 중";
     return;
   }
   try {
-    await window.SonpumAuth.api("/api/member/state/calculator", { method: "PUT", body: JSON.stringify({ state }) });
+    await window.TaranAuth.api("/api/member/state/calculator", { method: "PUT", body: JSON.stringify({ state }) });
     document.querySelector("#calculator-save-status").textContent = "계정에 자동 저장됨";
   } catch (_) {
     document.querySelector("#calculator-save-status").textContent = "저장 연결을 확인해주세요";
@@ -327,18 +327,18 @@ document.querySelector("#calculator-reset").addEventListener("click", () => {
 });
 
 (async function initializeCalculator() {
-  const account = await window.SonpumAuth.ready;
+  const account = await window.TaranAuth.ready;
   document.querySelector("#calculator-login-link").hidden = Boolean(account);
   if (account) {
     try {
-      const saved = await window.SonpumAuth.api("/api/member/state/calculator");
+      const saved = await window.TaranAuth.api("/api/member/state/calculator");
       applyState(Object.keys(saved.state).length ? saved.state : { "event-type": "kids", ...eventPresets.kids });
       document.querySelector("#calculator-save-status").textContent = "계정에 자동 저장됨";
       return;
     } catch (_) {}
   }
   try {
-    const saved = JSON.parse(localStorage.getItem("sonpum-calculator") || "{}");
+    const saved = JSON.parse(localStorage.getItem("taran-calculator") || "{}");
     applyState(Object.keys(saved).length ? saved : { "event-type": "kids", ...eventPresets.kids });
   } catch (_) {
     applyState({ "event-type": "kids", ...eventPresets.kids });

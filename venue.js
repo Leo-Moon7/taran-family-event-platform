@@ -109,7 +109,7 @@ function cleanAreaLabel(value) {
 function normalizeDistrictForDisplay(value, province) {
   const text = cleanAreaLabel(value);
   if (!text) return "";
-  const entry = (window.memoaRegionData || []).find(item => item.province === province);
+  const entry = (window.taranRegionData || []).find(item => item.province === province);
   if (entry) {
     const matched = entry.districts.find(district => {
       const shortName = district.replace(/(구|군|시)$/u, "");
@@ -123,12 +123,12 @@ function normalizeDistrictForDisplay(value, province) {
 function venueLocationText(item) {
   const regionRaw = String(item?.region ?? item?.inferredRegion ?? "").trim();
   const areaRaw = String(item?.area ?? "").trim();
-  const region = window.memoaResolveRegion(regionRaw);
-  const area = window.memoaResolveRegion(areaRaw);
+  const region = window.taranResolveRegion(regionRaw);
+  const area = window.taranResolveRegion(areaRaw);
   const province = region.province || area.province || "";
   const district = region.district || area.district || normalizeDistrictForDisplay(areaRaw, province);
   const base = [province, district].filter(Boolean).join(" ");
-  return base || window.memoaRegionLabel(regionRaw);
+  return base || window.taranRegionLabel(regionRaw);
 }
 
 function renderReviewPanels(item, showExternalFirst = false) {
@@ -140,18 +140,18 @@ function renderReviewPanels(item, showExternalFirst = false) {
   const internalPanel = document.querySelector("#internal-review-panel");
   internalPanel.innerHTML = internalReviews.length
     ? `<div class="internal-review-list">${internalReviews.map(review => `<article>
-        <div><strong>${escapeHtml(review.author || "메모아 고객")}</strong><span>${escapeHtml([internalReviewRatingText(review), displayDate(review.createdAt)].filter(Boolean).join(" · "))}</span></div>
+        <div><strong>${escapeHtml(review.author || "따란 고객")}</strong><span>${escapeHtml([internalReviewRatingText(review), displayDate(review.createdAt)].filter(Boolean).join(" · "))}</span></div>
         <p>${escapeHtml(review.body)}</p>
       </article>`).join("")}</div>`
     : `<div class="review-empty-state">
-        <strong>아직 메모아 고객 리뷰가 없습니다.</strong>
-        <p>메모아에서 실제 이용 여부가 확인된 고객의 리뷰만 이곳에 표시할 예정입니다.</p>
+        <strong>아직 따란 고객 리뷰가 없습니다.</strong>
+        <p>따란에서 실제 이용 여부가 확인된 고객의 리뷰만 이곳에 표시할 예정입니다.</p>
         <button type="button" disabled>실제 이용 확인 후 작성 가능</button>
       </div>`;
 
   const externalPanel = document.querySelector("#external-review-panel");
   externalPanel.innerHTML = externalReviews.length
-    ? `<div class="external-review-notice"><strong>외부 후기 참고 안내</strong><p>외부 블로그 후기는 메모아 고객 리뷰와 구분해 표시합니다. 가격과 운영 조건은 실제 상담 시 업체에서 최종 안내합니다.</p></div>
+    ? `<div class="external-review-notice"><strong>외부 후기 참고 안내</strong><p>외부 블로그 후기는 따란 고객 리뷰와 구분해 표시합니다. 가격과 운영 조건은 실제 상담 시 업체에서 최종 안내합니다.</p></div>
       <div class="external-review-list">${externalReviews.map(review => `<article>
         <div><span>네이버 블로그</span><time>${escapeHtml(displayDate(review.publishedDate))}</time></div>
         <h3>${escapeHtml(review.title)}</h3>
@@ -180,7 +180,7 @@ function renderCandidate(candidate) {
   const spec = candidateSpecProfile(candidate);
   document.body.classList.add("review-candidate-detail");
   document.querySelectorAll(".verified-only").forEach(element => { element.hidden = true; });
-  document.title = `${candidate.name} 업체 정보 | 메모아`;
+  document.title = `${candidate.name} 업체 정보 | 따란`;
   setText("#breadcrumb-name", candidate.name);
   setText("#detail-location", `${regionLabel} · ${candidate.category}`);
   setText("#detail-name", candidate.name);
@@ -227,7 +227,7 @@ function renderCandidate(candidate) {
 
   document.querySelector("#caution-list").innerHTML = [
     "가격, 상세 주소, 예약 가능 날짜는 업체 상담 시 최종 안내됩니다.",
-    "메모아 고객 리뷰와 외부 블로그 후기는 별도로 구분해 보여드립니다.",
+    "따란 고객 리뷰와 외부 블로그 후기는 별도로 구분해 보여드립니다.",
     "업체와 연결되면 연락처와 패키지 가격을 순차적으로 보강합니다."
   ].map(item => `<li>${escapeHtml(item)}</li>`).join("");
 
@@ -240,7 +240,7 @@ function renderCandidate(candidate) {
   setText("#side-address", spec.location);
 
   const saveButton = document.querySelector("#save-venue");
-  const saveKey = `nopoom-saved-candidate-${candidate.id}`;
+  const saveKey = `taran-saved-candidate-${candidate.id}`;
   let savedCandidate = localStorage.getItem(saveKey) === "1";
   const paintCandidateSave = () => {
     saveButton.textContent = savedCandidate ? "♥ 관심 업체 저장됨" : "♡ 관심 업체 저장";
@@ -251,9 +251,9 @@ function renderCandidate(candidate) {
   saveButton.disabled = false;
   saveButton.nextElementSibling.textContent = "관심 있는 업체를 저장하고 나중에 다시 볼 수 있습니다.";
   saveButton.addEventListener("click", async () => {
-    const account = await window.SonpumAuth.ready;
+    const account = await window.TaranAuth.ready;
     if (!account) {
-      window.location.href = window.SonpumAuth.loginUrl(`venue.html${window.location.search}`);
+      window.location.href = window.TaranAuth.loginUrl(`venue.html${window.location.search}`);
       return;
     }
     savedCandidate = !savedCandidate;
@@ -285,7 +285,7 @@ function renderCandidate(candidate) {
 function renderPublishedVenue(item) {
   const isSample = String(item.sourceStatus).includes("검수 준비") || String(item.sourceStatus).includes("확인 예정");
   const verificationLabel = isSample ? "정보 확인 예정" : "관리자 검수 완료";
-  document.title = `${item.name} | 메모아`;
+  document.title = `${item.name} | 따란`;
   setText("#breadcrumb-name", item.name);
   setText("#detail-location", `${venueLocationText(item)} · ${item.type}`);
   setText("#detail-name", item.name);
@@ -347,22 +347,22 @@ function renderPublishedVenue(item) {
     saveButton.classList.toggle("is-saved", saved);
   };
   saveButton.addEventListener("click", async () => {
-    const account = await window.SonpumAuth.ready;
+    const account = await window.TaranAuth.ready;
     if (!account) {
-      window.location.href = window.SonpumAuth.loginUrl(`venue.html${window.location.search}`);
+      window.location.href = window.TaranAuth.loginUrl(`venue.html${window.location.search}`);
       return;
     }
     try {
-      await window.SonpumAuth.api(`/api/member/saved-venues/${encodeURIComponent(item.id)}`, { method: saved ? "DELETE" : "PUT" });
+      await window.TaranAuth.api(`/api/member/saved-venues/${encodeURIComponent(item.id)}`, { method: saved ? "DELETE" : "PUT" });
       saved = !saved;
       paintSaveButton();
     } catch (error) { setText("#detail-notice", error.message); }
   });
   (async () => {
-    const account = await window.SonpumAuth.ready;
+    const account = await window.TaranAuth.ready;
     if (account) {
       try {
-        const result = await window.SonpumAuth.api("/api/member/saved-venues");
+        const result = await window.TaranAuth.api("/api/member/saved-venues");
         saved = result.venue_slugs.includes(item.id);
       } catch (_) {}
     }

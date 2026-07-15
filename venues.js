@@ -1,4 +1,4 @@
-Promise.resolve(window.memoaContentReady).finally(() => {
+Promise.resolve(window.taranContentReady).finally(() => {
 const categoryOrder = ["장소/베뉴", "스냅/영상", "돌상/케이터링", "의상/뷰티", "답례품/초대장", "공간 대여"];
 const reviewCoverage = window.reviewCoverageData || { regions: [] };
 const reviewCandidates = window.reviewVenueCandidateData || [];
@@ -11,7 +11,7 @@ const reviewVenueDirectoryItems = reviewCandidates
       garden: "가든·하우스웨딩",
       home: "우리집 홈파티"
     }[candidateSpace(item)] || item.category;
-    const regionLabel = window.memoaRegionLabel(item.inferredRegion);
+    const regionLabel = window.taranRegionLabel(item.inferredRegion);
     return {
       id: item.id,
       name: item.name,
@@ -44,7 +44,7 @@ const requestedEvent = pageParams.get("event") || "all";
 const requestedSpace = pageParams.get("space") || "all";
 const requestedService = pageParams.get("service") || "all";
 const eventContexts = {
-  all: { kicker: "memoa PARTNERS", title: "조건에 맞는 가족행사 파트너를\n한눈에 비교하세요.", copy: "원하는 행사, 지역, 서비스 유형을 선택하면 공개 가능한 파트너 정보를 먼저 보여드립니다." },
+  all: { kicker: "taran PARTNERS", title: "조건에 맞는 가족행사 파트너를\n한눈에 비교하세요.", copy: "원하는 행사, 지역, 서비스 유형을 선택하면 공개 가능한 파트너 정보를 먼저 보여드립니다." },
   wedding: { kicker: "WEDDING & COUPLE", title: "우리다운 시작을 위한\n웨딩·상견례 파트너", copy: "스몰웨딩, 야외 하우스웨딩, 상견례와 리마인드 이벤트에 맞는 파트너를 모읍니다." },
   kids: { kicker: "BABY & KIDS", title: "우리 아이의 특별한 날을 위한\n백일·돌·키즈파티 파트너", copy: "백일과 첫돌, 입학 축하, 프라이빗 키즈 생일파티에 맞는 정보를 확인하세요." },
   parents: { kicker: "PARENTS & FAMILY", title: "감사의 마음을 전하는\n환갑·칠순·퇴임 파트너", copy: "환갑, 칠순, 팔순과 퇴임식, 은혼식·금혼식에 맞는 공간과 서비스를 준비합니다." },
@@ -90,7 +90,7 @@ function cleanAreaLabel(value) {
 function normalizeDistrictForDisplay(value, province) {
   const text = cleanAreaLabel(value);
   if (!text) return "";
-  const entry = (window.memoaRegionData || []).find(item => item.province === province);
+  const entry = (window.taranRegionData || []).find(item => item.province === province);
   if (entry) {
     const matched = entry.districts.find(district => {
       const shortName = district.replace(/(구|군|시)$/u, "");
@@ -104,8 +104,8 @@ function normalizeDistrictForDisplay(value, province) {
 function directoryLocationText(item) {
   const regionRaw = String(item.region ?? "").trim();
   const areaRaw = String(item.area ?? "").trim();
-  const region = window.memoaResolveRegion(regionRaw);
-  const area = window.memoaResolveRegion(areaRaw);
+  const region = window.taranResolveRegion(regionRaw);
+  const area = window.taranResolveRegion(areaRaw);
   const province = region.province || area.province || "";
   const district = region.district || area.district || normalizeDistrictForDisplay(areaRaw, province);
   const base = [province, district].filter(Boolean).join(" ");
@@ -150,14 +150,14 @@ function setupFilters() {
     .filter(category => !categories.includes(category))
     .sort((a, b) => a.localeCompare(b, "ko-KR"));
   fillSelect("#directory-category", [...categories, ...extraCategories]);
-  window.memoaSetupRegionSelects(
+  window.taranSetupRegionSelects(
     document.querySelector("#directory-province"),
     document.querySelector("#directory-region")
   );
 }
 
 function regionMatches(item, province, district) {
-  const resolved = window.memoaResolveRegion(item.region);
+  const resolved = window.taranResolveRegion(item.region);
   return (province === "all" || resolved.province === province) &&
     (district === "all" || resolved.district === district);
 }
@@ -171,10 +171,10 @@ function renderReviewCoverage() {
   document.querySelector("#coverage-priority").textContent = Number(reviewCoverage.prioritySources || 0).toLocaleString("ko-KR");
   document.querySelector("#coverage-date").textContent = reviewCoverage.generatedAt || "-";
   document.querySelector("#review-coverage-policy").textContent = "공개 후기와 기본 업체 정보를 바탕으로 가족행사 파트너를 계속 정리하고 있습니다.";
-  const provinceCoverage = window.memoaRegionData.map(entry => ({
+  const provinceCoverage = window.taranRegionData.map(entry => ({
     name: entry.province,
     sourceCount: (reviewCoverage.regions || []).reduce((total, item) => {
-      const resolved = window.memoaResolveRegion(item.name);
+      const resolved = window.taranResolveRegion(item.name);
       return total + (resolved.province === entry.province ? Number(item.sourceCount || 0) : 0);
     }, 0)
   })).filter(item => item.sourceCount > 0);
@@ -184,7 +184,7 @@ function renderReviewCoverage() {
 }
 
 function setupReviewCandidateFilters() {
-  window.memoaSetupRegionSelects(
+  window.taranSetupRegionSelects(
     document.querySelector("#review-candidate-province"),
     document.querySelector("#review-candidate-region")
   );
@@ -241,7 +241,7 @@ function candidateHasTopic(item, names) {
 }
 
 function candidateSpecProfile(item) {
-  const regionLabel = window.memoaRegionLabel(item.inferredRegion);
+  const regionLabel = window.taranRegionLabel(item.inferredRegion);
   const hasPrice = candidateHasTopic(item, ["비용", "견적", "금액", "식대", "대관료", "할인"]);
   const hasCapacity = candidateHasTopic(item, ["인원", "보증", "소규모", "명"]);
   const hasParking = candidateHasTopic(item, ["주차", "발렛"]);
@@ -305,8 +305,8 @@ function filteredReviewCandidates() {
   const space = document.querySelector("#review-candidate-category").value;
   const eventContext = document.querySelector("#review-candidate-event").value;
   return reviewCandidates.filter(item => {
-    const resolved = window.memoaResolveRegion(item.inferredRegion);
-    const regionLabel = window.memoaRegionLabel(item.inferredRegion);
+    const resolved = window.taranResolveRegion(item.inferredRegion);
+    const regionLabel = window.taranRegionLabel(item.inferredRegion);
     return (province === "all" || resolved.province === province) &&
       (district === "all" || resolved.district === district) &&
       (space === "all" || candidateSpace(item) === space) &&
@@ -496,7 +496,7 @@ function itemSearchText(item) {
 }
 
 function regionSortKey(item) {
-  const resolved = window.memoaResolveRegion(item.region);
+  const resolved = window.taranResolveRegion(item.region);
   const regionText = [
     item.region,
     item.area,
@@ -505,8 +505,8 @@ function regionSortKey(item) {
   ].filter(Boolean).join(" ");
   if (!resolved.district) {
     const provinceCandidates = resolved.province
-      ? window.memoaRegionData.filter(entry => entry.province === resolved.province)
-      : window.memoaRegionData;
+      ? window.taranRegionData.filter(entry => entry.province === resolved.province)
+      : window.taranRegionData;
     for (const entry of provinceCandidates) {
       const foundDistrict = entry.districts.find(district => {
         const shortName = district.replace(/(특별시|광역시|특별자치시|특별자치도|자치도|시|군|구)$/g, "");
@@ -519,8 +519,8 @@ function regionSortKey(item) {
       }
     }
   }
-  const provinceIndex = window.memoaRegionData.findIndex(entry => entry.province === resolved.province);
-  const provinceEntry = window.memoaRegionData.find(entry => entry.province === resolved.province);
+  const provinceIndex = window.taranRegionData.findIndex(entry => entry.province === resolved.province);
+  const provinceEntry = window.taranRegionData.find(entry => entry.province === resolved.province);
   const districtIndex = provinceEntry ? provinceEntry.districts.indexOf(resolved.district) : -1;
   return {
     provinceIndex: provinceIndex === -1 ? 999 : provinceIndex,
@@ -622,7 +622,7 @@ function drawDirectory() {
 
   if (!items.length) {
     const reviewItem = reviewCoverage.regions.find(item => {
-      const resolved = window.memoaResolveRegion(item.name);
+      const resolved = window.taranResolveRegion(item.name);
       return (province === "all" || resolved.province === province) &&
         (district === "all" || resolved.district === district);
     });
@@ -712,7 +712,7 @@ document.querySelector("#directory-category-summary").addEventListener("click", 
 document.querySelector("#review-region-list")?.addEventListener("click", event => {
   const button = event.target.closest("[data-review-region]");
   if (!button) return;
-  const resolved = window.memoaResolveRegion(button.dataset.reviewRegion);
+  const resolved = window.taranResolveRegion(button.dataset.reviewRegion);
   document.querySelector("#directory-province").value = resolved.province || "all";
   document.querySelector("#directory-province").dispatchEvent(new Event("change"));
   document.querySelector("#directory-region").value = resolved.district || "all";

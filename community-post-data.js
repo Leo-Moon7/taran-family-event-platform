@@ -1,4 +1,4 @@
-window.memoa_COMMUNITY_POSTS = [
+window.taran_COMMUNITY_POSTS = [
   {
     id: "guarantee-30",
     category: "준비 질문",

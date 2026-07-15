@@ -1,5 +1,5 @@
 let crawlReviewState = {};
-try { crawlReviewState = JSON.parse(localStorage.getItem("sonpum-haebang-crawl-review") || "{}"); } catch (_) { crawlReviewState = {}; }
+try { crawlReviewState = JSON.parse(localStorage.getItem("taran-crawl-review") || "{}"); } catch (_) { crawlReviewState = {}; }
 
 function crawlStatusLabel(status) {
   if (status === "published") return "발행 승인";
@@ -71,13 +71,13 @@ document.querySelector("#crawl-review-list").addEventListener("click", event => 
     crawlReviewState[id] = "rejected";
     message.textContent = "보류 처리했습니다. 공개 목록에는 노출되지 않습니다.";
   }
-  localStorage.setItem("sonpum-haebang-crawl-review", JSON.stringify(crawlReviewState));
+  localStorage.setItem("taran-crawl-review", JSON.stringify(crawlReviewState));
   card.querySelector(".review-status").className = `review-status ${crawlReviewState[id]}`;
   card.querySelector(".review-status").textContent = crawlStatusLabel(crawlReviewState[id]);
 });
 
 function readClaims() {
-  try { return JSON.parse(localStorage.getItem("sonpum-haebang-claims") || "[]"); } catch (_) { return []; }
+  try { return JSON.parse(localStorage.getItem("taran-provider-claims") || "[]"); } catch (_) { return []; }
 }
 
 function claimStatusLabel(status) {
@@ -122,7 +122,7 @@ document.querySelector("#claim-review-list").addEventListener("click", event => 
     claim.status = "rejected";
     message.textContent = "보완 요청 상태로 변경했습니다.";
   }
-  localStorage.setItem("sonpum-haebang-claims", JSON.stringify(claims));
+  localStorage.setItem("taran-provider-claims", JSON.stringify(claims));
   card.querySelector(".review-status").className = `review-status ${claim.status}`;
   card.querySelector(".review-status").textContent = claimStatusLabel(claim.status);
 });

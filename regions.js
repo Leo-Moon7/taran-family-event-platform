@@ -1,4 +1,4 @@
-window.memoaRegionData = [
+window.taranRegionData = [
   { province: "서울특별시", districts: ["강남구", "강동구", "강북구", "강서구", "관악구", "광진구", "구로구", "금천구", "노원구", "도봉구", "동대문구", "동작구", "마포구", "서대문구", "서초구", "성동구", "성북구", "송파구", "양천구", "영등포구", "용산구", "은평구", "종로구", "중구", "중랑구"] },
   { province: "부산광역시", districts: ["강서구", "금정구", "기장군", "남구", "동구", "동래구", "부산진구", "북구", "사상구", "사하구", "서구", "수영구", "연제구", "영도구", "중구", "해운대구"] },
   { province: "대구광역시", districts: ["남구", "달서구", "달성군", "동구", "북구", "서구", "수성구", "중구", "군위군"] },
@@ -18,7 +18,7 @@ window.memoaRegionData = [
   { province: "제주특별자치도", districts: ["서귀포시", "제주시"] }
 ];
 
-const memoaRegionAliases = {
+const taranRegionAliases = {
   "서울": ["서울특별시", ""], "부산": ["부산광역시", ""], "대구": ["대구광역시", ""], "경기": ["경기도", ""],
   "인천": ["인천광역시", ""], "광주광역시": ["광주광역시", ""], "대전": ["대전광역시", ""],
   "울산": ["울산광역시", ""], "세종": ["세종특별자치시", ""], "제주": ["제주특별자치도", ""],
@@ -32,38 +32,38 @@ const memoaRegionAliases = {
   "포항": ["경상북도", "포항시"], "김해": ["경상남도", "김해시"], "창원": ["경상남도", "창원시"]
 };
 
-window.memoaResolveRegion = function (value) {
+window.taranResolveRegion = function (value) {
   const raw = String(value || "").trim();
   if (!raw || raw === "all" || raw === "전국") return { province: "", district: "" };
-  if (memoaRegionAliases[raw]) {
-    const [province, district] = memoaRegionAliases[raw];
+  if (taranRegionAliases[raw]) {
+    const [province, district] = taranRegionAliases[raw];
     return { province, district };
   }
-  const provinceEntry = window.memoaRegionData.find(entry => entry.province === raw);
+  const provinceEntry = window.taranRegionData.find(entry => entry.province === raw);
   if (provinceEntry) return { province: provinceEntry.province, district: "" };
-  const seoulDistrict = window.memoaRegionData[0].districts.includes(raw);
+  const seoulDistrict = window.taranRegionData[0].districts.includes(raw);
   if (seoulDistrict) return { province: "서울특별시", district: raw };
-  for (const entry of window.memoaRegionData) {
+  for (const entry of window.taranRegionData) {
     if (entry.districts.includes(raw)) return { province: entry.province, district: raw };
   }
   return { province: raw, district: "" };
 };
 
-window.memoaRegionLabel = function (value) {
-  const resolved = window.memoaResolveRegion(value);
+window.taranRegionLabel = function (value) {
+  const resolved = window.taranResolveRegion(value);
   return [resolved.province, resolved.district].filter(Boolean).join(" ") || "지역 확인 필요";
 };
 
-window.memoaSetupRegionSelects = function (provinceSelect, districtSelect) {
+window.taranSetupRegionSelects = function (provinceSelect, districtSelect) {
   provinceSelect.innerHTML = '<option value="all">전체 시·도</option>';
-  window.memoaRegionData.forEach(entry => {
+  window.taranRegionData.forEach(entry => {
     const option = document.createElement("option");
     option.value = entry.province;
     option.textContent = entry.province;
     provinceSelect.append(option);
   });
   const fillDistricts = () => {
-    const entry = window.memoaRegionData.find(item => item.province === provinceSelect.value);
+    const entry = window.taranRegionData.find(item => item.province === provinceSelect.value);
     districtSelect.innerHTML = '<option value="all">전체 시·군·구</option>';
     (entry?.districts || []).forEach(district => {
       const option = document.createElement("option");

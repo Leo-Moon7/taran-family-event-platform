@@ -1,8 +1,8 @@
-Promise.resolve(window.memoaContentReady).finally(() => {
+Promise.resolve(window.taranContentReady).finally(() => {
 const providerParams = new URLSearchParams(window.location.search);
 const providerId = providerParams.get("id");
 const provider = (window.publicDirectoryData || []).find(item => item.id === providerId);
-const contributionStorageKey = "memoa-provider-contributions";
+const contributionStorageKey = "taran-provider-contributions";
 
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, char => ({
@@ -190,7 +190,7 @@ function renderProvider() {
     return;
   }
 
-  document.title = `${provider.name} | 메모아`;
+  document.title = `${provider.name} | 따란`;
   document.querySelector("#provider-category").textContent = `${provider.category || "업체"} · ${provider.subcategory || "가족행사"}`;
   document.querySelector("#provider-name").textContent = provider.name;
   document.querySelector("#provider-intro").textContent = provider.intro || "가족행사 상담을 검토할 수 있는 파트너입니다.";

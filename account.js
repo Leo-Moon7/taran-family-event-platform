@@ -1,7 +1,7 @@
 (async function initializeAccount() {
-  const account = await window.SonpumAuth.ready;
+  const account = await window.TaranAuth.ready;
   if (!account) {
-    window.location.href = window.SonpumAuth.loginUrl("account.html");
+    window.location.href = window.TaranAuth.loginUrl("account.html");
     return;
   }
   document.querySelector("#account-name").textContent = account.display_name;
@@ -10,7 +10,7 @@
 
   let savedSlugs = [];
   try {
-    const saved = await window.SonpumAuth.api("/api/member/saved-venues");
+    const saved = await window.TaranAuth.api("/api/member/saved-venues");
     savedSlugs = saved.venue_slugs;
   } catch (_) {}
   const savedVenues = window.publicVenueData.filter(venue => savedSlugs.includes(venue.id));
@@ -20,13 +20,13 @@
     : `<div class="saved-empty"><strong>아직 저장한 업체가 없어요.</strong><span>업체 상세 화면에서 관심 업체로 저장해보세요.</span></div>`;
 
   document.querySelector("#logout-button").addEventListener("click", async () => {
-    await window.SonpumAuth.api("/api/auth/logout", { method: "POST" });
+    await window.TaranAuth.api("/api/auth/logout", { method: "POST" });
     window.location.href = "index.html";
   });
 
   document.querySelector("#delete-account-button").addEventListener("click", async () => {
     if (!window.confirm("계정과 저장한 관심 업체, 예산, 체크리스트를 모두 삭제할까요?")) return;
-    await window.SonpumAuth.api("/api/auth/account", { method: "DELETE" });
+    await window.TaranAuth.api("/api/auth/account", { method: "DELETE" });
     window.location.href = "index.html";
   });
 })();

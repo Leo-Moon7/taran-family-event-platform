@@ -1,4 +1,4 @@
-﻿window.venueData = [
+window.venueData = [
   {
     id: "songpa-sample-a", name: "송파 한정식 룸 · 샘플 A", region: "송파구", area: "잠실·석촌", type: "한정식",
     capacity: 24, minGuests: 12, privateRoom: true, parking: true, price: 69000, childPrice: 35000,
@@ -130,15 +130,15 @@ window.venueData.forEach((venue, index) => {
 });
 
 try {
-  const vendorEdits = JSON.parse(localStorage.getItem("sonpum-haebang-vendor-edits") || "{}");
-  const approvedClaims = JSON.parse(localStorage.getItem("sonpum-haebang-claims") || "[]")
+  const vendorEdits = JSON.parse(localStorage.getItem("taran-provider-edits") || "{}");
+  const approvedClaims = JSON.parse(localStorage.getItem("taran-provider-claims") || "[]")
     .filter(claim => claim.status === "approved")
     .map(claim => claim.venueId);
   window.venueData.forEach(venue => {
     if (approvedClaims.includes(venue.id) && vendorEdits[venue.id]) Object.assign(venue, vendorEdits[venue.id]);
   });
 } catch (_) {
-  localStorage.removeItem("sonpum-haebang-vendor-edits");
+  localStorage.removeItem("taran-provider-edits");
 }
 
 // 고객용 업체 목록에서는 예시/샘플 장소를 노출하지 않습니다.

@@ -1,7 +1,7 @@
 (function () {
-  const storageKey = "memoa-admin-overrides-preview";
+  const storageKey = "taran-admin-overrides-preview";
   const configStorageKey = "taran-admin-db-config";
-  const baseConfig = window.memoaAdminConfig || window.memoaContentConfig || {};
+  const baseConfig = window.taranAdminConfig || window.taranContentConfig || {};
   const savedConfig = (() => {
     try {
       return JSON.parse(localStorage.getItem(configStorageKey) || "{}");
@@ -18,22 +18,22 @@
     }
   };
   const tables = {
-    siteCopy: "memoa_site_copy",
-    providers: "memoa_providers",
-    articles: "memoa_articles",
-    banners: "memoa_banners",
-    customers: "memoa_customers",
-    revisions: "memoa_content_revisions",
-    adminEvents: "memoa_admin_events",
+    siteCopy: "taran_site_copy",
+    providers: "taran_providers",
+    articles: "taran_articles",
+    banners: "taran_banners",
+    customers: "taran_customers",
+    revisions: "taran_content_revisions",
+    adminEvents: "taran_admin_events",
     ...(config.tables || {})
   };
 
   const defaultCopy = [
-    { label: "메인 배지", selector: ".memoa-badge", text: "프리미엄 가족행사 큐레이션" },
-    { label: "메인 제목", selector: "#memoa-hero-title", html: "가족의 중요한 날,<br>더 쉽고 완벽하게 준비하세요." },
-    { label: "메인 설명", selector: ".memoa-hero-copy p", text: "행사 종류와 조건을 입력하면 장소, 업체, 예상 비용과 준비 일정을 한 번에 확인할 수 있어요." },
-    { label: "카테고리 제목", selector: "#memoa-category-title", text: "어떤 날을 준비하시나요?" },
-    { label: "업체 섹션 제목", selector: "#memoa-partner-title", text: "조건에 맞는 장소와 업체를 먼저 보여드려요." }
+    { label: "메인 배지", selector: ".taran-badge", text: "프리미엄 가족행사 큐레이션" },
+    { label: "메인 제목", selector: "#taran-hero-title", html: "가족의 중요한 날,<br>더 쉽고 완벽하게 준비하세요." },
+    { label: "메인 설명", selector: ".taran-hero-copy p", text: "행사 종류와 조건을 입력하면 장소, 업체, 예상 비용과 준비 일정을 한 번에 확인할 수 있어요." },
+    { label: "카테고리 제목", selector: "#taran-category-title", text: "어떤 날을 준비하시나요?" },
+    { label: "업체 섹션 제목", selector: "#taran-partner-title", text: "조건에 맞는 장소와 업체를 먼저 보여드려요." }
   ];
 
   const defaultBanners = [
@@ -41,7 +41,7 @@
       id: "home-point",
       placement: "home-point",
       status: "published",
-      eyebrow: "memoa point",
+      eyebrow: "taran point",
       title: "견적서나 업체 정보를 공유하면 포인트를 쌓을 수 있어요.",
       body: "공유한 자료는 업체 조건표를 보강하는 데만 사용하고, 원본 파일은 검토 후 보관하지 않는 기준으로 운영합니다.",
       ctaLabel: "정보 공유하기",
@@ -112,7 +112,7 @@
     } catch (error) {
       console.warn("미리보기 데이터를 읽지 못했습니다.", error);
     }
-    return normalizeState(window.memoaContentOverrides || emptyState());
+    return normalizeState(window.taranContentOverrides || emptyState());
   }
 
   function emptyState() {
@@ -261,7 +261,7 @@
 
   function updateDashboard() {
     state.version = today();
-    const siteId = config.siteId || "memoa";
+    const siteId = config.siteId || "taran";
     const dbReady = isDbConfigured();
     const providers = visibleProviders();
     const reviewing = allProviders().filter(item => ["draft", "reviewing", "hidden"].includes(item.publicationStatus || item.status)).length;
@@ -532,7 +532,7 @@
     setText("[data-stat-visits]", total.toLocaleString("ko-KR"));
     setText("[data-stat-provider-clicks]", Math.max(0, Math.round(visibleProviders().length * 0.48)).toLocaleString("ko-KR"));
     setText("[data-stat-contributions]", customerData().reduce((sum, item) => sum + Number(item.contributionCount || 0), 0).toLocaleString("ko-KR"));
-    setText("[data-stat-articles]", (window.memoa_BLOG_POSTS || []).reduce((sum, item, index) => sum + (index < 4 ? 600 + index * 143 : 0), 0).toLocaleString("ko-KR"));
+    setText("[data-stat-articles]", (window.taran_BLOG_POSTS || []).reduce((sum, item, index) => sum + (index < 4 ? 600 + index * 143 : 0), 0).toLocaleString("ko-KR"));
   }
 
   function fillSelects() {
@@ -548,12 +548,12 @@
     }
 
     const articleSelect = $("[data-article-template]");
-    if (articleSelect && window.memoa_BLOG_POSTS) {
-      articleSelect.innerHTML += window.memoa_BLOG_POSTS
+    if (articleSelect && window.taran_BLOG_POSTS) {
+      articleSelect.innerHTML += window.taran_BLOG_POSTS
         .map(item => `<option value="${escapeAttr(item.slug)}">${escapeText(item.title)}</option>`)
         .join("");
       articleSelect.addEventListener("change", () => {
-        const item = window.memoa_BLOG_POSTS.find(entry => entry.slug === articleSelect.value);
+        const item = window.taran_BLOG_POSTS.find(entry => entry.slug === articleSelect.value);
         if (item) fillArticle(item);
       });
     }
@@ -767,7 +767,7 @@
   function exportJs() {
     syncCopyFromRows();
     state.version = today();
-    const js = `window.memoaContentOverrides = ${JSON.stringify(publicState(), null, 2)};\n`;
+    const js = `window.taranContentOverrides = ${JSON.stringify(publicState(), null, 2)};\n`;
     download("content-overrides.js", js, "text/javascript");
     addRecent("content-overrides.js 내보내기");
   }
@@ -775,7 +775,7 @@
   function exportJson() {
     syncCopyFromRows();
     state.version = today();
-    download("memoa-admin-backup.json", JSON.stringify(state, null, 2), "application/json");
+    download("taran-admin-backup.json", JSON.stringify(state, null, 2), "application/json");
     addRecent("관리자 JSON 백업 내보내기");
   }
 
@@ -804,7 +804,7 @@
 
   function aiTemplate() {
     const request = [
-      "아래 메모아 관리자 JSON 구조를 유지해서 업데이트해줘.",
+      "아래 따란 관리자 JSON 구조를 유지해서 업데이트해줘.",
       "고객에게 보이는 문구는 자연스럽게 작성하고, 가격·수용인원처럼 확정이 필요한 정보는 근거가 있을 때만 넣어줘.",
       "업체는 providers 배열, 준비백과 글은 articles 배열, 배너는 banners 배열에 추가해줘.",
       "customers 배열에는 개인정보가 들어갈 수 있으니 공개 파일로 내보내지 않도록 주의해줘.",
@@ -887,7 +887,7 @@
       const mode = item.html ? "html" : "text";
       return {
         id: item.id || slugify(item.selector || item.label || `copy-${index}`),
-        site_id: config.siteId || "memoa",
+        site_id: config.siteId || "taran",
         label: item.label || "",
         selector: item.selector,
         mode,
@@ -924,7 +924,7 @@
   function bannerRows() {
     return state.banners.map((item, index) => ({
       id: item.id,
-      site_id: config.siteId || "memoa",
+      site_id: config.siteId || "taran",
       placement: item.placement || "home-point",
       data: item,
       status: item.status || "published",
@@ -971,7 +971,7 @@
       await upsertRows(tables.customers, customerRows(), "id");
       await client.from(tables.revisions).insert({
         content_type: "bulk",
-        content_key: `memoa-${Date.now()}`,
+        content_key: `taran-${Date.now()}`,
         action: "admin-save",
         data: {
           version: state.version,

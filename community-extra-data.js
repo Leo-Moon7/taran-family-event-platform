@@ -1,4 +1,4 @@
-window.memoa_COMMUNITY_POSTS = (window.memoa_COMMUNITY_POSTS || []).concat([
+window.taran_COMMUNITY_POSTS = (window.taran_COMMUNITY_POSTS || []).concat([
   {
     id: "weekday-lunch-discount",
     category: "견적 공유",
