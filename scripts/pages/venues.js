@@ -9,7 +9,7 @@
     form: document.querySelector("[data-filter-form]"), panel: document.querySelector("#directory-filter-panel"), query: document.querySelector("#directory-query"),
     event: document.querySelector("#directory-event"), province: document.querySelector("#directory-province"), district: document.querySelector("#directory-district"),
     guests: document.querySelector("#directory-guests"), budget: document.querySelector("#directory-budget"), category: document.querySelector("#directory-category"),
-    sort: document.querySelector("#directory-sort"), quickSort: document.querySelector("#directory-sort-quick"), chips: document.querySelector("#directory-filter-chips"),
+    sort: document.querySelector("#directory-sort-quick"), chips: document.querySelector("#directory-filter-chips"),
     summary: document.querySelector("#directory-result-summary"), results: document.querySelector("#directory-results"), pagination: document.querySelector("#directory-pagination")
   };
 
@@ -282,7 +282,7 @@
     history.replaceState(null, "", `${location.pathname}${query ? `?${query}` : ""}`);
   }
 
-  function render() {
+  function render(updateHistory = true) {
     const total = state.filtered.length;
     const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
     state.page = Math.min(state.page, totalPages);
@@ -294,24 +294,22 @@
     else pageItems.forEach((item) => elements.results.append(createCard(item)));
     window.TaranPagination.render(elements.pagination, { page: state.page, totalPages, onChange(page) { state.page = page; render(); document.querySelector(".result-toolbar")?.scrollIntoView({ behavior: "smooth", block: "start" }); } });
     renderChips();
-    updateUrl();
+    if (updateHistory) updateUrl();
   }
 
-  function applyFilters() {
+  function applyFilters(updateHistory = true) {
     const query = elements.query.value.trim().toLowerCase();
     state.filtered = sortItems(state.items.filter((item) => (!query || searchText(item).includes(query)) && (elements.event.value === "all" || (item.eventTags || []).includes(elements.event.value)) && (elements.category.value === "all" || serviceGroup(item) === elements.category.value) && itemMatchesRegion(item) && itemMatchesGuests(item) && itemMatchesBudget(item)));
-    elements.quickSort.value = elements.sort.value;
-    render();
+    render(updateHistory);
   }
 
-  function resetFilters() {
+  function resetFilters(updateHistory = true) {
     elements.form.reset();
     elements.event.value = "all";
     elements.province.value = "all";
     elements.province.dispatchEvent(new Event("change"));
     elements.district.value = "all";
     elements.sort.value = "region";
-    elements.quickSort.value = "region";
     state.page = 1;
     applyFilters();
   }
@@ -336,11 +334,13 @@
 
   function openFilter() {
     elements.panel.dataset.open = "true";
+    document.querySelector("[data-filter-open]")?.setAttribute("aria-expanded", "true");
     document.body.style.overflow = "hidden";
     elements.query.focus();
   }
   function closeFilter() {
     delete elements.panel.dataset.open;
+    document.querySelector("[data-filter-open]")?.setAttribute("aria-expanded", "false");
     document.body.style.removeProperty("overflow");
     document.querySelector("[data-filter-open]")?.focus();
   }
@@ -355,12 +355,23 @@
     elements.form.addEventListener("submit", (event) => { event.preventDefault(); state.page = 1; applyFilters(); closeFilter(); });
     elements.form.addEventListener("reset", (event) => { event.preventDefault(); resetFilters(); });
     elements.sort.addEventListener("change", () => { state.page = 1; applyFilters(); });
-    elements.quickSort.addEventListener("change", () => { elements.sort.value = elements.quickSort.value; state.page = 1; applyFilters(); });
     document.querySelector("[data-filter-open]")?.addEventListener("click", openFilter);
     document.querySelector("[data-filter-close]")?.addEventListener("click", closeFilter);
     document.addEventListener("keydown", (event) => { if (event.key === "Escape" && elements.panel.dataset.open === "true") closeFilter(); });
-    applyFilters();
+    window.addEventListener("popstate", () => {
+      resetFilters(false);
+      readUrl();
+      state.page = 1;
+      applyFilters(false);
+    });
+    applyFilters(false);
   }
 
-  init();
+  try { init(); }
+  catch (error) {
+    console.error("업체 목록을 표시하지 못했습니다.", error);
+    elements.results?.replaceChildren(window.TaranStates.message({ title: "업체 정보를 불러오지 못했습니다.", description: "잠시 후 다시 시도해 주세요.", actionLabel: "다시 시도", onAction: () => window.location.reload() }));
+    elements.results?.setAttribute("aria-busy", "false");
+    if (elements.summary) elements.summary.textContent = "불러오기 오류";
+  }
 })();

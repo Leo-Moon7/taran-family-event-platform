@@ -26,7 +26,16 @@
       const card = document.createElement("article");
       card.className = "card";
       card.setAttribute("aria-hidden", "true");
-      card.innerHTML = '<div class="card__media skeleton"></div><div class="card__body"><div class="skeleton" style="height:1.5rem;width:65%"></div><div class="skeleton" style="height:1rem;width:45%"></div><div class="skeleton" style="height:1rem;width:85%"></div></div>';
+      const media = document.createElement("div");
+      media.className = "card__media skeleton";
+      const body = document.createElement("div");
+      body.className = "card__body";
+      ["skeleton--title", "skeleton--meta", "skeleton--copy"].forEach(className => {
+        const line = document.createElement("div");
+        line.className = `skeleton ${className}`;
+        body.append(line);
+      });
+      card.append(media, body);
       fragment.append(card);
     }
     return fragment;

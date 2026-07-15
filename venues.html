@@ -18,6 +18,7 @@
   <link rel="stylesheet" href="styles/components/filter.css">
   <link rel="stylesheet" href="styles/components/modal.css">
   <link rel="stylesheet" href="styles/pages/venues.css">
+  <script src="scripts/core/brand.js"></script>
   <script src="scripts/core/storage.js"></script>
 </head>
 <body class="taran-directory">
@@ -71,12 +72,12 @@
             <h2 id="directory-search-title">검색 조건</h2>
             <p>행사 종류와 지역을 먼저 선택하고 필요한 조건을 더해보세요.</p>
           </div>
-          <button class="button button--secondary mobile-filter-button" type="button" data-filter-open aria-controls="directory-filter-panel">필터 열기</button>
+          <button class="button button--secondary mobile-filter-button" type="button" data-filter-open aria-controls="directory-filter-panel" aria-expanded="false">필터 열기</button>
         </div>
 
-        <form class="filter-panel" id="directory-filter-panel" data-filter-form>
+        <form class="filter-panel" id="directory-filter-panel" data-filter-form aria-labelledby="directory-filter-title">
           <div class="filter-panel__mobile-head">
-            <strong>검색 조건</strong>
+            <strong id="directory-filter-title">검색 조건</strong>
             <button class="button button--text" type="button" data-filter-close>닫기</button>
           </div>
           <div class="filter-panel__grid">
@@ -109,7 +110,6 @@
             <summary>상세 필터</summary>
             <div class="detail-filter__grid">
               <div class="field"><label class="field__label" for="directory-category">서비스 유형</label><select class="select" id="directory-category"><option value="all">전체 서비스</option></select></div>
-              <div class="field"><label class="field__label" for="directory-sort">정렬</label><select class="select" id="directory-sort"><option value="region">지역순</option><option value="review-count">후기 많은 순</option><option value="rating-high">평점 높은 순</option><option value="rating-low">평점 낮은 순</option><option value="price-low">가격 낮은 순</option><option value="updated">최근 확인 순</option></select></div>
             </div>
           </details>
           <div class="filter-panel__actions">
