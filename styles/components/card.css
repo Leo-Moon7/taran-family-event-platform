@@ -11,3 +11,7 @@
 .skeleton::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgb(255 255 255 / 70%), transparent); animation: taran-shimmer 1.4s infinite; }
 @keyframes taran-shimmer { to { transform: translateX(100%); } }
 @media (prefers-reduced-motion: reduce) { .skeleton::after { animation: none; } }
+.result-state { display: grid; min-height: 15rem; place-items: center; align-content: center; gap: var(--space-3); padding: var(--space-8); border: 1px dashed var(--color-border-strong); border-radius: var(--radius-lg); text-align: center; }
+.result-state strong { font-size: var(--font-size-20); }
+.result-state--error { border-color: #e8b7b7; background: var(--color-error-bg); }
+.pagination { display: flex; align-items: center; justify-content: center; gap: var(--space-4); margin-top: var(--space-8); }
