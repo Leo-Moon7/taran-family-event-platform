@@ -1,0 +1,9 @@
+.modal { position: fixed; z-index: 100; inset: 0; display: none; place-items: center; padding: var(--space-4); background: rgb(35 31 28 / 58%); }
+.modal[open], .modal[data-open="true"] { display: grid; }
+.modal__dialog { width: min(100%, 38rem); max-height: min(90vh, 48rem); overflow: auto; border: 0; border-radius: var(--radius-lg); background: var(--color-surface); box-shadow: var(--shadow-md); }
+.modal__header, .modal__body, .modal__footer { padding: var(--space-4) var(--space-6); }
+.modal__header { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--color-border); }
+.modal__footer { display: flex; justify-content: flex-end; gap: var(--space-3); border-top: 1px solid var(--color-border); }
+.toast-region { position: fixed; z-index: 120; right: var(--space-4); bottom: var(--space-4); display: grid; width: min(24rem, calc(100vw - 2rem)); gap: var(--space-2); }
+.toast { padding: var(--space-3) var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); box-shadow: var(--shadow-md); }
+.toast--error { border-color: #e8b7b7; background: var(--color-error-bg); }

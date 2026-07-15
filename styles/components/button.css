@@ -1,0 +1,25 @@
+.button {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 0.7rem 1.125rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.2;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
+}
+.button:hover { transform: translateY(-1px); }
+.button:active { transform: translateY(0); }
+.button:disabled, .button[aria-disabled="true"] { cursor: not-allowed; opacity: 0.48; transform: none; }
+.button--primary { color: #fff; background: var(--color-brand-800); }
+.button--primary:hover { background: var(--color-brand-900); }
+.button--secondary { color: var(--color-brand-900); border-color: var(--color-border-strong); background: var(--color-surface); }
+.button--secondary:hover { border-color: var(--color-brand-700); background: var(--color-bg-subtle); }
+.button--text { min-height: 44px; padding-inline: var(--space-2); color: var(--color-brand-800); background: transparent; }
+.button--text:hover { color: var(--color-accent-700); }
+.button.is-loading { color: transparent; position: relative; pointer-events: none; }
+.button.is-loading::after { content: ""; position: absolute; width: 1rem; height: 1rem; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: taran-spin 0.7s linear infinite; }
+@keyframes taran-spin { to { transform: rotate(360deg); } }
