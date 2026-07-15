@@ -1,0 +1,79 @@
+window.memoaRegionData = [
+  { province: "서울특별시", districts: ["강남구", "강동구", "강북구", "강서구", "관악구", "광진구", "구로구", "금천구", "노원구", "도봉구", "동대문구", "동작구", "마포구", "서대문구", "서초구", "성동구", "성북구", "송파구", "양천구", "영등포구", "용산구", "은평구", "종로구", "중구", "중랑구"] },
+  { province: "부산광역시", districts: ["강서구", "금정구", "기장군", "남구", "동구", "동래구", "부산진구", "북구", "사상구", "사하구", "서구", "수영구", "연제구", "영도구", "중구", "해운대구"] },
+  { province: "대구광역시", districts: ["남구", "달서구", "달성군", "동구", "북구", "서구", "수성구", "중구", "군위군"] },
+  { province: "인천광역시", districts: ["강화군", "계양구", "남동구", "동구", "미추홀구", "부평구", "서구", "연수구", "옹진군", "중구"] },
+  { province: "광주광역시", districts: ["광산구", "남구", "동구", "북구", "서구"] },
+  { province: "대전광역시", districts: ["대덕구", "동구", "서구", "유성구", "중구"] },
+  { province: "울산광역시", districts: ["남구", "동구", "북구", "울주군", "중구"] },
+  { province: "세종특별자치시", districts: [] },
+  { province: "경기도", districts: ["가평군", "고양시", "과천시", "광명시", "광주시", "구리시", "군포시", "김포시", "남양주시", "동두천시", "부천시", "성남시", "수원시", "시흥시", "안산시", "안성시", "안양시", "양주시", "양평군", "여주시", "연천군", "오산시", "용인시", "의왕시", "의정부시", "이천시", "파주시", "평택시", "포천시", "하남시", "화성시"] },
+  { province: "강원특별자치도", districts: ["강릉시", "고성군", "동해시", "삼척시", "속초시", "양구군", "양양군", "영월군", "원주시", "인제군", "정선군", "철원군", "춘천시", "태백시", "평창군", "홍천군", "화천군", "횡성군"] },
+  { province: "충청북도", districts: ["괴산군", "단양군", "보은군", "영동군", "옥천군", "음성군", "제천시", "증평군", "진천군", "청주시", "충주시"] },
+  { province: "충청남도", districts: ["계룡시", "공주시", "금산군", "논산시", "당진시", "보령시", "부여군", "서산시", "서천군", "아산시", "예산군", "천안시", "청양군", "태안군", "홍성군"] },
+  { province: "전북특별자치도", districts: ["고창군", "군산시", "김제시", "남원시", "무주군", "부안군", "순창군", "완주군", "익산시", "임실군", "장수군", "전주시", "정읍시", "진안군"] },
+  { province: "전라남도", districts: ["강진군", "고흥군", "곡성군", "광양시", "구례군", "나주시", "담양군", "목포시", "무안군", "보성군", "순천시", "신안군", "여수시", "영광군", "영암군", "완도군", "장성군", "장흥군", "진도군", "함평군", "해남군", "화순군"] },
+  { province: "경상북도", districts: ["경산시", "경주시", "고령군", "구미시", "김천시", "문경시", "봉화군", "상주시", "성주군", "안동시", "영덕군", "영양군", "영주시", "영천시", "예천군", "울릉군", "울진군", "의성군", "청도군", "청송군", "칠곡군", "포항시"] },
+  { province: "경상남도", districts: ["거제시", "거창군", "고성군", "김해시", "남해군", "밀양시", "사천시", "산청군", "양산시", "의령군", "진주시", "창녕군", "창원시", "통영시", "하동군", "함안군", "함양군", "합천군"] },
+  { province: "제주특별자치도", districts: ["서귀포시", "제주시"] }
+];
+
+const memoaRegionAliases = {
+  "서울": ["서울특별시", ""], "부산": ["부산광역시", ""], "대구": ["대구광역시", ""], "경기": ["경기도", ""],
+  "인천": ["인천광역시", ""], "광주광역시": ["광주광역시", ""], "대전": ["대전광역시", ""],
+  "울산": ["울산광역시", ""], "세종": ["세종특별자치시", ""], "제주": ["제주특별자치도", ""],
+  "고양": ["경기도", "고양시"], "김포": ["경기도", "김포시"], "남양주": ["경기도", "남양주시"],
+  "부천": ["경기도", "부천시"], "성남": ["경기도", "성남시"], "수원": ["경기도", "수원시"],
+  "안산": ["경기도", "안산시"], "안양": ["경기도", "안양시"], "양주": ["경기도", "양주시"],
+  "용인": ["경기도", "용인시"], "의정부": ["경기도", "의정부시"], "파주": ["경기도", "파주시"],
+  "평택": ["경기도", "평택시"], "화성": ["경기도", "화성시"], "경기 광주": ["경기도", "광주시"],
+  "원주": ["강원특별자치도", "원주시"], "춘천": ["강원특별자치도", "춘천시"],
+  "청주": ["충청북도", "청주시"], "천안": ["충청남도", "천안시"], "전주": ["전북특별자치도", "전주시"],
+  "포항": ["경상북도", "포항시"], "김해": ["경상남도", "김해시"], "창원": ["경상남도", "창원시"]
+};
+
+window.memoaResolveRegion = function (value) {
+  const raw = String(value || "").trim();
+  if (!raw || raw === "all" || raw === "전국") return { province: "", district: "" };
+  if (memoaRegionAliases[raw]) {
+    const [province, district] = memoaRegionAliases[raw];
+    return { province, district };
+  }
+  const provinceEntry = window.memoaRegionData.find(entry => entry.province === raw);
+  if (provinceEntry) return { province: provinceEntry.province, district: "" };
+  const seoulDistrict = window.memoaRegionData[0].districts.includes(raw);
+  if (seoulDistrict) return { province: "서울특별시", district: raw };
+  for (const entry of window.memoaRegionData) {
+    if (entry.districts.includes(raw)) return { province: entry.province, district: raw };
+  }
+  return { province: raw, district: "" };
+};
+
+window.memoaRegionLabel = function (value) {
+  const resolved = window.memoaResolveRegion(value);
+  return [resolved.province, resolved.district].filter(Boolean).join(" ") || "지역 확인 필요";
+};
+
+window.memoaSetupRegionSelects = function (provinceSelect, districtSelect) {
+  provinceSelect.innerHTML = '<option value="all">전체 시·도</option>';
+  window.memoaRegionData.forEach(entry => {
+    const option = document.createElement("option");
+    option.value = entry.province;
+    option.textContent = entry.province;
+    provinceSelect.append(option);
+  });
+  const fillDistricts = () => {
+    const entry = window.memoaRegionData.find(item => item.province === provinceSelect.value);
+    districtSelect.innerHTML = '<option value="all">전체 시·군·구</option>';
+    (entry?.districts || []).forEach(district => {
+      const option = document.createElement("option");
+      option.value = district;
+      option.textContent = district;
+      districtSelect.append(option);
+    });
+    districtSelect.disabled = !entry || !entry.districts.length;
+  };
+  provinceSelect.addEventListener("change", fillDistricts);
+  fillDistricts();
+  return fillDistricts;
+};

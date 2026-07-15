@@ -1,0 +1,79 @@
+﻿<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="메모아 내 정보와 관심 업체를 확인하는 화면입니다.">
+  <meta name="theme-color" content="#153c36">
+  <title>내 정보 | 메모아</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="upgrade.css?v=79">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="메모아 홈">
+      <span class="brand-mark">m</span><span>메모아</span><small>memoa</small>
+    </a>
+    <nav aria-label="주요 메뉴">
+      <a href="index.html#finder">조건 찾기</a>
+      <a href="calculator.html">계산기</a>
+      <a href="checklist.html">체크리스트</a>
+      <a href="articles.html">준비백과</a>
+      <a href="community.html">커뮤니티</a>
+      <a href="venues.html">업체 전체</a>
+      <a class="auth-link" href="account.html" data-auth-link aria-current="page">내 정보</a>
+    </nav>
+  </header>
+
+  <main class="account-page">
+    <section class="account-heading">
+      <p class="eyebrow">마이 메모아</p>
+      <h1><span id="account-name">회원</span>님,<br>저장한 후보를 이어보세요.</h1>
+      <p>관심 업체와 예산, 체크리스트를 계정에서 이어볼 수 있습니다.</p>
+    </section>
+
+    <section class="account-layout">
+      <article class="account-card">
+        <div class="account-card-heading"><h2>내 정보</h2><span class="prototype-badge">계정 저장</span></div>
+        <dl class="account-info">
+          <div><dt>회원 상태</dt><dd id="info-status">이메일 회원</dd></div>
+          <div><dt>이름</dt><dd id="info-name">-</dd></div>
+          <div><dt>이메일</dt><dd id="info-email">-</dd></div>
+        </dl>
+        <div class="account-tool-links"><a href="calculator.html"><strong>저장한 예산</strong><span>계산기 이어보기 →</span></a><a href="checklist.html"><strong>준비 일정</strong><span>체크리스트 이어보기 →</span></a></div>
+        <p class="account-note">비밀번호 원문은 저장하지 않으며, 저장된 준비 내용은 로그인한 계정에서만 확인할 수 있습니다.</p>
+        <div class="account-actions">
+          <button class="button button-quiet" id="logout-button" type="button">로그아웃</button>
+          <button class="danger-button" id="delete-account-button" type="button">회원 탈퇴</button>
+        </div>
+      </article>
+
+      <article class="account-card saved-card">
+        <div class="account-card-heading"><h2>관심 업체</h2><strong><span id="saved-count">0</span>곳</strong></div>
+        <div class="saved-list" id="saved-list"></div>
+        <a class="button button-primary" href="venues.html">업체 전체 보기</a>
+      </article>
+    </section>
+  </main>
+
+  <footer>
+    <a class="brand footer-brand" href="index.html"><span class="brand-mark">m</span><span>메모아</span></a>
+    <p>가족의 특별한 날, 검색하는 시간부터 줄입니다.</p>
+    <p class="legal">내 정보와 저장한 준비 내용을 확인할 수 있는 공간입니다.</p>
+  </footer>
+  <script src="data.js"></script>
+  <script src="auth.js?v=2"></script>
+  <script src="account.js?v=2"></script>
+  <script src="ui.js?v=18"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+

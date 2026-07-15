@@ -1,0 +1,16 @@
+﻿# Runtime / local files
+.DS_Store
+Thumbs.db
+*.log
+.env
+.env.*
+!.env.example
+
+# Codex / local verification folders
+backend/
+_tools/
+_verify/
+design-references/
+
+# Archives
+*.zip

@@ -1,0 +1,195 @@
+﻿<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#153c36">
+  <title>업체 상세 | 메모아</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="upgrade.css?v=81">
+</head>
+<body class="joblike-provider-page premium-detail-page jobplanet-detail-page">
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="메모아 홈"><span class="brand-mark">m</span><span>메모아</span><small>memoa</small></a>
+    <nav aria-label="주요 메뉴">
+      <a href="index.html#finder">행사 찾기</a>
+      <a href="venues.html">업체·장소</a>
+      <a href="calculator.html">비용 계산기</a>
+      <a href="checklist.html">준비 가이드</a>
+      <a href="community.html">커뮤니티</a>
+      <a class="auth-link" href="login.html" data-auth-link>로그인</a>
+    </nav>
+  </header>
+
+  <main class="provider-detail-page">
+    <section class="provider-hero joblike-provider-hero">
+      <div>
+        <a class="text-link" href="venues.html">← 업체 전체보기</a>
+        <p class="eyebrow" id="provider-category">업체 상세</p>
+        <h1 id="provider-name">업체 정보를 불러오는 중입니다.</h1>
+        <p id="provider-intro">잠시만 기다려주세요.</p>
+        <div class="provider-tags" id="provider-tags"></div>
+      </div>
+    </section>
+
+    <section class="joblike-profile-nav" aria-label="업체 상세 탭">
+      <a href="#provider-facts-section">업체정보</a>
+      <a href="#provider-quotes">공유 견적</a>
+      <a href="#provider-external-reviews">후기 자료</a>
+      <a href="#provider-contribution">정보 제보</a>
+    </section>
+
+    <section class="provider-tool-strip" aria-label="준비 도구 바로가기">
+      <a href="community.html">
+        <span>커뮤니티</span>
+        <strong>비슷한 행사를 준비한 가족들의 이야기</strong>
+      </a>
+      <a href="checklist.html">
+        <span>체크리스트</span>
+        <strong>행사일까지 필요한 준비를 순서대로</strong>
+      </a>
+      <a href="calculator.html">
+        <span>비용 계산기</span>
+        <strong>인원과 항목별 예산을 빠르게 계산</strong>
+      </a>
+    </section>
+
+    <section class="provider-layout">
+      <div class="provider-main">
+        <section class="detail-section-card" id="provider-facts-section">
+          <p class="eyebrow">핵심 비교 정보</p>
+          <div class="provider-fact-grid" id="provider-facts"></div>
+        </section>
+
+        <section class="detail-section-card">
+          <p class="eyebrow">예약 전 확인할 것</p>
+          <ul class="provider-check-list" id="provider-checks"></ul>
+        </section>
+
+        <section class="detail-section-card provider-note-card">
+          <p class="eyebrow">예약 전 안내</p>
+          <h2>가격과 제공 구성은 상담 전에 다시 확인해 주세요.</h2>
+          <p>행사 날짜와 지역, 인원, 선택 옵션에 따라 가격과 가능 여부가 달라질 수 있습니다. 같은 질문으로 두세 곳을 비교하면 차이를 더 쉽게 확인할 수 있습니다.</p>
+        </section>
+
+        <section class="detail-section-card joblike-quote-section" id="provider-quotes">
+          <div class="joblike-section-head">
+            <div>
+              <p class="eyebrow">공유 견적</p>
+              <h2>내가 받은 견적이 다음 가족의 기준이 됩니다.</h2>
+            </div>
+            <span>베타</span>
+          </div>
+          <div class="quote-share-layout">
+            <form class="quote-share-form" id="provider-contribution-form">
+              <label>행사 종류
+                <select name="eventType" required>
+                  <option value="">선택해 주세요</option>
+                  <option>웨딩·상견례</option>
+                  <option>백일·돌·키즈파티</option>
+                  <option>환갑·칠순·부모님 행사</option>
+                  <option>가족·홈파티</option>
+                </select>
+              </label>
+              <label>행사 인원
+                <input name="guestCount" type="number" min="1" placeholder="예: 30">
+              </label>
+              <label>받은 견적 금액
+                <input name="quoteAmount" type="text" placeholder="예: 1,800,000원">
+              </label>
+              <label>포함 항목
+                <textarea name="includedItems" rows="3" placeholder="예: 식사, 대관, 돌상, 음료, 주차 등"></textarea>
+              </label>
+              <label>견적서·사진 첨부
+                <input name="quoteFiles" type="file" accept="image/*,.pdf" multiple>
+              </label>
+              <label class="quote-consent">
+                <input name="consent" type="checkbox" required>
+                <span>이름, 전화번호, 계좌번호 등 개인정보를 가리고 업로드했어요.</span>
+              </label>
+              <button class="button button-primary" type="submit">견적서 공유하고 혜택 받기</button>
+              <p class="quote-submit-result" id="provider-contribution-result" role="status"></p>
+            </form>
+
+            <aside class="quote-benefit-card" id="provider-contribution">
+              <p class="eyebrow">BENEFIT POLICY</p>
+              <h3>자료를 공유하면 메모아 포인트를 드려요.</h3>
+              <ul>
+                <li><strong>견적서 업로드</strong><span>1,000P</span></li>
+                <li><strong>업체 정보 직접 입력</strong><span>500P</span></li>
+                <li><strong>사진 3장 이상</strong><span>700P</span></li>
+              </ul>
+              <small>공유한 자료는 확인 후 업체 정보 보강에만 사용합니다.</small>
+            </aside>
+          </div>
+        </section>
+
+        <section class="detail-section-card provider-review-section" id="provider-external-reviews" hidden>
+          <p class="eyebrow">외부 후기 <span id="provider-external-review-count">0</span></p>
+          <h2>준비 경험을 더 확인해 보세요.</h2>
+          <p class="provider-review-guide">후기 내용은 작성 시점의 경험이므로 현재 상품과 가격은 업체에 다시 확인해 주세요.</p>
+          <div class="external-review-list" id="provider-external-review-list"></div>
+        </section>
+      </div>
+
+      <aside class="provider-side">
+        <img id="provider-image" src="assets/images/venue-partyroom.webp" alt="" loading="lazy">
+        <div class="provider-price-card">
+          <span id="provider-price-label">예상가</span>
+          <strong id="provider-price">-</strong>
+          <p>실제 가격은 날짜, 인원, 구성에 따라 달라질 수 있습니다.</p>
+        </div>
+        <a class="button provider-official-link" id="provider-official-link" href="#" target="_blank" rel="noopener noreferrer nofollow" hidden>대표 채널 보기</a>
+        <a class="button button-primary" href="venues.html">다른 업체 보기</a>
+        <a class="button button-quiet" href="contribute.html">견적서 공유하기</a>
+        <a class="button button-quiet" href="partners.html">업체 입점 안내</a>
+      </aside>
+    </section>
+
+    <section class="monetization-row provider-monetization" aria-label="업체 상세 하단 추천 정보">
+      <aside class="soft-monetization">
+        <span>확인 팁</span>
+        <div>
+          <strong>상담 전에는 같은 질문으로 여러 업체를 비교해보세요.</strong>
+          <p>가격만 물어보기보다 날짜, 인원, 포함 항목, 추가 비용을 함께 확인하면 견적 차이가 명확해집니다.</p>
+        </div>
+      </aside>
+      <aside class="affiliate-placeholder">
+        <div class="monetization-heading"><span>다음 준비</span><strong>카테고리별로 이어서 볼 항목</strong></div>
+        <p>스냅·돌상·의상처럼 업체 유형에 맞는 준비 정보를 연결합니다.</p>
+      </aside>
+    </section>
+  </main>
+
+  <footer>
+    <a class="brand footer-brand" href="index.html"><span class="brand-mark">m</span><span>메모아</span></a>
+    <p>조건이 맞는 업체를 찾기 전, 확인해야 할 항목을 먼저 정리합니다.</p>
+    <p class="footer-links"><a href="articles.html">준비백과</a><a href="community.html">커뮤니티</a><a href="about.html">서비스 소개</a><a href="terms.html">이용약관</a><a href="privacy.html">개인정보처리방침</a><a href="contact.html">문의</a></p>
+    <p class="legal">표시된 정보와 가격은 변동될 수 있으며 예약 전 업체에 최종 확인해야 합니다.</p>
+  </footer>
+
+  <script src="review-provider-candidates.js?v=1"></script>
+  <script src="review-lifecycle-candidates.js?v=1"></script>
+  <script src="review-lifecycle-verified.js?v=6"></script>
+  <script src="review-local-api-partners.js?v=3"></script>
+  <script src="data.js?v=19"></script>
+<script src="content-config.js?v=1"></script>
+<script src="content-overrides.js?v=1"></script>
+  <script src="content-runtime.js?v=1"></script>
+  <script src="auth.js?v=2"></script>
+  <script src="provider.js?v=20"></script>
+  <script src="ui.js?v=18"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+

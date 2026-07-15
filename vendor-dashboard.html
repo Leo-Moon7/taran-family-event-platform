@@ -1,0 +1,63 @@
+﻿<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#153c36">
+  <title>업체 관리 대시보드 | 메모아</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="upgrade.css?v=79">
+</head>
+<body>
+  <header class="site-header"><a class="brand" href="index.html" aria-label="메모아 홈"><span class="brand-mark">m</span><span>메모아</span><small>PARTNER</small></a><nav aria-label="파트너 메뉴"><a href="partners.html">입점 안내</a><a href="venues.html">공개 업체 보기</a></nav></header>
+
+  <main class="vendor-page">
+    <section class="vendor-heading"><div><p class="eyebrow">Partner Dashboard</p><h1>업체 정보 관리</h1><p id="vendor-subtitle">승인 상태를 확인하고 있습니다.</p></div><div class="vendor-status" id="vendor-status"><span>권한 상태</span><strong>확인 중</strong></div></section>
+
+    <section class="vendor-gate" id="vendor-gate"><span>⏳</span><h2 id="vendor-gate-title">권한 상태 확인 중</h2><p id="vendor-gate-copy">잠시만 기다려주세요.</p><div><a class="button button-primary" id="vendor-action-link" href="claim.html">수정 권한 요청하기</a><a class="button button-quiet" href="partners.html">입점 안내 보기</a></div></section>
+
+    <section class="vendor-layout" id="vendor-layout" hidden>
+      <form class="vendor-editor" id="vendor-editor">
+        <div class="vendor-editor-heading"><div><span>승인된 업체</span><h2 id="vendor-venue-name">업체명</h2></div><a id="vendor-public-link" href="venue.html">공개 페이지 보기 →</a></div>
+        <div class="vendor-form-grid">
+          <label>성인 식대<input id="vendor-price" type="number" min="0" step="1000"><span>원</span></label>
+          <label>소인 식대<input id="vendor-child-price" type="number" min="0" step="1000"><span>원</span></label>
+          <label>최소 보증 인원<input id="vendor-min-guests" type="number" min="1"><span>명</span></label>
+          <label>최대 수용 인원<input id="vendor-capacity" type="number" min="1"><span>명</span></label>
+          <label>기본 대관료<input id="vendor-rental" type="number" min="0" step="10000"><span>원</span></label>
+          <label>외부 돌상 반입비<input id="vendor-table-fee" type="number" min="0" step="10000"><span>원</span></label>
+          <label class="wide">주차 정보<input id="vendor-parking" type="text" maxlength="100"></label>
+          <label class="wide">공간 이용 정보<input id="vendor-room" type="text" maxlength="100"></label>
+          <label class="wide">음식 반입 조건<input id="vendor-food" type="text" maxlength="100"></label>
+          <label class="wide">예약 가능 시간대<input id="vendor-times" type="text" maxlength="100"></label>
+        </div>
+        <p class="vendor-editor-note">저장한 내용은 시제품의 이 브라우저에서 공개 업체 페이지에 바로 반영됩니다. 실제 서비스에서는 수정 이력과 담당자 계정을 서버에 기록합니다.</p>
+        <p class="field-error form-error" id="vendor-message" aria-live="polite"></p>
+        <button class="button button-primary" type="submit">변경 내용 저장</button>
+      </form>
+
+      <aside class="vendor-plan-card">
+        <span>현재 요금제</span><strong id="vendor-plan-name">Basic</strong><p id="vendor-plan-copy">기본 정보 수정 기능을 이용 중입니다.</p>
+        <ul><li>검색 결과 스폰서 영역</li><li>고해상도 사진·영상 확대</li><li>경쟁 광고 제거</li><li>카카오톡 상담 버튼</li></ul>
+        <button class="button button-ink" id="premium-interest" type="button">Premium 상담 신청</button>
+        <small>월 39,000원 예정 · 실제 결제는 발생하지 않습니다.</small>
+      </aside>
+    </section>
+  </main>
+
+  <footer><a class="brand footer-brand" href="index.html"><span class="brand-mark">m</span><span>메모아</span></a><p>승인된 담당자만 업체 정보를 수정합니다.</p><p class="legal">본 대시보드는 권한 흐름 검증용 시제품입니다.</p></footer>
+  <script src="data.js"></script>
+  <script src="vendor-dashboard.js?v=5"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+

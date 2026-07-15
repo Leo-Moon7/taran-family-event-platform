@@ -1,0 +1,69 @@
+﻿<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="메모아 이메일 로그인과 회원가입 화면입니다.">
+  <meta name="theme-color" content="#153c36">
+  <title>로그인 | 메모아</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="upgrade.css?v=79">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="메모아 홈"><span class="brand-mark">m</span><span>메모아</span><small>memoa</small></a>
+    <nav aria-label="주요 메뉴"><a href="index.html#finder">조건 찾기</a><a href="calculator.html">계산기</a><a href="checklist.html">체크리스트</a><a href="articles.html">준비백과</a><a href="community.html">커뮤니티</a><a href="venues.html">업체 전체</a><a class="auth-link" href="login.html" data-auth-link aria-current="page">로그인</a></nav>
+  </header>
+
+  <main class="auth-page">
+    <section class="auth-shell">
+      <div class="auth-intro">
+        <p class="eyebrow">계정으로 이어보기</p>
+        <h1>준비하던 내용을<br>나중에도 이어보세요.</h1>
+        <p>로그인하면 관심 업체, 계산기 입력값, 행사일과 체크리스트 진행률이 계정에 저장됩니다.</p>
+        <ul><li>관심 업체를 다른 기기에서도 확인</li><li>계산 중이던 예산 다시 불러오기</li><li>행사일까지 남은 과업 이어보기</li></ul>
+      </div>
+
+      <div class="auth-card real-auth-card">
+        <div class="auth-tabs" role="tablist"><button class="is-active" type="button" data-auth-tab="login">로그인</button><button type="button" data-auth-tab="register">회원가입</button></div>
+
+        <form id="login-form" class="real-auth-form" novalidate>
+          <div><span class="step-label">다시 오셨나요?</span><h2>로그인</h2></div>
+          <label class="field-label" for="login-email">이메일</label><input id="login-email" type="email" autocomplete="email" placeholder="hello@example.com" required>
+          <label class="field-label" for="login-password">비밀번호</label><input id="login-password" type="password" autocomplete="current-password" minlength="8" required>
+          <p class="field-error form-error" id="login-error" aria-live="polite"></p>
+          <button class="button button-primary submit-auth" type="submit">로그인</button>
+        </form>
+
+        <form id="register-form" class="real-auth-form" hidden novalidate>
+          <div><span class="step-label">처음 오셨나요?</span><h2>회원가입</h2></div>
+          <label class="field-label" for="register-name">이름</label><input id="register-name" type="text" autocomplete="name" maxlength="30" placeholder="홍길동" required>
+          <label class="field-label" for="register-email">이메일</label><input id="register-email" type="email" autocomplete="email" placeholder="hello@example.com" required>
+          <label class="field-label" for="register-password">비밀번호</label><input id="register-password" type="password" autocomplete="new-password" minlength="8" placeholder="영문과 숫자 포함 8자 이상" required>
+          <label class="field-label" for="register-password-confirm">비밀번호 확인</label><input id="register-password-confirm" type="password" autocomplete="new-password" minlength="8" required>
+          <label class="simple-consent"><input id="register-consent" type="checkbox" required><span>서비스 이용 및 계정 저장을 위한 필수 정보 수집에 동의합니다.</span></label>
+          <details class="auth-privacy"><summary>수집·이용 내용</summary><p>수집 항목: 이름, 이메일, 암호화된 비밀번호<br>이용 목적: 회원 식별과 준비 내용 저장<br>보유 기간: 회원 탈퇴 시까지</p></details>
+          <p class="field-error form-error" id="register-error" aria-live="polite"></p>
+          <button class="button button-primary submit-auth" type="submit">계정 만들기</button>
+        </form>
+        <p class="security-note">비밀번호 원문은 저장하지 않고 안전한 해시 형태로 처리합니다.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer><a class="brand footer-brand" href="index.html"><span class="brand-mark">m</span><span>메모아</span></a><p>준비하던 내용을 안전하게 이어보세요.</p><p class="legal">현재 로컬 MVP 로그인입니다.</p></footer>
+  <script src="auth.js?v=2"></script>
+  <script src="login.js?v=3"></script>
+  <script src="ui.js?v=18"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+

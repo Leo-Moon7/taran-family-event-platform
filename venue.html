@@ -1,0 +1,188 @@
+﻿<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="가족행사 파트너의 진행 가능 행사, 포트폴리오, 견적과 리뷰 출처를 확인하는 메모아 상세페이지입니다.">
+  <meta name="theme-color" content="#4A3B32">
+  <title>가족행사 파트너 상세 | 메모아</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="upgrade.css?v=79">
+</head>
+<body class="premium-detail-page jobplanet-detail-page">
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="메모아 홈">
+      <span class="brand-mark">m</span><span>메모아</span><small>memoa</small>
+    </a>
+    <nav aria-label="주요 메뉴">
+      <a href="index.html#finder">조건 찾기</a>
+      <a href="calculator.html">계산기</a>
+      <a href="checklist.html">체크리스트</a>
+      <a href="articles.html">준비백과</a><a href="community.html">커뮤니티</a>
+      <a href="venues.html">업체 전체</a>
+      <a class="auth-link" href="login.html" data-auth-link>회원가입</a>
+    </nav>
+  </header>
+
+  <main class="venue-detail-page">
+    <div class="detail-breadcrumb">
+      <a href="venues.html">업체 전체</a><span>›</span><span id="breadcrumb-name">업체 상세</span>
+    </div>
+
+    <section class="detail-gallery" id="portfolio" aria-label="업체 포트폴리오 영역">
+      <div class="gallery-main"><span>대표 공간 사진 영역</span></div>
+      <div class="gallery-side one"><span>룸·좌석</span></div>
+      <div class="gallery-side two"><span>돌상·포토존</span></div>
+    </section>
+
+    <section class="detail-hero">
+      <div>
+        <p class="eyebrow" id="detail-location">업체 상세</p>
+        <h1 id="detail-name">업체 정보를 불러오는 중입니다.</h1>
+        <p id="detail-intro"></p>
+        <div class="tag-list detail-tags" id="detail-tags"></div>
+        <div class="detail-verification" id="detail-verification">
+          <i aria-hidden="true"></i>
+          <div><strong id="verification-label">정보 상태 확인 중</strong><small id="verification-copy"></small></div>
+          <div><span id="verification-date-label">정보 확인일</span><b id="hero-verified-at">-</b></div>
+        </div>
+      </div>
+      <div class="detail-actions">
+        <button class="button button-primary" id="save-venue" type="button">♡ 관심 업체 저장</button>
+        <small>로그인하면 나중에 다시 볼 수 있습니다.</small>
+        <a class="button button-quiet" href="venues.html">목록으로 돌아가기</a>
+      </div>
+    </section>
+
+    <section class="detail-quick-summary" aria-label="장소 핵심 정보">
+      <div><span>성인 1인 식대</span><strong id="quick-adult-price">-</strong></div>
+      <div><span>보증·최대 인원</span><strong id="quick-capacity">-</strong></div>
+      <div><span>주차</span><strong id="quick-parking">-</strong></div>
+      <div><span>장소 유형</span><strong id="quick-type">-</strong></div>
+    </section>
+
+    <nav class="detail-context-nav" aria-label="상세 정보 바로가기">
+      <a href="#portfolio">포트폴리오</a>
+      <a href="#packages">상품·견적</a>
+      <a href="#reviews">리뷰</a>
+      <a href="#policies">취소·환불</a>
+    </nav>
+
+    <section class="detail-content">
+      <div class="detail-main">
+        <div class="fact-grid" id="fact-grid"></div>
+
+        <article class="detail-section-card verified-only" id="packages">
+          <div class="detail-section-title"><p class="eyebrow">예상 비용</p><h2>비용 구조를 먼저 확인하세요.</h2></div>
+          <div class="price-table">
+            <div><span>성인 1인 예상 식대</span><strong id="adult-price-detail">-</strong></div>
+            <div><span>어린이 1인 예상 식대</span><strong id="child-price-detail">-</strong></div>
+            <div><span>최소 보증인원</span><strong id="min-guests-detail">-</strong></div>
+            <div><span>최소 보증 기준 식대</span><strong id="min-food-cost-detail">-</strong></div>
+          </div>
+          <p class="detail-help">최소 보증 기준 식대는 성인 식대×최소 보증인원으로 계산한 참고액이며, 대관료와 추가 비용은 포함하지 않습니다.</p>
+        </article>
+
+        <article class="detail-section-card verified-only">
+          <div class="detail-section-title"><p class="eyebrow">숨은 비용·운영 조건</p><h2>계약 전에 꼭 확인하세요.</h2></div>
+          <div class="cost-spec-grid">
+            <div><span>기본 대관료</span><strong id="rental-cost-detail">-</strong></div>
+            <div><span>외부 돌상 반입비</span><strong id="table-fee-detail">-</strong></div>
+            <div><span>보증 인원 미달</span><strong id="shortage-detail">-</strong></div>
+            <div><span>음식 반입</span><strong id="food-policy-detail">-</strong></div>
+            <div><span>행사 시간대</span><strong id="time-slots-detail">-</strong></div>
+          </div>
+        </article>
+
+        <article class="detail-section-card" id="policies">
+          <div class="detail-section-title"><p class="eyebrow">예약 전 확인</p><h2>놓치기 쉬운 조건입니다.</h2></div>
+          <ul class="caution-list" id="caution-list"></ul>
+        </article>
+
+        <article class="detail-section-card source-card">
+          <div><span>공개 상태</span><strong id="publication-status">-</strong></div>
+          <div><span>정보 상태</span><strong id="source-status">-</strong></div>
+          <div><span id="source-date-label">정보 확인일</span><strong id="verified-at">-</strong></div>
+          <p id="source-note"></p>
+        </article>
+      </div>
+
+      <aside class="detail-side-card">
+        <span class="mini-label">업체 요약</span>
+        <strong id="side-name">업체명</strong>
+        <p id="side-address">주소</p>
+        <div class="side-divider"></div>
+        <span>상담 연결은 업체 정보 확인 후 순차적으로 제공합니다.</span>
+        <button class="button button-primary" id="inquiry-button" type="button">견적 문의 준비 중</button>
+        <div class="claim-owner-box">
+          <span>이 업체의 담당자이신가요?</span>
+          <strong>직접 정보를 관리할 수 있습니다.</strong>
+          <ul class="claim-benefits">
+            <li>기본 정보 수정 권한은 무료</li>
+            <li>사업자등록증 확인 후 담당자 승인</li>
+            <li>상단 노출 광고 상품은 선택 사항</li>
+          </ul>
+          <a class="button button-quiet" id="claim-listing-link" href="contribute.html">업체 정보 제보하기</a>
+        </div>
+        <button class="text-button" id="correction-button" type="button">일반 이용자 정보 오류 제보</button>
+        <p class="inline-notice" id="detail-notice" aria-live="polite"></p>
+      </aside>
+    </section>
+
+    <section class="venue-review-section" id="reviews" aria-labelledby="venue-review-title">
+      <div class="venue-review-heading">
+        <div><p class="eyebrow">리뷰 참고</p><h2 id="venue-review-title">고객 리뷰와 외부 후기를 나눠서 봅니다.</h2></div>
+        <p>업체 선택의 주된 기준은 위 조건표이며, 외부 후기는 참고 자료로만 분리해 확인할 수 있습니다.</p>
+      </div>
+      <div class="venue-review-tabs" role="tablist" aria-label="리뷰 유형">
+        <button class="is-active" id="internal-review-tab" type="button" role="tab" aria-selected="true" aria-controls="internal-review-panel" data-review-tab="internal">메모아 고객 리뷰 <b id="internal-review-count">0</b></button>
+        <button id="external-review-tab" type="button" role="tab" aria-selected="false" aria-controls="external-review-panel" data-review-tab="external">외부 블로그 후기 <b id="external-review-count">0</b></button>
+      </div>
+      <div class="venue-review-panel" id="internal-review-panel" role="tabpanel" aria-labelledby="internal-review-tab"></div>
+      <div class="venue-review-panel" id="external-review-panel" role="tabpanel" aria-labelledby="external-review-tab" hidden></div>
+    </section>
+
+    <section class="detail-bottom-cta">
+      <h2>조건에 맞는 다른 장소를 확인해보세요.</h2>
+      <a class="button button-primary" href="venues.html">다른 장소 보기</a>
+    </section>
+
+    <aside class="soft-monetization venue-detail-monetization" aria-label="장소 상세 하단 추천 정보">
+      <span>계약 전 확인</span>
+      <div>
+        <strong>마음에 드는 장소라면 계약 조건을 한 번 더 확인하세요.</strong>
+        <p>보증 인원, 취소 수수료, 외부 반입비, 주차 등록 시간을 메모해두면 상담이 훨씬 수월합니다.</p>
+      </div>
+    </aside>
+  </main>
+
+  <div class="detail-sticky-action" aria-label="업체 상세 고정 메뉴">
+    <button type="button" id="sticky-save">♡ <span>저장하기</span></button>
+    <button type="button" id="sticky-inquiry">내 조건으로 1:1 견적 요청하기 <b>→</b></button>
+    <small>업체 정보 확인 후 연결합니다.</small>
+  </div>
+
+  <footer>
+    <a class="brand footer-brand" href="index.html"><span class="brand-mark">m</span><span>메모아</span></a>
+    <p>가족의 특별한 날, 검색하는 시간부터 줄입니다.</p>
+    <p class="footer-links"><a href="articles.html">준비백과</a><a href="community.html">커뮤니티</a><a href="about.html">서비스 소개</a><a href="terms.html">이용약관</a><a href="privacy.html">개인정보처리방침</a><a href="contact.html">문의</a></p>
+    <p class="legal">표시된 정보와 가격은 변동될 수 있으며 계약 전 업체에 최종 확인해야 합니다.</p>
+  </footer>
+  <script src="data.js?v=18"></script>
+  <script src="review-venue-candidates.js?v=2"></script>
+  <script src="regions.js?v=1"></script>
+  <script src="auth.js?v=2"></script>
+  <script src="venue.js?v=15"></script>
+  <script src="ui.js?v=18"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
