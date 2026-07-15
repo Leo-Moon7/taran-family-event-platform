@@ -23,5 +23,15 @@ begin
   end loop;
 end $$;
 
-update public.taran_site_copy set site_id = 'taran' where site_id = 'memoa';
-update public.taran_banners set site_id = 'taran' where site_id = 'memoa';
+do $$
+begin
+  if to_regclass('public.taran_site_copy') is not null then
+    execute 'update public.taran_site_copy set site_id = $1 where site_id = $2'
+      using 'taran', 'memoa';
+  end if;
+
+  if to_regclass('public.taran_banners') is not null then
+    execute 'update public.taran_banners set site_id = $1 where site_id = $2'
+      using 'taran', 'memoa';
+  end if;
+end $$;

@@ -1,5 +1,5 @@
 -- taran 운영 관리자용 Supabase 스키마
--- Supabase SQL Editor에서 실행한 뒤, admin-config.js/content-config.js에 Project URL과 anon key를 넣어주세요.
+-- Supabase SQL Editor에서 실행한 뒤, 공개 가능한 anon key는 배포 환경변수에서 주입하세요.
 -- 브라우저에는 service_role key를 절대 넣지 않습니다.
 
 create extension if not exists pgcrypto;
@@ -30,15 +30,15 @@ create table if not exists public.taran_site_copy (
   id text primary key,
   site_id text not null default 'taran',
   label text,
-  selector text not null,
-  mode text not null default 'text' check (mode in ('text', 'html')),
+  content_slot_id text not null,
   text_value text,
-  html_value text,
-  attributes jsonb not null default '{}'::jsonb,
   status text not null default 'published' check (status in ('draft', 'published', 'archived')),
   updated_by uuid references auth.users(id),
   updated_at timestamptz not null default now()
 );
+
+alter table public.taran_site_copy add column if not exists content_slot_id text;
+update public.taran_site_copy set content_slot_id = id where content_slot_id is null;
 
 create table if not exists public.taran_providers (
   id text primary key,

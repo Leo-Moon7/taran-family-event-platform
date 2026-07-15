@@ -1,6 +1,12 @@
 (function () {
   const storageKey = "taran-admin-overrides-preview";
   const config = window.taranContentConfig || {};
+  const CONTENT_SLOTS = Object.freeze({
+    "home.hero.title": { selector: "[data-content-slot='home.hero.title']", type: "text" },
+    "home.hero.description": { selector: "[data-content-slot='home.hero.description']", type: "text" },
+    "home.finalCta.title": { selector: "[data-content-slot='home.finalCta.title']", type: "text" }
+  });
+  const ALLOWED_PROTOCOLS = new Set(["https:", "http:", "tel:", "mailto:"]);
   const tables = {
     siteCopy: "taran_site_copy",
     providers: "taran_providers",
@@ -139,11 +145,12 @@
   function mergeSiteCopy(base, next) {
     const merged = Array.isArray(base) ? [...base] : [];
     (Array.isArray(next) ? next : []).forEach(item => {
-      if (!item || !item.selector) return;
-      const key = item.id || item.selector;
-      const index = merged.findIndex(existing => (existing.id || existing.selector) === key);
-      if (index >= 0) merged[index] = { ...merged[index], ...item };
-      else merged.push(item);
+      const contentSlotId = item?.contentSlotId || item?.id;
+      if (!contentSlotId || !CONTENT_SLOTS[contentSlotId]) return;
+      const normalized = { contentSlotId, text: String(item.text || item.textValue || "") };
+      const index = merged.findIndex(existing => (existing.contentSlotId || existing.id) === contentSlotId);
+      if (index >= 0) merged[index] = { ...merged[index], ...normalized };
+      else merged.push(normalized);
     });
     return merged;
   }
@@ -193,12 +200,9 @@
       return {
         version: new Date().toISOString().slice(0, 10).replace(/-/g, "."),
         siteCopy: (copyRows || []).map(row => ({
-          id: row.id,
-          label: row.label,
-          selector: row.selector,
-          ...(row.mode === "html" ? { html: row.html_value || "" } : { text: row.text_value || "" }),
-          attributes: row.attributes || {}
-        })),
+          contentSlotId: row.content_slot_id || row.id,
+          text: row.text_value || ""
+        })).filter(item => CONTENT_SLOTS[item.contentSlotId]),
         providers: (providerRows || []).map(row => ({ ...(row.data || {}), id: row.id })),
         articles: (articleRows || []).map(row => ({ ...(row.data || {}), slug: row.slug })),
         banners: (bannerRows || []).map(row => ({
@@ -221,18 +225,11 @@
 
     const apply = () => {
       siteCopy.forEach(item => {
-        if (!item || !item.selector) return;
-        document.querySelectorAll(item.selector).forEach(element => {
-          if (item.html) {
-            element.innerHTML = item.html;
-          } else if (item.text) {
-            element.textContent = item.text;
-          }
-          if (item.attributes && typeof item.attributes === "object") {
-            Object.entries(item.attributes).forEach(([name, value]) => {
-              element.setAttribute(name, value);
-            });
-          }
+        const contentSlotId = item?.contentSlotId || item?.id;
+        const slot = CONTENT_SLOTS[contentSlotId];
+        if (!slot || slot.type !== "text") return;
+        document.querySelectorAll(slot.selector).forEach(element => {
+          element.textContent = String(item.text || "");
         });
       });
     };
@@ -258,12 +255,22 @@
     return selectors.flatMap(selector => Array.from(document.querySelectorAll(selector)));
   }
 
-  function escapeHtml(value) {
-    return String(value || "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
+  function safeUrl(value, protocols = ALLOWED_PROTOCOLS) {
+    try {
+      const url = new URL(String(value || ""), window.location.href);
+      return protocols.has(url.protocol) ? url.href : "";
+    } catch (_error) {
+      return "";
+    }
+  }
+
+  function appendTextElement(parent, tagName, className, value) {
+    if (!value) return null;
+    const element = document.createElement(tagName);
+    if (className) element.className = className;
+    element.textContent = String(value);
+    parent.append(element);
+    return element;
   }
 
   function applyBanners(overrides) {
@@ -284,15 +291,26 @@
         usedPlacements.add(banner.placement);
         targets.forEach(target => {
           target.setAttribute("data-taran-managed-banner", banner.id);
-          target.innerHTML = `
-            <div class="cms-public-banner-copy">
-              ${banner.eyebrow ? `<span class="cms-public-banner-eyebrow">${escapeHtml(banner.eyebrow)}</span>` : ""}
-              ${banner.title ? `<h3>${escapeHtml(banner.title)}</h3>` : ""}
-              ${banner.body ? `<p>${escapeHtml(banner.body)}</p>` : ""}
-              ${banner.ctaLabel && banner.ctaUrl ? `<a href="${escapeHtml(banner.ctaUrl)}">${escapeHtml(banner.ctaLabel)} →</a>` : ""}
-            </div>
-            ${banner.image ? `<img src="${escapeHtml(banner.image)}" alt="" loading="lazy">` : ""}
-          `;
+          target.replaceChildren();
+          const copy = document.createElement("div");
+          copy.className = "cms-public-banner-copy";
+          appendTextElement(copy, "span", "cms-public-banner-eyebrow", banner.eyebrow);
+          appendTextElement(copy, "h3", "", banner.title);
+          appendTextElement(copy, "p", "", banner.body);
+          const ctaUrl = safeUrl(banner.ctaUrl);
+          if (banner.ctaLabel && ctaUrl) {
+            const link = appendTextElement(copy, "a", "", `${banner.ctaLabel} →`);
+            link.href = ctaUrl;
+          }
+          target.append(copy);
+          const imageUrl = safeUrl(banner.image, new Set(["https:", "http:"]));
+          if (imageUrl) {
+            const image = document.createElement("img");
+            image.src = imageUrl;
+            image.alt = banner.title ? `${banner.title} 배너 이미지` : "";
+            image.loading = "lazy";
+            target.append(image);
+          }
         });
       });
     };
@@ -330,4 +348,6 @@
     applyData(overrides);
     return overrides;
   })();
+
+  window.TaranContentSlots = CONTENT_SLOTS;
 })();
