@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>오늘 할 일 | 따란 운영센터</title>
+  <link rel="stylesheet" href="../styles/tokens.css">
+  <link rel="stylesheet" href="../styles/reset.css">
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/components/button.css">
+  <link rel="stylesheet" href="../styles/pages/admin.css">
+  <script src="../scripts/core/brand.js"></script>
+  <script src="../scripts/core/storage.js"></script>
+</head>
+<body class="admin-app" data-admin-view="dashboard">
+  <header class="admin-topbar" data-admin-header></header>
+  <div class="admin-layout">
+    <nav class="admin-sidebar" data-admin-sidebar></nav>
+    <noscript><p class="admin-noscript">관리자 메뉴를 사용하려면 JavaScript를 켜 주세요. <a href="../index.html">사이트로 돌아가기</a></p></noscript>
+    <main class="admin-main" id="admin-content">
+      <header class="admin-page-head"><div><p>오늘 할 일</p><h1>운영 현황</h1></div></header>
+      <section class="admin-metrics" aria-label="운영 요약" data-admin-metrics></section>
+      <section class="admin-section"><div class="admin-section__head"><h2>먼저 처리할 작업</h2></div><div class="admin-task-list" data-admin-tasks></div></section>
+      <section class="admin-section"><h2>온라인 저장 상태</h2><div class="admin-empty">관리자 로그인과 온라인 DB가 아직 연결되지 않았습니다. 현재 화면은 저장소에 포함된 공개 데이터와 이 브라우저에 저장된 운영 데이터를 보여줍니다.</div></section>
+    </main>
+  </div>
+  <script src="../review-provider-candidates.js"></script>
+  <script src="../review-lifecycle-candidates.js"></script>
+  <script src="../review-lifecycle-verified.js"></script>
+  <script src="../review-local-api-partners.js"></script>
+  <script src="../data.js"></script>
+  <script src="../blog-data.js"></script>
+  <script src="../scripts/components/admin-shell.js"></script>
+  <script src="../scripts/pages/admin/common.js"></script>
+  <script src="../scripts/pages/admin/dashboard.js"></script>
+</body>
+</html>
