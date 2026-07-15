@@ -1,7 +1,8 @@
 (function () {
   "use strict";
 
-  const PREFIX = "taran-";
+  const BRAND = window.PlatformBrand || { storagePrefix: "taran-" };
+  const PREFIX = BRAND.storagePrefix;
   const MIGRATION_MARKER = `${PREFIX}storage-migration-v1`;
   const LEGACY_KEYS = {
     "memoa-admin-overrides-preview": "taran-admin-overrides-preview",
@@ -35,7 +36,7 @@
     migrateStorage(window.localStorage);
     migrateStorage(window.sessionStorage);
   } catch (error) {
-    console.warn("따란 저장 데이터 마이그레이션을 완료하지 못했습니다.", error);
+    console.warn(`${window.PlatformBrand?.nameKo || "서비스"} 저장 데이터 마이그레이션을 완료하지 못했습니다.`, error);
   }
 
   window.TaranStorage = Object.freeze({

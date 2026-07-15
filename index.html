@@ -15,8 +15,10 @@
   <link rel="stylesheet" href="styles/components/form.css">
   <link rel="stylesheet" href="styles/components/card.css">
   <link rel="stylesheet" href="styles/components/badge.css">
+  <link rel="stylesheet" href="styles/components/filter.css">
   <link rel="stylesheet" href="styles/components/modal.css">
   <link rel="stylesheet" href="styles/pages/home.css">
+  <script src="scripts/core/brand.js"></script>
   <script src="scripts/core/storage.js"></script>
 </head>
 <body class="taran-home">
@@ -57,8 +59,8 @@
       <div class="container home-hero__grid">
         <div class="home-hero__copy">
           <span class="badge">가족행사 장소·업체 비교</span>
-          <h1>가족의 중요한 날,<br>조건에 맞는 곳부터 찾으세요.</h1>
-          <p>행사 종류와 지역, 예상 인원을 선택하면 비교 가능한 장소와 업체를 바로 확인할 수 있습니다.</p>
+          <h1 data-content-slot="home.hero.title">가족의 중요한 날,<br>조건에 맞는 곳부터 찾으세요.</h1>
+          <p data-content-slot="home.hero.description">행사 종류와 지역, 예상 인원을 선택하면 비교 가능한 장소와 업체를 바로 확인할 수 있습니다.</p>
           <form class="home-search" id="home-search" action="venues.html" method="get">
             <div class="field">
               <label class="field__label" for="home-event">행사 종류</label>
@@ -135,14 +137,19 @@
       </div>
     </section>
 
-    <section class="page-section final-cta"><div class="container final-cta__inner"><div><h2>지금 조건에 맞는 장소부터 확인하세요.</h2><p>행사 종류와 지역을 선택하고 비교를 시작할 수 있습니다.</p></div><a class="button button--primary" href="venues.html">장소·업체 찾기</a></div></section>
+    <section class="page-section final-cta"><div class="container final-cta__inner"><div><h2 data-content-slot="home.finalCta.title">지금 조건에 맞는 장소부터 확인하세요.</h2><p>행사 종류와 지역을 선택하고 비교를 시작할 수 있습니다.</p></div><a class="button button--primary" href="venues.html">장소·업체 찾기</a></div></section>
   </main>
 
   <footer class="site-footer"><div class="container site-footer__inner"><div><strong>따란</strong><small>T'ARAN · 가족행사 장소와 업체 비교</small></div><nav aria-label="정책 메뉴"><a href="about.html">서비스 소개</a><a href="privacy.html">개인정보처리방침</a><a href="terms.html">이용약관</a><a href="contact.html">문의</a></nav></div></footer>
 
   <script src="review-lifecycle-verified.js?v=6"></script>
   <script src="auth.js?v=2"></script>
+  <script src="content-config.js"></script>
+  <script src="content-overrides.js"></script>
+  <script src="content-runtime.js"></script>
   <script src="scripts/components/header.js"></script>
+  <script src="scripts/components/modal.js"></script>
+  <script src="scripts/components/toast.js"></script>
   <script src="scripts/components/states.js"></script>
   <script src="scripts/pages/home.js"></script>
 </body>

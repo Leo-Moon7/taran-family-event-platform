@@ -1,5 +1,5 @@
 window.taranContentConfig = window.taranContentConfig || {
-  siteId: "taran",
+  siteId: window.PlatformBrand?.siteId || "taran",
   supabaseUrl: "",
   supabaseAnonKey: "",
   tables: {
