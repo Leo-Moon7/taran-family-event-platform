@@ -131,7 +131,15 @@
 
     const policyList = byId("provider-policy-list");
     [["취소·환불", firstFact(facts, ["취소·환불", "취소 규정", "환불 규정"])], ["예약 변경", firstFact(facts, ["예약 변경", "변경 규정"])]].forEach(([label, value]) => addDataRow(policyList, label, value));
-    if (policyList.children.length) byId("provider-policy").hidden = false; else hideSection("provider-policy");
+    if (policyList.children.length) {
+      byId("provider-policy").hidden = false;
+    } else {
+      const notice = document.createElement("p");
+      notice.className = "provider-inline-empty";
+      notice.textContent = "취소·환불 조건은 예약 전에 업체에 확인해 주세요.";
+      policyList.append(notice);
+      byId("provider-policy").hidden = false;
+    }
   }
 
   function createReviewCard(review, external) {
@@ -156,7 +164,10 @@
 
   function renderReviews(item) {
     const saved = readJson("provider-reviews", []);
-    const internal = [...(Array.isArray(item.reviews) ? item.reviews : []), ...saved.filter((review) => review.providerId === item.id)];
+    const bundledInternal = Array.isArray(item.internalReviews)
+      ? item.internalReviews
+      : (Array.isArray(item.reviews) ? item.reviews : []);
+    const internal = [...bundledInternal, ...saved.filter((review) => review.providerId === item.id)];
     const external = Array.isArray(item.externalReviews) ? item.externalReviews : [];
     const internalList = byId("provider-internal-review-list");
     const externalList = byId("provider-external-review-list");
@@ -229,15 +240,25 @@
     if (!provider) { document.querySelectorAll(".provider-page > :not(#provider-not-found)").forEach((element) => { element.hidden = true; }); byId("provider-not-found").hidden = false; return; }
     const facts = provider.detailFacts || {};
     const official = provider.officialVerification || {};
-    document.title = `${provider.name} | 따란 T'ARAN`;
+    const brandName = window.PlatformBrand?.nameKo || "따란";
+    document.title = `${provider.name} | ${brandName}`;
     text(byId("provider-name"), provider.name);
     text(byId("provider-category"), [provider.category, provider.subcategory].filter(Boolean).join(" · "));
+    const verification = byId("provider-verification");
+    const isVerified = Boolean(provider.verifiedAt || official.status === "verified");
+    text(verification, isVerified ? "정보 확인" : "기본 정보");
+    verification?.classList.toggle("badge--verified", isVerified);
     text(byId("provider-verified-date"), provider.verifiedAt ? `정보 확인 ${formatDate(provider.verifiedAt)}` : "");
     const address = firstFact(facts, ["도로명 주소", "주소"]) || safeText(official.roadAddress) || safeText(official.address) || [provider.region, provider.area].filter(Boolean).join(" ");
     text(byId("provider-address"), address);
     const image = byId("provider-image");
-    image.src = provider.image || "assets/images/venue-partyroom.webp";
+    image.src = safeUrl(provider.image) || (/^(?:assets\/|\.\/|\/)/.test(provider.image || "") ? provider.image : "assets/images/venue-partyroom.webp");
     image.alt = provider.imageVerified ? `${provider.name} 대표 이미지` : "";
+    image.addEventListener("error", () => {
+      image.src = "assets/images/venue-partyroom.webp";
+      image.alt = "";
+      byId("provider-image-note").hidden = false;
+    }, { once: true });
     byId("provider-image-note").hidden = Boolean(provider.imageVerified);
     renderTags(provider);
     const rendered = renderFacts(provider);
