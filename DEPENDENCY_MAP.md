@@ -1,39 +1,50 @@
-# 따란 1차 구조 리팩터링 의존성 지도
+# 따란 리팩터링 의존성 지도
 
-## 현재 실행 구조
+## 실행 구조
 
-- 빌드 도구 없이 HTML이 CSS와 JavaScript를 직접 불러오는 정적 프론트엔드입니다.
-- 공용 UI는 `ui.js`, 인증은 `auth.js`, 운영 콘텐츠 병합은 `content-runtime.js`가 담당합니다.
-- 업체 데이터는 여러 대용량 JavaScript 파일이 전역 배열에 추가되는 구조입니다.
-- `data.js`가 업체 데이터를 하나의 공개 목록으로 합친 뒤 목록·상세 화면이 이를 읽습니다.
-- Supabase는 관리자 콘텐츠 저장 후보로만 연결되어 있으며, 설정값이 없으면 파일 데이터를 사용합니다.
+- 빌드 도구가 없는 정적 HTML/CSS/JavaScript 구조입니다.
+- 새 공개 화면은 `styles/` 디자인 시스템과 `scripts/` 페이지 모듈을 사용합니다.
+- 브랜드 설정은 `scripts/core/brand.js`, 저장 키 마이그레이션은 `scripts/core/storage.js`가 담당합니다.
+- 업체 데이터는 기존 전역 데이터 파일을 유지하고 `data.js`가 공개 목록으로 합칩니다.
+- 운영 문구는 미리 정의한 `contentSlotId`만 `content-runtime.js`가 반영합니다.
 
-## 핵심 페이지 의존성
+## 핵심 페이지
 
-| 페이지 | 주요 데이터 | 주요 동작 |
+| 페이지 | 스타일 | 동작·데이터 |
 | --- | --- | --- |
-| `index.html` | 검증 업체, 후기 집계 | 검색 시작, 추천 업체, 비용 계산 진입 |
-| `venues.html` | `data.js`와 업체 후보 파일 | 검색, 필터, 정렬, 목록 렌더링 |
-| `provider.html` | 업체 후보 파일과 `data.js` | 업체 조건, 가격, 후기, 문의 정보 |
-| `venue.html` | `data.js` | 레거시 장소 상세와 관심 저장 |
-| `articles.html` | `blog-data.js` | 준비백과 목록 |
-| `article.html` | `blog-data.js` | 준비백과 상세 |
-| `admin.html` | 업체·글·배너 데이터, Supabase | 운영 콘텐츠 관리 |
+| `index.html` | `styles/pages/home.css` | `scripts/pages/home.js`, 검증 업체 데이터 |
+| `venues.html` | `styles/pages/venues.css` | `scripts/pages/venues.js`, `data.js` |
+| `provider.html` | `styles/pages/provider.css` | `scripts/pages/provider.js`, `data.js` |
+| `admin/index.html` | `styles/pages/admin.css` | 공통 `admin-shell.js`와 페이지별 관리자 스크립트 |
 
-## 발견된 구조 문제
+## 관리자 경로
 
-1. `upgrade.css`가 약 1.6만 줄이며 페이지별 덮어쓰기가 누적되어 있습니다.
-2. `memoa`, `Sonpum`, `jobplanet`, `joblike`, `jp-` 식별자가 동시에 사용됩니다.
-3. 페이지마다 헤더 HTML이 다르고 `ui.js`가 다시 덮어씁니다.
-4. 인증 API는 `/api/...`를 호출하지만 정적 호스팅에서는 해당 서버가 없습니다.
-5. 운영 콘텐츠는 Supabase REST 직접 호출과 파일 내보내기 방식이 혼재합니다.
-6. 대용량 업체 데이터가 브라우저 전역에 한 번에 로드됩니다.
-7. 일부 문자열은 잘못된 인코딩 흔적이 있어 새 공통 모듈로 옮길 때 교정이 필요합니다.
+- `/admin/index.html`: 운영 현황
+- `/admin/inquiries.html`: 견적·정보 공유
+- `/admin/providers.html`: 업체 관리
+- `/admin/content.html`: 준비백과
+- `/admin/banners.html`: 배너
+- `/admin/members.html`: 회원
+- `/admin/analytics.html`: 통계
+- `/admin/settings.html`: 권한 안내
 
-## 리팩터링 원칙
+루트 `admin.html`은 `/admin/index.html`로 이동만 담당합니다.
 
-- URL과 기존 데이터 파일은 유지합니다.
-- 새 스타일은 `styles/` 아래에서만 작성합니다.
-- 기존 키는 `scripts/core/storage.js`가 한 번만 `taran-` 키로 이동합니다.
-- 공개 화면은 실제로 작동하는 링크와 버튼만 표시합니다.
-- 백엔드는 Supabase 중심 구조로 통일하되, 연결 전에는 읽기 전용 파일 데이터로 동작합니다.
+## 유지한 레거시 의존성
+
+- 기존 URL과 대용량 데이터 파일은 회귀 방지를 위해 유지했습니다.
+- 아직 전환하지 않은 보조 페이지는 기존 CSS/스크립트를 사용할 수 있습니다.
+- `auth.js`의 실제 `/api/...` 서버는 정적 호스팅에 존재하지 않으므로 온라인 인증으로 간주하면 안 됩니다.
+
+## 삭제한 의존성
+
+- 단일 관리자 구현 `admin.js`, `admin-config.js`, `scripts/pages/admin.js`
+- 사용자 입력 CSS selector/임의 HTML 기반 CMS 적용 경로
+- 목록 페이지의 중복 정렬 입력
+
+## 다음 연결 지점
+
+1. Supabase Auth와 관리자 역할 테이블
+2. RLS가 적용된 업체·글·배너 저장
+3. 비공개 Storage와 검증된 업로드 API
+4. 공개 데이터의 전역 파일 로딩을 페이지 단위 API로 교체
