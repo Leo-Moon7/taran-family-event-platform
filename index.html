@@ -3,494 +3,147 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="따란(T'ARAN)는 가족행사에 필요한 장소, 업체, 비용, 일정, 체크리스트와 실제 경험 정보를 한곳에서 제공하는 프리미엄 가족행사 큐레이션 플랫폼입니다.">
-  <meta name="theme-color" content="#FAF6F0">
-  <title>따란 taran | 프리미엄 가족행사 큐레이션</title>
-  <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="upgrade.css?v=79">
+  <meta name="description" content="따란(T'ARAN)은 가족행사 장소와 업체를 조건별로 비교하고 예상 비용과 준비 일정을 확인하는 플랫폼입니다.">
+  <meta name="theme-color" content="#ffffff">
+  <title>따란 T'ARAN | 가족행사 장소와 업체 비교</title>
+  <link rel="stylesheet" href="styles/tokens.css">
+  <link rel="stylesheet" href="styles/reset.css">
+  <link rel="stylesheet" href="styles/base.css">
+  <link rel="stylesheet" href="styles/layout.css">
+  <link rel="stylesheet" href="styles/components/header.css">
+  <link rel="stylesheet" href="styles/components/button.css">
+  <link rel="stylesheet" href="styles/components/form.css">
+  <link rel="stylesheet" href="styles/components/card.css">
+  <link rel="stylesheet" href="styles/components/badge.css">
+  <link rel="stylesheet" href="styles/components/modal.css">
+  <link rel="stylesheet" href="styles/pages/home.css">
   <script src="scripts/core/storage.js"></script>
 </head>
-<body class="taran-home taran-home">
-  <header class="site-header taran-header taran-header">
-    <a class="brand taran-brand" href="index.html" aria-label="따란 홈">
-      <span>따란</span><small>T'ARAN</small>
-    </a>
-    <nav aria-label="주요 메뉴"></nav>
+<body class="taran-home">
+  <header class="site-header" data-site-header>
+    <div class="site-header__inner">
+      <a class="brand" href="index.html" aria-label="따란 홈">
+        <span class="brand__mark" aria-hidden="true">T</span>
+        <span class="brand__name"><span>따란</span><small>T'ARAN</small></span>
+      </a>
+      <button class="site-header__toggle" type="button" aria-controls="site-navigation" aria-expanded="false" data-menu-toggle><span class="visually-hidden">메뉴 열기</span>☰</button>
+      <nav class="site-nav" id="site-navigation" aria-label="주요 메뉴">
+        <div class="nav-menu">
+          <button type="button" aria-haspopup="true" aria-expanded="false" data-nav-menu-button>행사 찾기</button>
+          <div class="nav-menu__panel">
+            <a href="venues.html?event=kids"><strong>아이 행사</strong><span>백일·돌잔치·키즈파티</span></a>
+            <a href="venues.html?event=wedding"><strong>결혼 준비</strong><span>상견례·스몰웨딩</span></a>
+            <a href="venues.html?event=parents"><strong>부모님 행사</strong><span>환갑·칠순·퇴임식</span></a>
+            <a href="venues.html?event=home"><strong>가족 모임</strong><span>집들이·명절·기념일</span></a>
+          </div>
+        </div>
+        <a href="venues.html">업체·장소</a>
+        <a href="calculator.html">비용 계산기</a>
+        <div class="nav-menu">
+          <button type="button" aria-haspopup="true" aria-expanded="false" data-nav-menu-button>준비 가이드</button>
+          <div class="nav-menu__panel">
+            <a href="articles.html"><strong>준비백과</strong><span>계약·예산·준비 노하우</span></a>
+            <a href="checklist.html"><strong>체크리스트</strong><span>행사일 기준 준비 일정</span></a>
+          </div>
+        </div>
+        <a href="community.html">커뮤니티</a>
+        <a class="site-nav__auth" href="login.html" data-auth-link>로그인</a>
+      </nav>
+    </div>
   </header>
 
-  <main class="taran-main taran-main">
-    <section class="taran-guide-hero" aria-labelledby="taran-hero-title">
-      <div class="taran-hero-copy">
-        <span class="taran-badge">프리미엄 가족행사 큐레이션</span>
-        <h1 id="taran-hero-title">가족의 중요한 날,<br>더 쉽고 완벽하게 준비하세요.</h1>
-        <p>행사 종류와 조건을 입력하면 장소, 업체, 예상 비용과 준비 일정을 한 번에 확인할 수 있어요.</p>
+  <main>
+    <section class="home-hero">
+      <div class="container home-hero__grid">
+        <div class="home-hero__copy">
+          <span class="badge">가족행사 장소·업체 비교</span>
+          <h1>가족의 중요한 날,<br>조건에 맞는 곳부터 찾으세요.</h1>
+          <p>행사 종류와 지역, 예상 인원을 선택하면 비교 가능한 장소와 업체를 바로 확인할 수 있습니다.</p>
+          <form class="home-search" id="home-search" action="venues.html" method="get">
+            <div class="field">
+              <label class="field__label" for="home-event">행사 종류</label>
+              <select class="select" id="home-event" name="event">
+                <option value="kids">아이 행사</option>
+                <option value="wedding">결혼 준비</option>
+                <option value="parents">부모님 행사</option>
+                <option value="home">가족 모임</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="field__label" for="home-region">지역</label>
+              <select class="select" id="home-region" name="province">
+                <option value="all">전국</option>
+                <option>서울특별시</option><option>부산광역시</option><option>대구광역시</option><option>인천광역시</option>
+                <option>광주광역시</option><option>대전광역시</option><option>울산광역시</option><option>세종특별자치시</option>
+                <option>경기도</option><option>강원특별자치도</option><option>충청북도</option><option>충청남도</option>
+                <option>전북특별자치도</option><option>전라남도</option><option>경상북도</option><option>경상남도</option><option>제주특별자치도</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="field__label" for="home-guests">예상 인원</label>
+              <select class="select" id="home-guests" name="guests">
+                <option value="10">10명 이하</option><option value="30" selected>11~30명</option><option value="50">31~50명</option><option value="100">51~100명</option><option value="101">100명 초과</option>
+              </select>
+            </div>
+            <button class="button button--primary" type="submit">조건에 맞는 곳 찾기</button>
+          </form>
+        </div>
+        <figure class="home-hero__visual">
+          <img src="assets/images/venue-garden.webp" alt="밝은 자연광과 정원이 보이는 가족행사 공간">
+        </figure>
       </div>
+    </section>
 
-      <form class="taran-condition-panel taran-step-form" id="taran-calculator-form" aria-label="행사 조건 입력">
-        <div class="taran-step-head">
-          <span id="taran-step-count">1 / 5</span>
-          <strong id="taran-step-title">어떤 행사를 준비하시나요?</strong>
-          <p id="taran-step-help">행사 종류를 먼저 고르면 다음 조건을 이어서 선택할 수 있어요.</p>
-        </div>
-        <label data-step="0">
-          <span>행사 종류</span>
-          <select id="taran-event">
-            <option value="kids" selected>아이 행사</option>
-            <option value="wedding">결혼·커플</option>
-            <option value="parents">부모님 행사</option>
-            <option value="home">가족 모임</option>
-          </select>
-        </label>
-        <label data-step="1">
-          <span>지역</span>
-          <select id="taran-region">
-            <option value="">전체 지역</option>
-            <option value="서울특별시">서울특별시</option>
-            <option value="경기도">경기도</option>
-            <option value="인천광역시">인천광역시</option>
-            <option value="부산광역시">부산광역시</option>
-            <option value="대구광역시">대구광역시</option>
-            <option value="대전광역시">대전광역시</option>
-            <option value="광주광역시">광주광역시</option>
-            <option value="제주특별자치도">제주특별자치도</option>
-          </select>
-        </label>
-        <label data-step="2">
-          <span>날짜·예정 월</span>
-          <select id="taran-date">
-            <option value="undecided">날짜 미정</option>
-            <option value="2026-08">2026년 8월</option>
-            <option value="2026-09">2026년 9월</option>
-            <option value="2026-10">2026년 10월</option>
-            <option value="later">2026년 11월 이후</option>
-          </select>
-        </label>
-        <label data-step="3">
-          <span>예상 인원</span>
-          <select id="taran-guests">
-            <option value="under10">10명 이하</option>
-            <option value="10to30" selected>10~30명</option>
-            <option value="30to50">30~50명</option>
-            <option value="over50">50명 이상</option>
-          </select>
-        </label>
-        <label data-step="4">
-          <span>예산 범위</span>
-          <select id="taran-budget">
-            <option value="under100">100만원 이하</option>
-            <option value="100to300" selected>100~300만원</option>
-            <option value="300to500">300~500만원</option>
-            <option value="over500">500만원 이상</option>
-          </select>
-        </label>
-        <div class="taran-step-actions">
-          <button type="button" class="taran-step-back" data-step-prev>이전</button>
-          <button type="button" class="taran-step-next" data-step-next>다음</button>
-          <button type="submit" class="taran-step-submit" data-step-submit>조건에 맞는 행사 찾기</button>
-        </div>
-      </form>
-
-      <div class="taran-estimate-strip" aria-live="polite">
-        <div>
-          <span>예상 비용 범위</span>
-          <strong id="taran-estimate-result">120만원 ~ 260만원</strong>
-        </div>
-        <p id="taran-estimate-note">아이 행사 기준으로 장소, 기본 식사, 준비 항목 일부를 포함한 대략적인 범위입니다.</p>
-        <div class="taran-estimate-actions">
-          <a href="calculator.html">상세 계산</a>
-          <a href="checklist.html">체크리스트 만들기</a>
+    <section class="page-section verification-section" aria-labelledby="verification-title">
+      <div class="container">
+        <div class="section-header"><div class="section-header__copy"><h2 id="verification-title">확인할 수 있는 정보만 구분해 보여드립니다.</h2><p>기본 업체 정보, 운영자가 확인한 조건, 이용 후기를 서로 구분해 표시해 판단 기준을 명확하게 합니다.</p></div></div>
+        <div class="grid grid--3 verification-grid">
+          <article><span class="badge badge--info">기본 정보</span><h3>공식 주소와 업종</h3><p>업체명, 주소, 업종처럼 출처를 확인할 수 있는 기본 정보부터 제공합니다.</p></article>
+          <article><span class="badge badge--success">조건 확인</span><h3>가격과 이용 조건</h3><p>수용 인원, 가격, 주차, 이용 규정은 확인된 값과 확인일을 함께 표시합니다.</p></article>
+          <article><span class="badge">후기 구분</span><h3>내부 후기와 외부 자료</h3><p>따란 고객 후기와 외부 후기 링크를 섞지 않고 별도 영역에서 확인할 수 있습니다.</p></article>
         </div>
       </div>
     </section>
 
-    <section class="taran-category-section" aria-labelledby="taran-category-title" data-reveal>
-      <div class="taran-section-head">
-        <div>
-          <span class="taran-eyebrow">popular events</span>
-          <h2 id="taran-category-title">어떤 날을 준비하시나요?</h2>
-        </div>
-        <a href="venues.html">업체 전체보기 →</a>
-      </div>
-      <div class="taran-category-grid">
-        <a class="taran-category-card" href="venues.html?event=kids">
-          <img src="assets/images/venue-partyroom.webp" alt="">
-          <span>아이</span>
-          <strong>아이의 첫 번째 생일</strong>
-          <p>백일, 돌잔치, 키즈 생일파티에 맞는 공간과 준비 항목을 확인합니다.</p>
-          <small>대표 서비스 · 장소, 스냅, 돌상, 답례품</small>
-        </a>
-        <a class="taran-category-card" href="venues.html?event=parents">
-          <img src="assets/images/venue-hanjeongsik.webp" alt="">
-          <span>부모님</span>
-          <strong>부모님의 특별한 생신</strong>
-          <p>환갑, 칠순, 팔순, 퇴임식에 어울리는 룸과 가족 동선을 비교합니다.</p>
-          <small>대표 서비스 · 한정식, 스냅, 감사패, 케이크</small>
-        </a>
-        <a class="taran-category-card" href="venues.html?event=wedding">
-          <img src="assets/images/venue-garden.webp" alt="">
-          <span>결혼·커플</span>
-          <strong>두 가족이 처음 만나는 날</strong>
-          <p>상견례, 스몰웨딩, 브라이덜 샤워를 위한 분위기와 예산을 정리합니다.</p>
-          <small>대표 서비스 · 가든, 파인다이닝, 플라워, 영상</small>
-        </a>
-        <a class="taran-category-card" href="venues.html?event=home">
-          <img src="assets/images/venue-hotel.webp" alt="">
-          <span>가족 모임</span>
-          <strong>우리 가족만의 작은 파티</strong>
-          <p>집들이, 명절 모임, 홈파티에 필요한 대관과 출장 서비스를 찾아봅니다.</p>
-          <small>대표 서비스 · 케이터링, 대관, 스타일링</small>
-        </a>
+    <section class="page-section page-section--subtle" aria-labelledby="recommended-title">
+      <div class="container">
+        <div class="section-header"><div class="section-header__copy"><h2 id="recommended-title">추천 장소·업체</h2><p>현재 공개 가능한 정보가 있는 파트너 중 최근 확인한 곳을 먼저 보여드립니다.</p></div><a class="button button--text" href="venues.html">전체 보기 →</a></div>
+        <div class="grid grid--3 recommended-grid" id="home-recommended" aria-live="polite"></div>
       </div>
     </section>
 
-    <section class="taran-section taran-partner-section" aria-labelledby="taran-partner-title" data-reveal>
-      <div class="taran-section-head">
-        <div>
-          <span class="taran-eyebrow">curated partners</span>
-          <h2 id="taran-partner-title">조건에 맞는 장소와 업체를 먼저 보여드려요.</h2>
-        </div>
-        <a href="venues.html">업체 전체보기 →</a>
-      </div>
-      <div class="taran-tip-line taran-tip-line"><b>TIP</b> 같은 날짜라도 인원, 공간 형태, 포함 항목에 따라 견적이 크게 달라질 수 있어요.</div>
-      <div class="taran-card-row taran-partner-row taran-partner-row">
-        <a href="venues.html?event=kids" class="taran-mini-card taran-mini-card">
-          <span class="taran-card-badge">아이 행사</span>
-          <h3>돌·백일 장소 비교</h3>
-          <p>10~30명 · 프라이빗 룸 · 유모차 동선</p>
-          <small>보증 인원, 주차, 가족 대기 공간을 먼저 확인합니다.</small>
-        </a>
-        <a href="venues.html?event=parents" class="taran-mini-card taran-mini-card">
-          <span class="taran-card-badge">부모님</span>
-          <h3>환갑·칠순 생신 모임</h3>
-          <p>20~50명 · 한정식 · 가족 룸</p>
-          <small>룸 크기, 코스 구성, 조용한 분위기를 비교합니다.</small>
-        </a>
-        <a href="venues.html?event=wedding" class="taran-mini-card taran-mini-card">
-          <span class="taran-card-badge">결혼 준비</span>
-          <h3>스몰웨딩·상견례</h3>
-          <p>30~80명 · 단독 대관 · 스타일링</p>
-          <small>대관료, 식사, 플라워 포함 여부를 함께 봅니다.</small>
-        </a>
-      </div>
-    </section>
-
-    <section class="taran-process-section" aria-labelledby="taran-process-title" data-reveal>
-      <div class="taran-section-head">
-        <div>
-          <span class="taran-eyebrow">how it works</span>
-          <h2 id="taran-process-title">행사 준비, 이렇게 이어집니다.</h2>
+    <section class="page-section calculator-preview" aria-labelledby="calculator-preview-title">
+      <div class="container calculator-preview__grid">
+        <div class="section-header__copy"><h2 id="calculator-preview-title">예상 비용을 먼저 가늠해보세요.</h2><p>행사 종류와 인원에 따라 식사, 공간, 촬영, 스타일링 비용을 항목별로 확인할 수 있습니다.</p><a class="button button--primary" href="calculator.html">비용 계산기 열기</a></div>
+        <div class="calculator-preview__receipt" aria-label="예상 비용 예시">
+          <div><span>가족 모임 30명 예시</span><strong>약 180만~320만 원</strong></div>
+          <ul><li><span>식사</span><b>인원과 메뉴에 따라</b></li><li><span>공간</span><b>대관 조건에 따라</b></li><li><span>촬영·스타일링</span><b>선택 항목에 따라</b></li></ul>
+          <small>실제 금액은 날짜와 업체 구성에 따라 달라질 수 있습니다.</small>
         </div>
       </div>
-      <div class="taran-process-grid">
-        <article>
-          <span>01</span>
-          <strong>행사 조건 입력</strong>
-          <p>행사 종류, 지역, 날짜, 인원, 예산을 간단히 선택합니다.</p>
-        </article>
-        <article>
-          <span>02</span>
-          <strong>장소와 업체 비교</strong>
-          <p>공간 성격과 서비스 태그에 맞는 업체를 한 화면에서 봅니다.</p>
-        </article>
-        <article>
-          <span>03</span>
-          <strong>예산 및 일정 정리</strong>
-          <p>예상 비용과 행사일까지 필요한 준비 순서를 확인합니다.</p>
-        </article>
-        <article>
-          <span>04</span>
-          <strong>저장하고 함께 준비</strong>
-          <p>마음에 드는 업체와 계산 결과를 저장하고 다음 방문에 이어봅니다.</p>
-        </article>
+    </section>
+
+    <section class="page-section page-section--subtle" aria-labelledby="process-title">
+      <div class="container"><div class="section-header"><div class="section-header__copy"><h2 id="process-title">이용 방법</h2></div></div>
+        <ol class="process-list"><li><b>1</b><div><h3>조건 선택</h3><p>행사 종류, 지역, 예상 인원을 선택합니다.</p></div></li><li><b>2</b><div><h3>후보 비교</h3><p>가격, 인원, 주차와 확인 상태를 비교합니다.</p></div></li><li><b>3</b><div><h3>준비 정리</h3><p>비용 계산기와 체크리스트로 예산과 일정을 정리합니다.</p></div></li></ol>
       </div>
     </section>
 
-    <section class="taran-quote-section" aria-labelledby="taran-quote-title" data-reveal>
-      <div class="taran-section-head">
-        <div>
-          <span class="taran-eyebrow">cost examples</span>
-          <h2 id="taran-quote-title">우리 가족 예산이 어떻게 나뉘는지 먼저 확인하세요.</h2>
-        </div>
-        <a href="contribute.html">견적 공유하기 →</a>
-      </div>
-      <div class="taran-quote-grid">
-        <article>
-          <span>공유 견적 예시</span>
-          <strong>돌잔치 · 24명 · 프라이빗 룸</strong>
-          <p class="quote-summary">가족 식사 중심으로 진행하고, 스냅과 돌상은 기본 구성만 선택한 경우입니다.</p>
-          <dl>
-            <div><dt>성인 식사 20명</dt><dd>약 132만원</dd></div>
-            <div><dt>아동 식사 4명</dt><dd>약 12만원</dd></div>
-            <div><dt>룸 이용·기본 세팅</dt><dd>약 30만원</dd></div>
-            <div><dt>스냅 1인 작가</dt><dd>약 45만원</dd></div>
-            <div><dt>돌상·소품</dt><dd>약 35만원</dd></div>
-          </dl>
-          <p class="quote-total">예상 합계 <b>약 254만원</b></p>
-          <ul>
-            <li>보증 인원 조정 가능 여부 상담 전 확인</li>
-            <li>주차 무료 시간과 외부 돌상 반입비를 함께 확인하면 좋아요</li>
-          </ul>
-        </article>
-        <article>
-          <span>공유 견적 예시</span>
-          <strong>칠순 모임 · 32명 · 한정식 룸</strong>
-          <p class="quote-summary">부모님 생신 식사에 사진 촬영과 감사 선물을 더한 구성입니다.</p>
-          <dl>
-            <div><dt>코스 식사 32명</dt><dd>약 256만원</dd></div>
-            <div><dt>프라이빗 룸</dt><dd>약 20만원</dd></div>
-            <div><dt>가족 스냅</dt><dd>약 50만원</dd></div>
-            <div><dt>케이크·현수막</dt><dd>약 18만원</dd></div>
-            <div><dt>감사패·꽃다발</dt><dd>약 22만원</dd></div>
-          </dl>
-          <p class="quote-total">예상 합계 <b>약 366만원</b></p>
-          <ul>
-            <li>룸 이용 시간과 식사 코스 변경 가능 여부를 먼저 확인하세요</li>
-            <li>어르신 이동 동선과 엘리베이터 접근성도 중요합니다</li>
-          </ul>
-        </article>
-        <article>
-          <span>공유 견적 예시</span>
-          <strong>스몰웨딩 · 50명 · 가든 공간</strong>
-          <p class="quote-summary">소규모 예식과 식사, 플라워 스타일링, 촬영을 함께 진행하는 구성입니다.</p>
-          <dl>
-            <div><dt>대관 4시간</dt><dd>약 180만원</dd></div>
-            <div><dt>코스 식사 50명</dt><dd>약 420만원</dd></div>
-            <div><dt>플라워·테이블 장식</dt><dd>약 120만원</dd></div>
-            <div><dt>스냅·영상</dt><dd>약 160만원</dd></div>
-            <div><dt>사회·음향</dt><dd>약 45만원</dd></div>
-          </dl>
-          <p class="quote-total">예상 합계 <b>약 925만원</b></p>
-          <ul>
-            <li>우천 시 실내 대체 공간이 있는지 확인하세요</li>
-            <li>플라워 철거비와 음향 장비 포함 여부를 함께 봅니다</li>
-          </ul>
-        </article>
+    <section class="page-section" aria-labelledby="guide-title">
+      <div class="container"><div class="section-header"><div class="section-header__copy"><h2 id="guide-title">행사 준비 가이드</h2><p>계약 전 확인할 조건과 예산, 당일 준비 순서를 차근차근 확인하세요.</p></div><a class="button button--text" href="articles.html">준비백과 전체 보기 →</a></div>
+        <div class="grid grid--3 guide-grid"><a class="card card--interactive" href="article.html?slug=contract-questions"><div class="card__body"><span class="badge">계약</span><h3>장소 계약 전 확인할 항목</h3><p>보증 인원, 식대, 주차, 취소 조건을 계약 전에 점검합니다.</p></div></a><a class="card card--interactive" href="article.html?slug=budget-hidden-costs"><div class="card__body"><span class="badge">예산</span><h3>총액에서 빠지기 쉬운 비용</h3><p>대관, 반입, 장식, 촬영 비용을 항목별로 확인합니다.</p></div></a><a class="card card--interactive" href="checklist.html"><div class="card__body"><span class="badge">일정</span><h3>행사일까지 준비할 일</h3><p>행사일을 기준으로 필요한 준비를 놓치지 않도록 정리합니다.</p></div></a></div>
       </div>
     </section>
 
-    <section class="taran-section taran-article-section" aria-labelledby="taran-article-title" data-reveal>
-      <div class="taran-section-head">
-        <div>
-          <span class="taran-eyebrow">taran guide</span>
-          <h2 id="taran-article-title">처음 준비하는 가족이 먼저 읽으면 좋은 글</h2>
-        </div>
-        <a href="articles.html">준비백과 전체보기 →</a>
-      </div>
-      <div class="taran-article-grid">
-        <a href="article-contract-questions.html" class="taran-article-card is-featured">
-          <img src="assets/images/editorial-checklist.webp" alt="">
-          <span>장소 계약</span>
-          <strong>돌잔치 장소 계약 전 꼭 물어볼 12가지</strong>
-          <p>보증 인원, 대관료, 주차, 반입비처럼 실제 비용과 진행에 영향을 주는 질문을 계약 전에 정리합니다.</p>
-        </a>
-        <a href="articles.html" class="taran-article-card">
-          <img src="assets/images/editorial-parking.webp" alt="">
-          <span>체크리스트</span>
-          <strong>행사 100일 전부터 준비할 것</strong>
-          <p>날짜가 가까워질수록 놓치기 쉬운 준비 순서를 한눈에 확인하세요.</p>
-        </a>
-        <a href="calculator.html" class="taran-article-card">
-          <img src="assets/images/venue-hanjeongsik.webp" alt="">
-          <span>예산</span>
-          <strong>우리 가족 행사 예산 감 잡기</strong>
-          <p>식대, 대관, 촬영, 스타일링을 나눠 생각하면 견적 비교가 쉬워집니다.</p>
-        </a>
-      </div>
-    </section>
-
-    <section class="taran-section taran-review-picks taran-life-section" aria-labelledby="taran-life-title" data-reveal>
-      <div class="taran-section-head">
-        <div>
-          <span class="taran-eyebrow">life cycle</span>
-          <h2 id="taran-life-title">소중한 순간이 오래 기억되도록</h2>
-        </div>
-      </div>
-      <div class="taran-image-card-grid taran-life-grid">
-        <a href="venues.html?event=wedding"><img src="assets/images/venue-garden.webp" alt=""><span>새로운 시작</span><strong>결혼 준비</strong><p>스몰웨딩, 상견례, 브라이덜 샤워를 한 번에 둘러보세요.</p></a>
-        <a href="venues.html?event=kids"><img src="assets/images/venue-partyroom.webp" alt=""><span>우리 아이</span><strong>백일·돌·키즈파티</strong><p>아이 컨디션과 가족 동선을 기준으로 공간을 찾습니다.</p></a>
-        <a href="venues.html?event=parents"><img src="assets/images/venue-hanjeongsik.webp" alt=""><span>부모님</span><strong>환갑·칠순·퇴임식</strong><p>가족이 편하게 모일 수 있는 생신 공간을 비교합니다.</p></a>
-        <a href="venues.html?event=home"><img src="assets/images/venue-hotel.webp" alt=""><span>가족·홈파티</span><strong>명절·집들이·케이터링</strong><p>우리집 또는 대관 공간에 맞는 준비 항목을 모아봅니다.</p></a>
-      </div>
-    </section>
-
-    <section class="taran-section taran-community-section taran-community-section" aria-labelledby="taran-community-title" data-reveal>
-      <div class="taran-section-head">
-        <div>
-          <span class="taran-eyebrow">community</span>
-          <h2 id="taran-community-title">다른 가족들은 어떻게 준비하고 있을까요?</h2>
-        </div>
-        <a href="community.html">커뮤니티 전체보기 →</a>
-      </div>
-      <div class="taran-post-grid taran-post-grid">
-        <a href="community.html"><p>보증 인원 30명인데 실제 참석은 24명일 것 같아요. 계약해도 괜찮을까요?</p><span>댓글 12 · 조회 9766</span></a>
-        <a href="community.html"><p>25명 한정식 룸 기준으로 받은 견적, 이 정도면 평균인가요?</p><span>댓글 9 · 조회 6771</span></a>
-        <a href="community.html"><p>어두운 한정식 룸이면 스냅 작가에게 어떤 사진을 요청해야 하나요?</p><span>댓글 25 · 조회 5346</span></a>
-        <a href="community.html"><p>업체 페이지에는 주차 3시간이라고 되어 있는데 안내 전화로는 2시간이라고 들었어요.</p><span>댓글 9 · 조회 2515</span></a>
-      </div>
-    </section>
-
-    <aside class="taran-wide-banner taran-wide-banner" aria-label="정보 공유 안내" data-reveal>
-      <div>
-        <span>T'ARAN 포인트</span>
-        <strong>견적서나 업체 정보를 공유하면 포인트를 쌓고, 이후 기프티콘 교환 혜택으로 이어갈 수 있어요.</strong>
-        <p>개인정보는 가린 뒤 공유하도록 안내하고, 자료는 업체 조건 업데이트 후 보관하지 않는 기준으로 운영합니다.</p>
-      </div>
-      <a href="contribute.html">정보 공유하기</a>
-    </aside>
-
-    <section class="taran-manifesto" aria-labelledby="taran-manifesto-title" data-reveal>
-      <span class="taran-eyebrow">brand story</span>
-      <h2 id="taran-manifesto-title">가장 축하받아야 할 날이,<br>가장 고단한 숙제가 되지 않도록</h2>
-      <p>흩어진 정보는 따란가 모으겠습니다. 당신은 그저, 사랑하는 이들과 온전하게 추억을 모으기만 하세요.</p>
-      <a href="about.html">따란 이야기 보기 →</a>
-    </section>
+    <section class="page-section final-cta"><div class="container final-cta__inner"><div><h2>지금 조건에 맞는 장소부터 확인하세요.</h2><p>행사 종류와 지역을 선택하고 비교를 시작할 수 있습니다.</p></div><a class="button button--primary" href="venues.html">장소·업체 찾기</a></div></section>
   </main>
 
-  <footer class="taran-footer taran-footer">
-    <nav>
-      <a href="about.html">서비스 소개</a>
-      <a href="terms.html">이용약관</a><a href="privacy.html">개인정보처리방침</a>
-      <a href="editorial-policy.html">콘텐츠 원칙</a>
-      <a href="contact.html">고객 문의</a>
-      <a href="partners.html">파트너 문의</a>
-    </nav>
-    <p><strong>따란 taran</strong> 가족의 중요한 날을 위한 장소, 업체, 비용, 일정 정보를 모읍니다.</p>
-    <small>표시된 정보와 가격은 변동될 수 있으며 예약 전 업체에 최종 확인해야 합니다.</small>
-  </footer>
+  <footer class="site-footer"><div class="container site-footer__inner"><div><strong>따란</strong><small>T'ARAN · 가족행사 장소와 업체 비교</small></div><nav aria-label="정책 메뉴"><a href="about.html">서비스 소개</a><a href="privacy.html">개인정보처리방침</a><a href="terms.html">이용약관</a><a href="contact.html">문의</a></nav></div></footer>
 
   <script src="review-lifecycle-verified.js?v=6"></script>
-  <script src="review-coverage.js?v=2"></script>
   <script src="auth.js?v=2"></script>
-  <script src="ui.js?v=18"></script>
-<script src="content-config.js?v=1"></script>
-<script src="content-overrides.js?v=1"></script>
-  <script src="content-runtime.js?v=1"></script>
-  <script>
-    (() => {
-      const ranges = {
-        wedding: { under10: [180, 420], "10to30": [250, 580], "30to50": [420, 900], over50: [680, 1400] },
-        kids: { under10: [60, 150], "10to30": [120, 260], "30to50": [220, 460], over50: [380, 780] },
-        parents: { under10: [80, 180], "10to30": [150, 320], "30to50": [280, 560], over50: [450, 900] },
-        home: { under10: [40, 120], "10to30": [90, 220], "30to50": [180, 420], over50: [320, 760] }
-      };
-      const budgetMultiplier = { under100: 0.82, "100to300": 1, "300to500": 1.16, over500: 1.32 };
-      const eventLabels = {
-        wedding: "결혼·커플",
-        kids: "아이 행사",
-        parents: "부모님 행사",
-        home: "가족 모임"
-      };
-      const event = document.querySelector("#taran-event");
-      const guests = document.querySelector("#taran-guests");
-      const budget = document.querySelector("#taran-budget");
-      const region = document.querySelector("#taran-region");
-      const result = document.querySelector("#taran-estimate-result");
-      const note = document.querySelector("#taran-estimate-note");
-      const form = document.querySelector("#taran-calculator-form");
-      const stepLabels = Array.from(form.querySelectorAll("[data-step]"));
-      const stepTitle = document.querySelector("#taran-step-title");
-      const stepCount = document.querySelector("#taran-step-count");
-      const stepHelp = document.querySelector("#taran-step-help");
-      const prevButton = form.querySelector("[data-step-prev]");
-      const nextButton = form.querySelector("[data-step-next]");
-      const submitButton = form.querySelector("[data-step-submit]");
-      const choiceGrid = document.createElement("div");
-      choiceGrid.className = "taran-step-choice-grid";
-      form.insertBefore(choiceGrid, form.querySelector(".taran-step-actions"));
-      const stepCopy = [
-        ["어떤 행사를 준비하시나요?", "행사 종류를 선택하세요."],
-        ["어느 지역에서 준비하시나요?", "희망 지역을 선택하세요."],
-        ["행사 날짜는 정해졌나요?", "날짜 또는 예정 월을 선택하세요."],
-        ["몇 명 정도 참석하나요?", "예상 인원을 선택하세요."],
-        ["생각해둔 예산이 있나요?", "예산 범위를 선택하세요."]
-      ];
-      const eventOptionHelp = {
-        kids: "백일 · 돌잔치 · 키즈 생일파티",
-        wedding: "상견례 · 스몰웨딩 · 브라이덜 샤워",
-        parents: "환갑 · 칠순 · 팔순 · 퇴임식",
-        home: "집들이 · 명절 · 홈파티 · 기념일"
-      };
-      let currentStep = 0;
-      const update = () => {
-        const base = ranges[event.value][guests.value];
-        const multiplier = budgetMultiplier[budget.value] || 1;
-        const min = Math.round(base[0] * multiplier / 10) * 10;
-        const max = Math.round(base[1] * multiplier / 10) * 10;
-        result.textContent = `${min}만원 ~ ${max}만원`;
-        note.textContent = `${eventLabels[event.value]} 기준으로 장소, 기본 식사, 준비 항목 일부를 포함한 대략적인 범위입니다.`;
-      };
-      const renderStep = () => {
-        stepLabels.forEach((label, index) => {
-          const active = index === currentStep;
-          label.hidden = !active;
-          label.classList.toggle("is-active", active);
-        });
-        stepCount.textContent = `${currentStep + 1} / ${stepLabels.length}`;
-        stepTitle.textContent = stepCopy[currentStep][0];
-        stepHelp.textContent = stepCopy[currentStep][1];
-        prevButton.hidden = currentStep === 0;
-        nextButton.hidden = currentStep === stepLabels.length - 1;
-        submitButton.hidden = currentStep !== stepLabels.length - 1;
-        renderChoices();
-      };
-      const renderChoices = () => {
-        const select = stepLabels[currentStep].querySelector("select");
-        choiceGrid.innerHTML = "";
-        Array.from(select.options).forEach(option => {
-          const button = document.createElement("button");
-          button.type = "button";
-          button.className = "taran-choice-card";
-          button.classList.toggle("is-selected", option.value === select.value);
-          button.dataset.value = option.value;
-          const help = select.id === "taran-event" ? eventOptionHelp[option.value] : "";
-          button.innerHTML = `<span>${option.textContent}</span>${help ? `<small>${help}</small>` : ""}`;
-          button.addEventListener("click", () => {
-            select.value = option.value;
-            update();
-            renderChoices();
-            if (currentStep < stepLabels.length - 1) {
-              window.setTimeout(() => moveStep(1), 140);
-            }
-          });
-          choiceGrid.appendChild(button);
-        });
-      };
-      const moveStep = direction => {
-        currentStep = Math.max(0, Math.min(stepLabels.length - 1, currentStep + direction));
-        renderStep();
-      };
-      nextButton.addEventListener("click", () => moveStep(1));
-      prevButton.addEventListener("click", () => moveStep(-1));
-      [event, guests, budget].forEach(input => input.addEventListener("change", update));
-      stepLabels.forEach(label => {
-        const select = label.querySelector("select");
-        select.addEventListener("change", () => {
-          update();
-          renderChoices();
-        });
-      });
-      update();
-      renderStep();
-      form.addEventListener("submit", e => {
-        e.preventDefault();
-        if (currentStep < stepLabels.length - 1) {
-          moveStep(1);
-          return;
-        }
-        const query = new URLSearchParams({ event: event.value });
-        if (region.value) query.set("region", region.value);
-        location.href = `venues.html?${query.toString()}`;
-      });
-    })();
-  </script>
+  <script src="scripts/components/header.js"></script>
+  <script src="scripts/components/states.js"></script>
+  <script src="scripts/pages/home.js"></script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-

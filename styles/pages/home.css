@@ -1,0 +1,48 @@
+.home-hero { padding-block: clamp(3rem, 8vw, 7rem); background: var(--color-bg-subtle); }
+.home-hero__grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(20rem, 0.9fr); align-items: center; gap: var(--space-12); }
+.home-hero__copy { display: grid; gap: var(--space-6); }
+.home-hero__copy > p { max-width: 42rem; font-size: var(--font-size-18); }
+.home-search { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) auto; gap: var(--space-3); align-items: end; padding: var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface); box-shadow: var(--shadow-md); }
+.home-hero__visual { min-height: 30rem; overflow: hidden; border-radius: var(--radius-lg); }
+.home-hero__visual img { width: 100%; height: 100%; object-fit: cover; }
+.verification-grid article { display: grid; gap: var(--space-3); padding-right: var(--space-6); border-right: 1px solid var(--color-border); }
+.verification-grid article:last-child { border-right: 0; }
+.recommended-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.recommended-grid .card__body { min-height: 11rem; }
+.partner-facts { display: flex; flex-wrap: wrap; gap: var(--space-2); color: var(--color-text-muted); font-size: var(--font-size-14); }
+.calculator-preview__grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(20rem, 28rem); align-items: center; gap: var(--space-12); }
+.calculator-preview__receipt { display: grid; gap: var(--space-4); padding: var(--space-6); border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-bg-subtle); }
+.calculator-preview__receipt > div { display: grid; gap: var(--space-1); }
+.calculator-preview__receipt strong { font-size: var(--font-size-24); }
+.calculator-preview__receipt ul { display: grid; gap: var(--space-2); padding: 0; list-style: none; }
+.calculator-preview__receipt li { display: flex; justify-content: space-between; gap: var(--space-4); padding-top: var(--space-2); border-top: 1px solid var(--color-border); }
+.process-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-8); padding: 0; list-style: none; }
+.process-list li { display: flex; gap: var(--space-4); }
+.process-list b { display: grid; width: 2.5rem; height: 2.5rem; flex: 0 0 auto; place-items: center; border-radius: 50%; color: #fff; background: var(--color-brand-800); }
+.guide-grid .card__body { min-height: 12rem; align-content: start; }
+.final-cta { color: #fff; background: var(--color-brand-800); }
+.final-cta h2, .final-cta p { color: #fff; }
+.final-cta__inner { display: flex; align-items: center; justify-content: space-between; gap: var(--space-8); }
+.final-cta .button--primary { color: var(--color-brand-900); background: #fff; }
+.site-footer { padding-block: var(--space-8); border-top: 1px solid var(--color-border); }
+.site-footer__inner { display: flex; justify-content: space-between; gap: var(--space-6); }
+.site-footer__inner > div { display: grid; }
+.site-footer nav { display: flex; flex-wrap: wrap; gap: var(--space-4); font-size: var(--font-size-14); }
+@media (max-width: 64rem) {
+  .home-hero__grid { grid-template-columns: 1fr; }
+  .home-hero__visual { min-height: 20rem; max-height: 28rem; }
+  .home-search { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .home-search .button { grid-column: 1 / -1; }
+  .recommended-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 40rem) {
+  .home-hero { padding-block: var(--space-8); }
+  .home-hero__grid { gap: var(--space-8); }
+  .home-search { grid-template-columns: 1fr; padding: var(--space-3); }
+  .home-hero__visual { min-height: 15rem; }
+  .verification-grid article { padding: 0 0 var(--space-6); border-right: 0; border-bottom: 1px solid var(--color-border); }
+  .verification-grid article:last-child { padding-bottom: 0; border-bottom: 0; }
+  .recommended-grid, .calculator-preview__grid, .process-list { grid-template-columns: 1fr; }
+  .calculator-preview__grid { gap: var(--space-6); }
+  .final-cta__inner, .site-footer__inner { align-items: flex-start; flex-direction: column; }
+}
