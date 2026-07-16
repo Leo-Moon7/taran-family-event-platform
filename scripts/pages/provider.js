@@ -3,7 +3,7 @@
 
   const params = new URLSearchParams(window.location.search);
   const providerId = params.get("id");
-  const provider = (window.publicDirectoryData || []).find((item) => item.id === providerId);
+  let provider = null;
   const EVENT_LABELS = { wedding: "결혼 준비", kids: "아이 행사", parents: "부모님 행사", home: "가족 모임" };
   const UNKNOWN_PATTERN = /확인\s*(필요|예정|중)|상담\s*시|문의|미정|미확인|준비\s*중|안내\s*예정|^[-–—]$/;
 
@@ -162,12 +162,20 @@
     return card;
   }
 
-  function renderReviews(item) {
+  async function renderReviews(item) {
     const saved = readJson("provider-reviews", []);
     const bundledInternal = Array.isArray(item.internalReviews)
       ? item.internalReviews
       : (Array.isArray(item.reviews) ? item.reviews : []);
-    const internal = [...bundledInternal, ...saved.filter((review) => review.providerId === item.id)];
+    let onlineInternal = [];
+    if (window.TaranConfig?.isSupabaseConfigured) {
+      try {
+        const rows = await window.TaranApi.select(window.TaranConfig.tables.reviews, { provider_id: `eq.${item.id}`, status: "eq.published", order: "created_at.desc" });
+        onlineInternal = rows.map(review => ({ rating: review.rating, name: review.author_name, content: review.content, createdAt: review.created_at }));
+      } catch (error) { console.warn("공개 후기를 불러오지 못했습니다.", error); }
+    }
+    const localInternal = window.TaranConfig?.isSupabaseConfigured ? [] : saved.filter((review) => review.providerId === item.id);
+    const internal = [...bundledInternal, ...onlineInternal, ...localInternal];
     const external = Array.isArray(item.externalReviews) ? item.externalReviews : [];
     const internalList = byId("provider-internal-review-list");
     const externalList = byId("provider-external-review-list");
@@ -198,19 +206,43 @@
 
   function setupReviewForm(item) {
     const form = byId("provider-review-form");
-    form?.addEventListener("submit", (event) => {
+    if (window.TaranConfig?.isSupabaseConfigured && !window.TaranAuth?.getAccount()) {
+      const status = document.querySelector("[data-review-status]");
+      if (status) status.textContent = "로그인 후 후기를 등록할 수 있습니다.";
+    }
+    form?.addEventListener("submit", async (event) => {
       event.preventDefault();
       const formData = new FormData(form);
       const rating = Number(formData.get("rating"));
       const name = String(formData.get("name") || "").trim();
       const content = String(formData.get("content") || "").trim();
-      if (!rating || !name || !content) return;
-      const reviews = readJson("provider-reviews", []);
-      reviews.unshift({ providerId: item.id, rating, name, content, createdAt: new Date().toISOString().slice(0, 10) });
-      writeJson("provider-reviews", reviews.slice(0, 200));
-      text(document.querySelector("[data-review-status]"), "후기가 저장되었습니다.");
-      form.reset();
-      window.setTimeout(() => window.location.reload(), 500);
+      if (!rating || !name || content.length < 10) {
+        text(document.querySelector("[data-review-status]"), "평점과 표시 이름, 10자 이상의 이용 경험을 입력해 주세요.");
+        return;
+      }
+      const button = form.querySelector("button[type=submit]");
+      if (button) button.disabled = true;
+      try {
+        if (window.TaranConfig?.isSupabaseConfigured) {
+          const account = await window.TaranAuth.ready;
+          if (!account) {
+            window.location.href = window.TaranAuth.loginUrl(`provider.html?id=${encodeURIComponent(item.id)}#provider-reviews`);
+            return;
+          }
+          await window.TaranApi.upsert(window.TaranConfig.tables.reviews, {
+            provider_id: item.id, user_id: account.id, rating, author_name: name, content, status: "pending"
+          });
+          text(document.querySelector("[data-review-status]"), "후기가 접수되었습니다. 운영자 확인 후 공개됩니다.");
+        } else {
+          const reviews = readJson("provider-reviews", []);
+          reviews.unshift({ providerId: item.id, rating, name, content, createdAt: new Date().toISOString().slice(0, 10) });
+          writeJson("provider-reviews", reviews.slice(0, 200));
+          text(document.querySelector("[data-review-status]"), "미리보기 브라우저에 후기가 저장되었습니다.");
+        }
+        form.reset();
+      } catch (error) {
+        text(document.querySelector("[data-review-status]"), error.message || "후기를 접수하지 못했습니다.");
+      } finally { if (button) button.disabled = false; }
     });
   }
 
@@ -223,8 +255,70 @@
       text(status, label);
       window.TaranToast?.show(label);
     };
-    document.querySelector("[data-save-provider]")?.addEventListener("click", () => saveTo("saved-providers", "관심 업체에 저장했습니다."));
+    document.querySelector("[data-save-provider]")?.addEventListener("click", async () => {
+      if (window.TaranConfig?.isSupabaseConfigured) {
+        const account = await window.TaranAuth.ready;
+        if (!account) { window.location.href = window.TaranAuth.loginUrl(`provider.html?id=${encodeURIComponent(item.id)}`); return; }
+        await window.TaranAuth.api(`/api/member/saved-venues/${encodeURIComponent(item.id)}`, { method: "PUT" });
+        text(status, "관심 업체에 저장했습니다.");
+        window.TaranToast?.show("관심 업체에 저장했습니다.");
+      } else saveTo("saved-providers", "관심 업체에 저장했습니다.");
+    });
     document.querySelector("[data-compare-provider]")?.addEventListener("click", () => saveTo("compare-providers", "비교함에 담았습니다."));
+  }
+
+  function setupInquiry(item) {
+    const trigger = document.querySelector("[data-inquiry-provider]");
+    const dialog = byId("provider-inquiry-dialog");
+    const form = byId("provider-inquiry-form");
+    if (!trigger || !dialog || !form || !window.TaranConfig?.isSupabaseConfigured) return;
+    trigger.hidden = false;
+    document.querySelector("[data-inquiry-close]")?.addEventListener("click", () => dialog.close());
+    trigger.addEventListener("click", async () => {
+      const account = await window.TaranAuth.ready;
+      if (!account) {
+        window.location.href = window.TaranAuth.loginUrl(`provider.html?id=${encodeURIComponent(item.id)}`);
+        return;
+      }
+      form.elements.name.value = account.display_name || "";
+      form.elements.region.value = [item.region, item.area].filter(Boolean).join(" ");
+      const firstEvent = (item.eventTags || [])[0];
+      if (firstEvent && EVENT_LABELS[firstEvent]) form.elements.eventType.value = firstEvent;
+      dialog.showModal();
+      form.elements.eventType.focus();
+      window.TaranApi.rpc("taran_track_event", { p_event_name: "inquiry_started", p_page_path: "provider.html", p_metadata: {} }).catch(() => {});
+    });
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const status = document.querySelector("[data-inquiry-status]");
+      const button = form.querySelector("button[type=submit]");
+      const values = new FormData(form);
+      const account = await window.TaranAuth.ready;
+      if (!account) return;
+      if (!values.get("consent")) { text(status, "개인정보 제공 동의가 필요합니다."); return; }
+      button.disabled = true;
+      text(status, "접수 중입니다.");
+      try {
+        await window.TaranApi.upsert(window.TaranConfig.tables.inquiries, {
+          user_id: account.id,
+          provider_id: item.id,
+          provider_name: item.name,
+          event_type: String(values.get("eventType") || ""),
+          region: String(values.get("region") || "").trim(),
+          guests: Number(values.get("guests")),
+          budget: String(values.get("budget") || "").trim(),
+          contact: { name: String(values.get("name") || "").trim(), phone: String(values.get("phone") || "").trim(), email: account.email || "" },
+          details: { note: String(values.get("note") || "").trim(), consentedAt: new Date().toISOString() },
+          status: "pending"
+        });
+        window.TaranApi.rpc("taran_track_event", { p_event_name: "inquiry_submitted", p_page_path: "provider.html", p_metadata: {} }).catch(() => {});
+        form.reset();
+        dialog.close();
+        window.TaranToast?.show("견적 문의를 접수했습니다.");
+      } catch (error) {
+        text(status, error.message || "견적 문의를 접수하지 못했습니다.");
+      } finally { button.disabled = false; }
+    });
   }
 
   function renderLocation(item, address) {
@@ -236,7 +330,9 @@
     mapLink.hidden = false;
   }
 
-  function renderProvider() {
+  async function renderProvider() {
+    await Promise.resolve(window.taranContentReady);
+    provider = (window.publicDirectoryData || []).find((item) => item.id === providerId);
     if (!provider) { document.querySelectorAll(".provider-page > :not(#provider-not-found)").forEach((element) => { element.hidden = true; }); byId("provider-not-found").hidden = false; return; }
     const facts = provider.detailFacts || {};
     const official = provider.officialVerification || {};
@@ -251,6 +347,8 @@
     text(byId("provider-verified-date"), provider.verifiedAt ? `정보 확인 ${formatDate(provider.verifiedAt)}` : "");
     const address = firstFact(facts, ["도로명 주소", "주소"]) || safeText(official.roadAddress) || safeText(official.address) || [provider.region, provider.area].filter(Boolean).join(" ");
     text(byId("provider-address"), address);
+    const claimLink = byId("provider-claim-link");
+    if (claimLink) claimLink.href = `claim.html?id=${encodeURIComponent(provider.id)}`;
     const image = byId("provider-image");
     image.src = safeUrl(provider.image) || (/^(?:assets\/|\.\/|\/)/.test(provider.image || "") ? provider.image : "assets/images/venue-partyroom.webp");
     image.alt = provider.imageVerified ? `${provider.name} 대표 이미지` : "";
@@ -263,10 +361,12 @@
     renderTags(provider);
     const rendered = renderFacts(provider);
     renderOptionalSections(provider);
-    renderReviews(provider);
+    await window.TaranAuth?.ready;
+    await renderReviews(provider);
     setupReviewTabs();
     setupReviewForm(provider);
     setupSaveActions(provider);
+    setupInquiry(provider);
     renderLocation(provider, rendered.address || address);
 
     const officialHref = safeUrl(provider.officialLink || official.link);
@@ -275,5 +375,5 @@
     if (phone && /^[0-9+()\-\s]+$/.test(phone)) { const link = byId("provider-phone-link"); link.href = `tel:${phone.replace(/[^0-9+]/g, "")}`; link.hidden = false; }
   }
 
-  renderProvider();
+  renderProvider().catch(error => console.error("업체 상세 정보를 표시하지 못했습니다.", error));
 })();

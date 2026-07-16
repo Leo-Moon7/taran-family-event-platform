@@ -2,6 +2,7 @@
 .site-header__inner { display: flex; width: min(100% - 2rem, var(--content-max)); min-height: var(--header-height); align-items: center; justify-content: space-between; gap: var(--space-6); margin-inline: auto; }
 .brand { display: inline-flex; min-height: 44px; align-items: center; gap: var(--space-3); font-weight: var(--font-weight-bold); }
 .brand__mark { display: grid; width: 2.5rem; height: 2.5rem; place-items: center; border-radius: var(--radius-md); color: #fff; background: var(--color-brand-800); font-family: var(--font-display); font-size: var(--font-size-24); }
+.brand-mark { display: grid; width: 2.5rem; height: 2.5rem; place-items: center; border-radius: var(--radius-md); color: #fff; background: var(--color-brand-800); font-family: var(--font-display); font-size: var(--font-size-20); }
 .brand__name { display: grid; line-height: 1.05; }
 .brand__name small { color: var(--color-accent-700); font-size: var(--font-size-12); letter-spacing: 0.08em; }
 .site-nav { display: flex; align-items: center; gap: var(--space-1); }
@@ -23,3 +24,14 @@
   .nav-menu__panel { position: static; width: 100%; margin-block: var(--space-1) var(--space-2); box-shadow: none; }
 }
 @media (max-width: 40rem) { .site-header__inner { width: min(100% - 1.5rem, var(--content-max)); } }
+
+/* 기존 페이지의 의미 있는 HTML 내비게이션도 새 공통 헤더에서 유지합니다. */
+.site-header:not(:has(.site-header__inner)) { display: flex; min-height: var(--header-height); align-items: center; justify-content: space-between; gap: var(--space-5); padding-inline: max(var(--container-gutter), calc((100% - var(--content-max)) / 2)); }
+.site-header:not(:has(.site-header__inner)) > nav { display: flex; align-items: center; gap: var(--space-1); }
+.site-header:not(:has(.site-header__inner)) > nav a { display: inline-flex; min-height: 44px; align-items: center; padding-inline: var(--space-3); border-radius: var(--radius-sm); font-weight: var(--font-weight-semibold); }
+.site-header:not(:has(.site-header__inner)) > nav .auth-link { color: #fff; background: var(--color-brand-800); }
+@media (max-width: 64rem) {
+  .site-header:not(:has(.site-header__inner)) { position: static; align-items: flex-start; flex-direction: column; padding-block: var(--space-3); }
+  .site-header:not(:has(.site-header__inner)) > nav { width: 100%; flex-wrap: nowrap; overflow-x: auto; }
+  .site-header:not(:has(.site-header__inner)) > nav a { flex: 0 0 auto; }
+}

@@ -1,0 +1,4 @@
+/admin  /admin/index.html  200
+/admin-review.html  /admin/  301
+/vendor-dashboard.html  /admin/providers.html  301
+/venue.html  /provider.html  301

@@ -1,4 +1,59 @@
 <!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>업체 관리 | 따란 운영센터</title>
-<link rel="stylesheet" href="../styles/tokens.css"><link rel="stylesheet" href="../styles/reset.css"><link rel="stylesheet" href="../styles/base.css"><link rel="stylesheet" href="../styles/components/button.css"><link rel="stylesheet" href="../styles/components/form.css"><link rel="stylesheet" href="../styles/pages/admin.css"><script src="../scripts/core/brand.js"></script><script src="../scripts/core/storage.js"></script></head>
-<body class="admin-app" data-admin-view="providers"><header class="admin-topbar" data-admin-header></header><div class="admin-layout"><nav class="admin-sidebar" data-admin-sidebar></nav><main class="admin-main"><header class="admin-page-head"><div><p>업체 관리</p><h1>업체 목록과 공개 상태</h1></div></header><form class="admin-filter" data-admin-filter><label>검색<input name="query" placeholder="업체명 또는 지역"></label><label>상태<select name="status"><option value="all">전체</option><option value="published">공개</option><option value="hidden">비공개</option></select></label><button class="button button--secondary" type="submit">검색</button></form><p class="admin-result-count" data-admin-result-count></p><div class="admin-table-wrap"><table><thead><tr><th>업체명</th><th>지역</th><th>유형</th><th>후기</th><th>상태</th><th>관리</th></tr></thead><tbody data-admin-table></tbody></table></div><div class="admin-empty" data-admin-empty hidden>조건에 맞는 업체가 없습니다.</div><nav class="pagination" data-admin-pagination aria-label="업체 목록 페이지"></nav></main></div><script src="../review-provider-candidates.js"></script><script src="../review-lifecycle-candidates.js"></script><script src="../review-lifecycle-verified.js"></script><script src="../review-local-api-partners.js"></script><script src="../data.js"></script><script src="../scripts/components/admin-shell.js"></script><script src="../scripts/pages/admin/common.js"></script><script src="../scripts/pages/admin/providers.js"></script></body></html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>업체 관리 | 따란 운영센터</title>
+  <link rel="stylesheet" href="../styles/tokens.css">
+  <link rel="stylesheet" href="../styles/reset.css">
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/components/button.css">
+  <link rel="stylesheet" href="../styles/components/form.css">
+  <link rel="stylesheet" href="../styles/pages/admin.css">
+  <script src="../scripts/core/brand.js"></script>
+  <script src="../scripts/core/storage.js"></script>
+  <script src="../content-config.js"></script>
+  <script src="../scripts/core/config.js"></script>
+  <script src="../scripts/core/api.js"></script>
+  <script src="../scripts/core/auth.js"></script>
+</head>
+<body class="admin-app" data-admin-view="providers">
+  <header class="admin-topbar" data-admin-header></header>
+  <div class="admin-layout">
+    <nav class="admin-sidebar" data-admin-sidebar></nav>
+    <main class="admin-main">
+      <header class="admin-page-head"><div><p>업체 관리</p><h1>업체 목록과 공개 상태</h1></div></header>
+      <form class="admin-filter" data-admin-filter>
+        <label>검색<input name="query" placeholder="업체명 또는 지역"></label>
+        <label>상태<select name="status"><option value="all">전체</option><option value="published">공개</option><option value="hidden">비공개</option></select></label>
+        <button class="button button--secondary" type="submit">검색</button>
+      </form>
+      <p class="admin-result-count" data-admin-result-count></p>
+      <div class="admin-table-wrap"><table><thead><tr><th>업체명</th><th>지역</th><th>유형</th><th>후기</th><th>상태</th><th>관리</th></tr></thead><tbody data-admin-table></tbody></table></div>
+      <div class="admin-empty" data-admin-empty hidden>조건에 맞는 업체가 없습니다.</div>
+      <nav class="pagination" data-admin-pagination aria-label="업체 목록 페이지"></nav>
+
+      <section class="admin-section" data-review-section hidden>
+        <h2>공개 대기 후기</h2>
+        <div class="admin-table-wrap"><table><thead><tr><th>등록일</th><th>업체</th><th>평점</th><th>작성자</th><th>내용</th><th>관리</th></tr></thead><tbody data-review-table></tbody></table></div>
+        <div class="admin-empty" data-review-empty hidden>공개를 기다리는 후기가 없습니다.</div>
+      </section>
+
+      <section class="admin-section" data-claim-section hidden>
+        <h2>업체 수정 권한 요청</h2>
+        <div class="admin-table-wrap"><table><thead><tr><th>요청일</th><th>업체</th><th>담당자</th><th>연락처</th><th>광고 안내</th><th>상태</th><th>관리</th></tr></thead><tbody data-claim-table></tbody></table></div>
+        <div class="admin-empty" data-claim-empty hidden>처리할 권한 요청이 없습니다.</div>
+      </section>
+    </main>
+  </div>
+  <script src="../review-provider-candidates.js"></script>
+  <script src="../review-lifecycle-candidates.js"></script>
+  <script src="../review-lifecycle-verified.js"></script>
+  <script src="../review-local-api-partners.js"></script>
+  <script src="../data.js"></script>
+  <script src="../scripts/components/admin-shell.js"></script>
+  <script src="../scripts/pages/admin/data.js"></script>
+  <script src="../scripts/pages/admin/common.js"></script>
+  <script src="../scripts/pages/admin/providers.js"></script>
+</body>
+</html>

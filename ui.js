@@ -29,7 +29,7 @@ if (publicHeader) {
           <a href="articles.html"><strong>준비백과</strong><span>행사별 준비 순서와 계약 팁</span></a>
           <a href="checklist.html"><strong>체크리스트</strong><span>행사일 기준 자동 준비 일정</span></a>
           <a href="contribute.html"><strong>견적 공유</strong><span>받은 견적과 업체 정보를 나누고 포인트 받기</span></a>
-          <a href="about.html"><strong>서비스 소개</strong><span>따란가 정보를 정리하는 방식</span></a>
+          <a href="about.html"><strong>서비스 소개</strong><span>따란이 정보를 정리하는 방식</span></a>
         </div>
       </div>
       <a href="community.html">커뮤니티</a>

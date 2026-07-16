@@ -1,6 +1,13 @@
 const authTabs = [...document.querySelectorAll("[data-auth-tab]")];
 const loginForm = document.querySelector("#login-form");
 const registerForm = document.querySelector("#register-form");
+const authCard = document.querySelector(".real-auth-card");
+const unavailable = document.querySelector("[data-auth-unavailable]");
+
+if (!window.TaranAuth.isConfigured()) {
+  if (authCard) authCard.hidden = true;
+  if (unavailable) unavailable.hidden = false;
+}
 
 function selectAuthTab(name) {
   authTabs.forEach(tab => tab.classList.toggle("is-active", tab.dataset.authTab === name));
@@ -15,7 +22,7 @@ function returnPath() {
   return window.TaranAuth.safeReturnPath(new URLSearchParams(window.location.search).get("return") || "account.html");
 }
 
-loginForm.addEventListener("submit", async event => {
+loginForm?.addEventListener("submit", async event => {
   event.preventDefault();
   const error = document.querySelector("#login-error");
   error.textContent = "";
@@ -30,7 +37,7 @@ loginForm.addEventListener("submit", async event => {
   }
 });
 
-registerForm.addEventListener("submit", async event => {
+registerForm?.addEventListener("submit", async event => {
   event.preventDefault();
   const error = document.querySelector("#register-error");
   const password = document.querySelector("#register-password").value;

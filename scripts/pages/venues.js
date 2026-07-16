@@ -367,11 +367,10 @@
     applyFilters(false);
   }
 
-  try { init(); }
-  catch (error) {
+  Promise.resolve(window.taranContentReady).then(init).catch((error) => {
     console.error("업체 목록을 표시하지 못했습니다.", error);
     elements.results?.replaceChildren(window.TaranStates.message({ title: "업체 정보를 불러오지 못했습니다.", description: "잠시 후 다시 시도해 주세요.", actionLabel: "다시 시도", onAction: () => window.location.reload() }));
     elements.results?.setAttribute("aria-busy", "false");
     if (elements.summary) elements.summary.textContent = "불러오기 오류";
-  }
+  });
 })();

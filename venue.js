@@ -253,7 +253,7 @@ function renderCandidate(candidate) {
   saveButton.addEventListener("click", async () => {
     const account = await window.TaranAuth.ready;
     if (!account) {
-      window.location.href = window.TaranAuth.loginUrl(`venue.html${window.location.search}`);
+      window.location.href = window.TaranAuth.loginUrl(`provider.html${window.location.search}`);
       return;
     }
     savedCandidate = !savedCandidate;
@@ -263,21 +263,17 @@ function renderCandidate(candidate) {
   });
   paintCandidateSave();
   const inquiryButton = document.querySelector("#inquiry-button");
-  inquiryButton.disabled = true;
-  inquiryButton.textContent = "상담 연결 준비 중";
+  inquiryButton.hidden = true;
   const claimLink = document.querySelector("#claim-listing-link");
-  claimLink.textContent = "업체 정보 제보하기";
-  claimLink.removeAttribute("href");
-  claimLink.setAttribute("aria-disabled", "true");
+  claimLink.textContent = "업체 담당자 권한 요청";
+  claimLink.href = `claim.html?id=${encodeURIComponent(candidate.id)}`;
   const stickySave = document.querySelector("#sticky-save");
   const stickyInquiry = document.querySelector("#sticky-inquiry");
   stickySave.disabled = false;
-  stickyInquiry.disabled = true;
-  stickyInquiry.firstChild.textContent = "상담 연결 준비 중 ";
+  stickyInquiry.hidden = true;
   stickySave.addEventListener("click", () => saveButton.click());
-  setText("#detail-notice", "업체 담당자 확인과 관리자 검수가 끝나기 전에는 견적·예약을 연결하지 않습니다.");
   document.querySelector("#correction-button").addEventListener("click", () => {
-    setText("#detail-notice", "정보 오류 제보 접수 기능은 호스팅과 회원 시스템 연결 후 제공합니다.");
+    window.location.href = `contribute.html?provider=${encodeURIComponent(candidate.id)}`;
   });
   renderReviewPanels(candidate, true);
 }
@@ -311,7 +307,8 @@ function renderPublishedVenue(item) {
     : "크롤링 자료를 자동 공개하지 않고, 관리자가 공식 채널과 전화 확인 내용을 검수한 뒤 공개합니다.");
   setText("#side-name", item.name);
   setText("#side-address", item.address);
-  document.querySelector("#claim-listing-link").href = `contribute.html?provider=${encodeURIComponent(item.id)}`;
+  document.querySelector("#claim-listing-link").textContent = "업체 담당자 권한 요청";
+  document.querySelector("#claim-listing-link").href = `claim.html?id=${encodeURIComponent(item.id)}`;
 
   const verificationBox = document.querySelector("#detail-verification");
   verificationBox.classList.add(isSample ? "is-sample" : "is-reviewed");
@@ -349,7 +346,7 @@ function renderPublishedVenue(item) {
   saveButton.addEventListener("click", async () => {
     const account = await window.TaranAuth.ready;
     if (!account) {
-      window.location.href = window.TaranAuth.loginUrl(`venue.html${window.location.search}`);
+      window.location.href = window.TaranAuth.loginUrl(`provider.html${window.location.search}`);
       return;
     }
     try {
@@ -368,13 +365,10 @@ function renderPublishedVenue(item) {
     }
     paintSaveButton();
   })();
-  document.querySelector("#inquiry-button").addEventListener("click", () => setText("#detail-notice", "실제 업체 확인 후 견적 문의 기능을 연결합니다."));
-  document.querySelector("#correction-button").addEventListener("click", () => setText("#detail-notice", "이용자 제보 접수 기능은 실제 사이트 공개 전에 추가합니다."));
+  document.querySelector("#inquiry-button").hidden = true;
+  document.querySelector("#correction-button").addEventListener("click", () => { window.location.href = `contribute.html?provider=${encodeURIComponent(item.id)}`; });
   document.querySelector("#sticky-save").addEventListener("click", () => saveButton.click());
-  document.querySelector("#sticky-inquiry").addEventListener("click", () => {
-    document.querySelector("#inquiry-button").click();
-    document.querySelector("#detail-notice").scrollIntoView({ behavior: "smooth", block: "center" });
-  });
+  document.querySelector("#sticky-inquiry").hidden = true;
   renderReviewPanels({ internalReviews: item.internalReviews || [], evidence: item.evidence || [] });
 }
 

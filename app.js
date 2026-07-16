@@ -56,7 +56,7 @@ function renderVenues(items, province = "all", district = "all") {
     return;
   }
   container.innerHTML = items.map(venue => `
-    <a class="venue-card venue-card-link" href="venue.html?id=${venue.id}" aria-label="${venue.name} 상세보기">
+    <a class="venue-card venue-card-link" href="provider.html?id=${venue.id}" aria-label="${venue.name} 상세보기">
       <div class="venue-visual">
         <img src="${venue.image}" alt="" loading="lazy">
         <span>검수 기준</span>

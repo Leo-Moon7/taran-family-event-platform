@@ -1,3 +1,17 @@
 <!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>콘텐츠 관리 | 따란 운영센터</title><link rel="stylesheet" href="../styles/tokens.css"><link rel="stylesheet" href="../styles/reset.css"><link rel="stylesheet" href="../styles/base.css"><link rel="stylesheet" href="../styles/pages/admin.css"><script src="../scripts/core/brand.js"></script></head>
-<body class="admin-app" data-admin-view="content"><header class="admin-topbar" data-admin-header></header><div class="admin-layout"><nav class="admin-sidebar" data-admin-sidebar></nav><main class="admin-main"><header class="admin-page-head"><div><p>콘텐츠 관리</p><h1>준비백과와 공지</h1></div></header><div class="admin-table-wrap"><table><thead><tr><th>제목</th><th>주제</th><th>상태</th><th>작성일</th><th>관리</th></tr></thead><tbody data-admin-table></tbody></table></div><div class="admin-empty" data-admin-empty hidden>등록된 콘텐츠가 없습니다.</div></main></div><script src="../blog-data.js"></script><script src="../scripts/components/admin-shell.js"></script><script src="../scripts/pages/admin/common.js"></script><script src="../scripts/pages/admin/content.js"></script></body></html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>콘텐츠 관리 | 따란 운영센터</title>
+  <link rel="stylesheet" href="../styles/tokens.css"><link rel="stylesheet" href="../styles/reset.css"><link rel="stylesheet" href="../styles/base.css"><link rel="stylesheet" href="../styles/components/button.css"><link rel="stylesheet" href="../styles/components/form.css"><link rel="stylesheet" href="../styles/pages/admin.css">
+  <script src="../scripts/core/brand.js"></script><script src="../scripts/core/storage.js"></script><script src="../content-config.js"></script><script src="../scripts/core/config.js"></script><script src="../scripts/core/api.js"></script><script src="../scripts/core/auth.js"></script>
+</head>
+<body class="admin-app" data-admin-view="content">
+  <header class="admin-topbar" data-admin-header></header>
+  <div class="admin-layout"><nav class="admin-sidebar" data-admin-sidebar></nav><main class="admin-main">
+    <header class="admin-page-head"><div><p>콘텐츠 관리</p><h1>준비백과와 커뮤니티</h1></div></header>
+    <section class="admin-section"><h2>준비백과</h2><div class="admin-table-wrap"><table><thead><tr><th>제목</th><th>주제</th><th>상태</th><th>작성일</th><th>관리</th></tr></thead><tbody data-admin-table></tbody></table></div><div class="admin-empty" data-admin-empty hidden>등록된 콘텐츠가 없습니다.</div></section>
+    <section class="admin-section" data-community-section hidden><h2>커뮤니티 공개 대기</h2><div class="admin-table-wrap"><table><thead><tr><th>등록일</th><th>말머리</th><th>제목</th><th>작성자</th><th>관리</th></tr></thead><tbody data-community-table></tbody></table></div><div class="admin-empty" data-community-empty hidden>공개를 기다리는 글이 없습니다.</div></section>
+  </main></div>
+  <script src="../blog-data.js"></script><script src="../scripts/components/admin-shell.js"></script><script src="../scripts/pages/admin/data.js"></script><script src="../scripts/pages/admin/common.js"></script><script src="../scripts/pages/admin/content.js"></script>
+</body></html>

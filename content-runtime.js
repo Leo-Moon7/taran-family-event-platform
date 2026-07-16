@@ -86,6 +86,10 @@
       .replace(/[^a-z0-9가-힣]+/g, "-")
       .replace(/^-+|-+$/g, "");
 
+    const plainBody = Array.isArray(article.body) ? article.body : String(article.body || "").split(/\n\s*\n|\n/).map(value => value.trim()).filter(Boolean);
+    const sections = Array.isArray(article.sections) && article.sections.length
+      ? article.sections
+      : (plainBody.length ? [{ heading: "본문", body: plainBody }] : []);
     return {
       slug: article.slug || `custom-${slug || Date.now()}`,
       category: article.category || "준비 가이드",
@@ -96,7 +100,7 @@
       image: article.image || "assets/images/editorial-checklist.webp",
       alt: article.alt || article.title,
       tags: normalizeList(article.tags),
-      sections: Array.isArray(article.sections) ? article.sections : [],
+      sections,
       checklist: normalizeList(article.checklist),
       summaryPoints: normalizeList(article.summaryPoints),
       questions: normalizeList(article.questions),
@@ -169,22 +173,12 @@
   }
 
   function hasDbConfig() {
-    return /^https?:\/\//.test(config.supabaseUrl || "") && Boolean(config.supabaseAnonKey);
+    return Boolean(window.TaranConfig?.isSupabaseConfigured && window.TaranApi);
   }
 
   async function fetchTable(tableName, params = {}) {
-    if (!hasDbConfig() || !window.fetch) return [];
-    const url = new URL(`${config.supabaseUrl.replace(/\/$/, "")}/rest/v1/${tableName}`);
-    url.searchParams.set("select", "*");
-    Object.entries(params).forEach(([key, value]) => url.searchParams.set(key, value));
-    const response = await fetch(url.toString(), {
-      headers: {
-        apikey: config.supabaseAnonKey,
-        Authorization: `Bearer ${config.supabaseAnonKey}`
-      }
-    });
-    if (!response.ok) throw new Error(`콘텐츠 DB 조회 실패: ${response.status}`);
-    return response.json();
+    if (!hasDbConfig()) return [];
+    return window.TaranApi.select(tableName, params);
   }
 
   async function readOnlineOverrides() {
@@ -326,13 +320,11 @@
     const providers = (overrides.providers || []).map(normalizeProvider).filter(Boolean);
     const articles = (overrides.articles || []).map(normalizeArticle).filter(Boolean);
 
-    if (window.publicDirectoryData) {
-      upsertByKey(window.publicDirectoryData, providers, "id");
-    }
+    if (!Array.isArray(window.publicDirectoryData)) window.publicDirectoryData = [];
+    upsertByKey(window.publicDirectoryData, providers, "id");
 
-    if (window.taran_BLOG_POSTS) {
-      upsertByKey(window.taran_BLOG_POSTS, articles, "slug");
-    }
+    if (!Array.isArray(window.taran_BLOG_POSTS)) window.taran_BLOG_POSTS = [];
+    upsertByKey(window.taran_BLOG_POSTS, articles, "slug");
 
     applySiteCopy(overrides);
     applyBanners(overrides);

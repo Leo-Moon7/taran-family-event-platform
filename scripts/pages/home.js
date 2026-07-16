@@ -21,8 +21,9 @@
   }
 
   function verifiedPartners() {
-    const source = Array.isArray(window.reviewLifecycleVerifiedData) ? window.reviewLifecycleVerifiedData : [];
-    return source
+    const source = [...(Array.isArray(window.reviewLifecycleVerifiedData) ? window.reviewLifecycleVerifiedData : []), ...(Array.isArray(window.publicDirectoryData) ? window.publicDirectoryData : [])];
+    const unique = [...new Map(source.filter(item => item?.id).map(item => [item.id, item])).values()];
+    return unique
       .filter(item => item && item.name && item.publicationStatus !== "hidden")
       .sort((a, b) => text(b.verifiedAt).localeCompare(text(a.verifiedAt)))
       .slice(0, 6);
@@ -65,9 +66,10 @@
     return link;
   }
 
-  if (container) {
+  Promise.resolve(window.taranContentReady).then(() => {
+    if (!container) return;
     const partners = verifiedPartners();
     if (partners.length) partners.forEach(item => container.append(createPartnerCard(item)));
     else container.append(window.TaranStates.message({ title: "추천 파트너를 준비하고 있습니다.", description: "업체 전체보기에서 현재 공개된 정보를 확인해 주세요." }));
-  }
+  }).catch(error => console.error("추천 파트너를 불러오지 못했습니다.", error));
 })();

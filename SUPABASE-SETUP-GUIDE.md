@@ -1,61 +1,69 @@
-# T'ARAN 관리자 온라인 저장 연결 가이드
+# 따란 온라인 저장 연결 가이드
 
-이 문서는 비개발자 운영자가 관리자 페이지를 실제 로그인/DB 저장형으로 연결하기 위한 순서입니다.
+개발 지식이 없어도 아래 순서대로 한 번만 설정하면 됩니다. `service_role` 키는 어떤 경우에도 사이트 파일·GitHub·채팅에 넣지 않습니다.
 
-## 1. Supabase에서 준비할 것
+## 1. Supabase 프로젝트 만들기
 
-1. Supabase 프로젝트를 만듭니다.
-2. Supabase 왼쪽 메뉴에서 `SQL Editor`를 엽니다.
-3. 이 폴더의 `admin-schema.sql` 내용을 복사해 실행합니다.
-4. Supabase `Authentication` 메뉴에서 관리자 이메일 계정을 만듭니다.
-5. `admin-schema.sql` 하단의 관리자 등록 예시에서 이메일을 실제 관리자 이메일로 바꿔 실행합니다.
+1. Supabase에서 새 프로젝트를 만듭니다.
+2. `SQL Editor > New query`를 엽니다.
+3. 저장소의 `admin-schema.sql` 전체를 붙여넣고 `Run`을 누릅니다.
+4. 오류 없이 완료되는지 확인합니다. 같은 SQL을 다시 실행해도 기존 표를 지우지 않도록 작성되어 있습니다.
 
-## 2. 관리자 페이지에서 붙여넣을 것
+## 2. 로그인 주소 설정
 
-Supabase 프로젝트 화면에서 아래 2개를 복사합니다.
+`Authentication > URL Configuration`에서 다음을 설정합니다.
+
+- Site URL: 실제 Netlify 주소
+- Redirect URLs: `https://내주소.netlify.app/**`
+
+`Authentication > Providers > Email`은 활성화하고, 초기 운영 중에는 이메일 확인을 켜는 것을 권장합니다.
+
+## 3. 첫 관리자 만들기
+
+1. 공개 사이트 회원가입에서 본인 관리자 이메일로 가입합니다.
+2. Supabase `SQL Editor`에서 아래 SQL의 이메일만 바꿔 실행합니다.
+
+```sql
+insert into public.taran_admin_profiles (user_id, email, role)
+select id, email, 'owner'
+from auth.users
+where email = '내관리자이메일@example.com'
+on conflict (user_id) do update set role = 'owner', email = excluded.email;
+```
+
+관리자 역할은 `owner`, `admin`, `operations`, `content`, `provider` 중 하나입니다.
+
+## 4. Netlify에 공개 설정값 넣기
+
+Supabase `Project Settings > API`에서 다음 두 값만 확인합니다.
 
 - Project URL
 - anon public key
 
-관리자 페이지 `고급 설정` 영역에 붙여넣고 `연결 정보 저장`을 누릅니다.
+Netlify `Site configuration > Environment variables`에 다음 이름으로 등록합니다.
 
-중요: `service_role key`는 절대 넣지 마세요. 브라우저에 넣으면 안 되는 관리자용 비밀키입니다.
+```text
+SUPABASE_URL=Project URL
+SUPABASE_ANON_KEY=anon public key
+```
 
-## 3. 로그인 후 사용하는 순서
+다시 배포하면 `scripts/build/write-config.mjs`가 공개용 설정 파일을 자동 생성합니다. `service_role` 키는 넣지 않습니다.
 
-1. 관리자 페이지에서 이메일과 비밀번호로 로그인합니다.
-2. 배너, 업체, 준비백과, 문구를 수정합니다.
-3. `온라인 저장`을 누릅니다.
-4. 공개 사이트를 새로고침해서 반영 상태를 확인합니다.
+## 5. 최초 동작 확인
 
-## 4. 업체 공개 기준
+1. `/login.html`에서 회원 로그인
+2. `/admin/`에서 관리자 화면 진입
+3. 테스트 업체를 `검수 중`으로 등록 후 `공개` 전환
+4. 공개 목록과 상세 화면에서 업체 확인
+5. 업체 상세에서 테스트 견적 문의 접수
+6. 관리자 `견적 관리`에서 접수 확인
+7. 테스트 후기 등록 후 `업체 관리 > 공개 대기 후기`에서 공개
+8. `정보 공유`에서 자료를 제출하고 관리자 승인 후 포인트 반영 확인
 
-업체는 아래 기준을 최대한 충족한 경우부터 공개합니다.
+## 6. 운영 보안 원칙
 
-- 주소 또는 지역이 확인됨
-- 가능한 행사 유형이 확인됨
-- 참고 후기 또는 공식 채널이 있음
-- 가격 또는 수용인원 중 최소 1개 이상 확인됨
-
-관리자 화면에서는 4개 기준 중 3개 이상 체크하면 공개 후보로 저장되고, 부족하면 검토 대기로 저장됩니다.
-
-## 5. 운영자가 매일 볼 것
-
-- 견적 공유 검토 건수
-- 포인트 지급 대기
-- 업체 정보 보강 대기
-- 진행 중인 배너
-- 최근 인기 준비백과 글
-
-## 6. 개발자용 기능은 언제 쓰나요?
-
-아래 기능은 일반 운영 중에는 거의 쓰지 않습니다.
-
-- 공개 반영 파일 다운로드
-- 관리자 백업 파일 다운로드
-- 온라인 저장 내용 불러오기
-- DB 설치 파일 다운로드
-- AI/외부 데이터 가져오기
-
-필요할 때만 `고급 설정 > 개발자용 파일/데이터 도구 열기`에서 사용하세요.
-
+- 관리자 권한은 필요한 사람에게만 부여합니다.
+- 견적서·사진은 비공개 Storage에 저장되며 공개 URL을 만들지 않습니다.
+- 고객 연락처는 견적 처리 목적 외에 사용하지 않습니다.
+- 탈퇴 요청은 관리자 DB에서 확인하고, 법정 보관 의무가 없는 Auth 사용자와 자료를 삭제합니다.
+- SQL, 정책 또는 키를 바꾼 뒤에는 로그인·저장·공개 읽기를 다시 시험합니다.

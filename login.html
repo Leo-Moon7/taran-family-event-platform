@@ -6,8 +6,16 @@
   <meta name="description" content="따란 이메일 로그인과 회원가입 화면입니다.">
   <meta name="theme-color" content="#153c36">
   <title>로그인 | 따란</title>
-  <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="upgrade.css?v=79">
+  <link rel="stylesheet" href="styles/tokens.css">
+  <link rel="stylesheet" href="styles/reset.css">
+  <link rel="stylesheet" href="styles/base.css">
+  <link rel="stylesheet" href="styles/layout.css">
+  <link rel="stylesheet" href="styles/components/header.css">
+  <link rel="stylesheet" href="styles/components/button.css">
+  <link rel="stylesheet" href="styles/components/form.css">
+  <link rel="stylesheet" href="styles/components/card.css">
+  <link rel="stylesheet" href="styles/components/badge.css">
+  <link rel="stylesheet" href="styles/pages/member.css">
   <script src="scripts/core/storage.js"></script>
 </head>
 <body>
@@ -49,11 +57,16 @@
         </form>
         <p class="security-note">비밀번호 원문은 저장하지 않고 안전한 해시 형태로 처리합니다.</p>
       </div>
+      <section class="auth-card" data-auth-unavailable hidden>
+        <h2>계정 서비스를 준비하고 있습니다.</h2>
+        <p>온라인 계정 저장소 연결이 완료되면 로그인과 회원가입을 이용할 수 있습니다.</p>
+        <a class="button button-secondary" href="index.html">홈으로 돌아가기</a>
+      </section>
     </section>
   </main>
 
-  <footer><a class="brand footer-brand" href="index.html"><span class="brand-mark">m</span><span>따란</span></a><p>준비하던 내용을 안전하게 이어보세요.</p><p class="legal">현재 로컬 MVP 로그인입니다.</p></footer>
-  <script src="auth.js?v=2"></script>
+  <footer><a class="brand footer-brand" href="index.html"><span class="brand-mark">T</span><span>따란</span></a><p>준비하던 내용을 안전하게 이어보세요.</p></footer>
+  <script src="content-config.js"></script><script src="scripts/core/config.js"></script><script src="scripts/core/api.js"></script><script src="scripts/core/auth.js"></script>
   <script src="login.js?v=3"></script>
   <script src="ui.js?v=18"></script>
 </body>

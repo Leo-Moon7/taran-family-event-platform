@@ -6,8 +6,16 @@
   <meta name="robots" content="noindex">
   <meta name="theme-color" content="#153c36">
   <title>업체 관리 대시보드 | 따란</title>
-  <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="upgrade.css?v=79">
+  <link rel="stylesheet" href="styles/tokens.css">
+  <link rel="stylesheet" href="styles/reset.css">
+  <link rel="stylesheet" href="styles/base.css">
+  <link rel="stylesheet" href="styles/layout.css">
+  <link rel="stylesheet" href="styles/components/header.css">
+  <link rel="stylesheet" href="styles/components/button.css">
+  <link rel="stylesheet" href="styles/components/form.css">
+  <link rel="stylesheet" href="styles/components/card.css">
+  <link rel="stylesheet" href="styles/components/badge.css">
+  <link rel="stylesheet" href="styles/pages/admin.css">
   <script src="scripts/core/storage.js"></script>
 </head>
 <body>
@@ -20,7 +28,7 @@
 
     <section class="vendor-layout" id="vendor-layout" hidden>
       <form class="vendor-editor" id="vendor-editor">
-        <div class="vendor-editor-heading"><div><span>승인된 업체</span><h2 id="vendor-venue-name">업체명</h2></div><a id="vendor-public-link" href="venue.html">공개 페이지 보기 →</a></div>
+        <div class="vendor-editor-heading"><div><span>승인된 업체</span><h2 id="vendor-venue-name">업체명</h2></div><a id="vendor-public-link" href="provider.html">공개 페이지 보기 →</a></div>
         <div class="vendor-form-grid">
           <label>성인 식대<input id="vendor-price" type="number" min="0" step="1000"><span>원</span></label>
           <label>소인 식대<input id="vendor-child-price" type="number" min="0" step="1000"><span>원</span></label>

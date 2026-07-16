@@ -6,8 +6,16 @@
   <meta name="description" content="돌잔치 준비 질문, 견적 공유, 후기, 업체 정보 오류 제보를 이용자들이 함께 나누는 따란 커뮤니티입니다.">
   <meta name="theme-color" content="#153c36">
   <title>커뮤니티 | 따란</title>
-  <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="upgrade.css?v=79">
+  <link rel="stylesheet" href="styles/tokens.css">
+  <link rel="stylesheet" href="styles/reset.css">
+  <link rel="stylesheet" href="styles/base.css">
+  <link rel="stylesheet" href="styles/layout.css">
+  <link rel="stylesheet" href="styles/components/header.css">
+  <link rel="stylesheet" href="styles/components/button.css">
+  <link rel="stylesheet" href="styles/components/form.css">
+  <link rel="stylesheet" href="styles/components/card.css">
+  <link rel="stylesheet" href="styles/components/badge.css">
+  <link rel="stylesheet" href="styles/pages/member.css">
   <script src="scripts/core/storage.js"></script>
 </head>
 <body>
@@ -132,17 +140,18 @@
         </article>
       </section>
 
-      <section class="community-write-preview compact-write" id="write-preview">
+      <section class="community-write-preview compact-write" id="write-preview" data-community-write>
         <div>
-          <p class="eyebrow">글쓰기 미리보기</p>
-          <h2>말머리와 조건을 먼저 고르게 합니다.</h2>
-          <p>로그인 후에는 질문, 견적 공유, 후기, 오류 제보를 남기고 댓글로 경험을 나눌 수 있습니다.</p>
+          <p class="eyebrow">글쓰기</p>
+          <h2>궁금한 점과 경험을 나눠보세요.</h2>
+          <p>개인정보와 업체 담당자의 개인 연락처는 적지 마세요. 새 글은 운영자 확인 후 공개됩니다.</p>
         </div>
-        <form class="community-mock-form">
-          <label>말머리<select disabled><option>준비 질문</option></select></label>
-          <label>제목<input disabled value="예: 보증 인원 30명 계약 괜찮을까요?"></label>
-          <label>본문<textarea disabled>지역, 인원, 날짜, 예산, 이미 확인한 조건을 함께 적습니다.</textarea></label>
-          <button class="button button-primary" type="button" disabled>로그인 후 글쓰기 연결 예정</button>
+        <form class="community-mock-form" id="community-write-form">
+          <label>말머리<select name="category" required><option>준비 질문</option><option>견적 공유</option><option>행사 후기</option><option>업체 정보</option></select></label>
+          <label>제목<input name="title" maxlength="120" placeholder="예: 보증 인원 30명 계약 괜찮을까요?" required></label>
+          <label>본문<textarea name="content" maxlength="5000" placeholder="지역, 인원, 날짜, 예산, 이미 확인한 조건을 함께 적어주세요." required></textarea></label>
+          <p class="field-error" data-community-write-message aria-live="polite"></p>
+          <button class="button button-primary" type="submit">글 등록하기</button>
         </form>
       </section>
     </section>
@@ -155,7 +164,7 @@
     <p class="legal">커뮤니티는 개인정보 보호와 사실 기반 정보 공유를 우선합니다.</p>
   </footer>
 
-  <script src="auth.js?v=2"></script>
+  <script src="content-config.js"></script><script src="scripts/core/config.js"></script><script src="scripts/core/api.js"></script><script src="scripts/core/auth.js"></script><script src="scripts/core/analytics.js"></script>
   <script src="community-post-data.js?v=18"></script>
   <script src="community-extra-data.js?v=18"></script>
   <script src="community-list.js?v=1"></script>

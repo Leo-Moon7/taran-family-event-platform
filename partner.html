@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="승인된 따란 파트너가 업체 정보를 직접 관리하는 화면입니다.">
+  <meta name="robots" content="noindex,nofollow">
+  <title>내 업체 관리 | 따란 T'ARAN</title>
+  <link rel="stylesheet" href="styles/tokens.css">
+  <link rel="stylesheet" href="styles/reset.css">
+  <link rel="stylesheet" href="styles/base.css">
+  <link rel="stylesheet" href="styles/layout.css">
+  <link rel="stylesheet" href="styles/components/header.css">
+  <link rel="stylesheet" href="styles/components/button.css">
+  <link rel="stylesheet" href="styles/components/form.css">
+  <link rel="stylesheet" href="styles/components/card.css">
+  <link rel="stylesheet" href="styles/components/badge.css">
+  <link rel="stylesheet" href="styles/pages/provider.css">
+  <script src="scripts/core/brand.js"></script>
+  <script src="scripts/core/storage.js"></script>
+</head>
+<body>
+  <header class="site-header" data-site-header>
+    <div class="site-header__inner">
+      <a class="brand" href="index.html" aria-label="따란 홈"><span class="brand__mark" aria-hidden="true">T</span><span class="brand__name"><span>따란</span><small>T'ARAN</small></span></a>
+      <button class="site-header__toggle" type="button" aria-controls="site-navigation" aria-expanded="false" data-menu-toggle><span class="visually-hidden">메뉴 열기</span>☰</button>
+      <nav class="site-nav" id="site-navigation" aria-label="주요 메뉴"><a href="venues.html">업체·장소</a><a href="account.html">내 계정</a><a class="site-nav__auth" href="account.html" data-auth-link>로그인</a></nav>
+    </div>
+  </header>
+
+  <main class="partner-manage page-section">
+    <div class="container partner-manage__container">
+      <header class="section-header partner-manage__heading"><div class="section-header__copy"><span class="badge badge--success">승인된 업체 담당자 전용</span><h1>내 업체 정보 관리</h1><p>고객에게 공개할 기본 정보와 이용 조건을 최신 내용으로 수정하세요.</p></div></header>
+
+      <div class="notice" id="partner-notice" role="status" aria-live="polite">업체 정보를 불러오는 중입니다.</div>
+      <form class="partner-manage__form" id="partner-form" hidden novalidate>
+        <div class="partner-manage__section">
+          <h2>기본 정보</h2>
+          <div class="form-grid form-grid--2">
+            <label class="field"><span class="field__label">업체명</span><input class="input" id="partner-name" maxlength="80" required></label>
+            <label class="field"><span class="field__label">업체 유형</span><input class="input" id="partner-category" maxlength="50" placeholder="예: 식당, 공간 대여"></label>
+            <label class="field"><span class="field__label">시·도</span><input class="input" id="partner-region" maxlength="30" required></label>
+            <label class="field"><span class="field__label">시·군·구</span><input class="input" id="partner-area" maxlength="30" required></label>
+            <label class="field field--full"><span class="field__label">주소</span><input class="input" id="partner-address" maxlength="160"></label>
+          </div>
+        </div>
+
+        <fieldset class="partner-manage__section">
+          <legend>진행 가능한 행사</legend>
+          <div class="partner-manage__checks">
+            <label><input type="checkbox" name="event" value="wedding"> 결혼 준비</label>
+            <label><input type="checkbox" name="event" value="kids"> 아이 행사</label>
+            <label><input type="checkbox" name="event" value="parents"> 부모님 행사</label>
+            <label><input type="checkbox" name="event" value="home"> 가족 모임</label>
+          </div>
+        </fieldset>
+
+        <div class="partner-manage__section">
+          <h2>이용 조건</h2>
+          <div class="form-grid form-grid--2">
+            <label class="field"><span class="field__label">적정 인원</span><input class="input" id="partner-ideal" maxlength="40" placeholder="예: 20~40명"></label>
+            <label class="field"><span class="field__label">최대 수용 인원</span><input class="input" id="partner-maximum" maxlength="40" placeholder="예: 60명"></label>
+            <label class="field"><span class="field__label">최소 보증 인원</span><input class="input" id="partner-guarantee" maxlength="40" placeholder="예: 20명"></label>
+            <label class="field"><span class="field__label">기본 가격·식대</span><input class="input" id="partner-price" maxlength="80" placeholder="예: 성인 1인 65,000원"></label>
+            <label class="field"><span class="field__label">주차</span><input class="input" id="partner-parking" maxlength="80" placeholder="예: 30대, 2시간 무료"></label>
+            <label class="field"><span class="field__label">문의 가능 시간</span><input class="input" id="partner-hours" maxlength="80" placeholder="예: 평일 10:00~18:00"></label>
+            <label class="field"><span class="field__label">외부 음식</span><input class="input" id="partner-food" maxlength="80" placeholder="예: 협의 후 가능"></label>
+            <label class="field"><span class="field__label">외부 업체 이용</span><input class="input" id="partner-external" maxlength="80" placeholder="예: 돌상·스냅 반입 가능"></label>
+            <label class="field field--full"><span class="field__label">취소·환불 조건</span><textarea class="textarea" id="partner-policy" maxlength="500" rows="4"></textarea></label>
+          </div>
+        </div>
+
+        <p class="field__message field__message--error" id="partner-error" aria-live="polite"></p>
+        <div class="partner-manage__actions"><a class="button button--secondary" id="partner-preview" href="provider.html">공개 화면 보기</a><button class="button button--primary" id="partner-save" type="submit">변경 내용 저장</button></div>
+      </form>
+    </div>
+  </main>
+
+  <footer class="site-footer"><div class="container site-footer__inner"><div><strong>따란 T'ARAN</strong><p>가족행사 장소와 업체를 조건별로 비교합니다.</p></div><nav aria-label="정책 메뉴"><a href="privacy.html">개인정보처리방침</a><a href="terms.html">이용약관</a></nav></div></footer>
+  <script src="content-config.js"></script><script src="scripts/core/config.js"></script><script src="scripts/core/api.js"></script><script src="scripts/core/auth.js"></script><script src="scripts/components/header.js"></script><script src="scripts/pages/partner.js"></script>
+</body>
+</html>

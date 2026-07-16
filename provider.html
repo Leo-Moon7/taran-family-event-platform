@@ -18,6 +18,11 @@
   <link rel="stylesheet" href="styles/pages/provider.css">
   <script src="scripts/core/brand.js"></script>
   <script src="scripts/core/storage.js"></script>
+  <script src="content-config.js"></script>
+  <script src="scripts/core/config.js"></script>
+  <script src="scripts/core/api.js"></script>
+  <script src="scripts/core/auth.js"></script>
+  <script src="scripts/core/analytics.js"></script>
 </head>
 <body class="taran-provider-page">
   <header class="site-header" data-site-header>
@@ -49,10 +54,12 @@
         <p class="provider-address" id="provider-address"></p>
         <div class="provider-tags" id="provider-tags" aria-label="가능 행사"></div>
         <div class="provider-hero__actions" id="provider-actions">
+          <button class="button button--primary" type="button" data-inquiry-provider hidden>견적 문의하기</button>
           <button class="button button--primary" type="button" data-save-provider>관심 업체 저장</button>
           <button class="button button--secondary" type="button" data-compare-provider>비교함에 담기</button>
           <a class="button button--secondary" id="provider-official-link" href="#" target="_blank" rel="noopener noreferrer nofollow" hidden>대표 채널</a>
           <a class="button button--secondary" id="provider-phone-link" href="#" hidden>전화 문의</a>
+          <a class="button button--text" id="provider-claim-link" href="claim.html">업체 담당자 권한 요청</a>
         </div>
         <p class="provider-action-status" data-provider-action-status role="status"></p>
       </div>
@@ -121,7 +128,24 @@
   <footer class="site-footer"><div class="container site-footer__inner"><a class="brand" href="index.html" aria-label="따란 홈"><span class="brand__mark" aria-hidden="true">T</span><span class="brand__name">따란</span></a><nav aria-label="하단 메뉴"><a href="about.html">서비스 소개</a><a href="terms.html">이용약관</a><a href="privacy.html">개인정보처리방침</a><a href="contact.html">문의</a></nav><p>가족행사 준비에 필요한 정보를 확인된 기준으로 정리합니다.</p></div></footer>
 
   <div class="toast-region" aria-live="polite" aria-atomic="true" data-toast-region></div>
+  <dialog class="provider-inquiry-dialog" id="provider-inquiry-dialog" aria-labelledby="provider-inquiry-title">
+    <form class="provider-inquiry-dialog__form" id="provider-inquiry-form">
+      <header><div><p class="eyebrow">견적 문의</p><h2 id="provider-inquiry-title">내 조건을 업체에 전달하세요</h2></div><button class="button button--text" type="button" data-inquiry-close aria-label="견적 문의 닫기">닫기</button></header>
+      <div class="provider-inquiry-dialog__fields">
+        <div class="field"><label for="inquiry-event">행사 종류</label><select id="inquiry-event" name="eventType" required><option value="">선택</option><option value="wedding">결혼 준비</option><option value="kids">아이 행사</option><option value="parents">부모님 행사</option><option value="home">가족 모임</option></select></div>
+        <div class="field"><label for="inquiry-guests">예상 인원</label><input id="inquiry-guests" name="guests" type="number" min="1" max="5000" required></div>
+        <div class="field"><label for="inquiry-region">희망 지역</label><input id="inquiry-region" name="region" maxlength="80" required></div>
+        <div class="field"><label for="inquiry-budget">예산</label><input id="inquiry-budget" name="budget" maxlength="80" placeholder="예: 200만 원 내외"></div>
+        <div class="field"><label for="inquiry-name">이름</label><input id="inquiry-name" name="name" maxlength="30" required></div>
+        <div class="field"><label for="inquiry-phone">연락처</label><input id="inquiry-phone" name="phone" inputmode="tel" maxlength="30" required></div>
+        <div class="field field--full"><label for="inquiry-note">요청 사항</label><textarea id="inquiry-note" name="note" rows="4" maxlength="1000"></textarea></div>
+        <label class="provider-inquiry-consent field--full"><input type="checkbox" name="consent" required> 견적 상담을 위해 이름·연락처와 행사 조건을 해당 업체 및 따란 운영자에게 전달하는 데 동의합니다.</label>
+      </div>
+      <footer><p role="status" data-inquiry-status></p><button class="button button--primary" type="submit">견적 문의 접수</button></footer>
+    </form>
+  </dialog>
   <script src="review-provider-candidates.js?v=1"></script><script src="review-lifecycle-candidates.js?v=1"></script><script src="review-lifecycle-verified.js?v=6"></script><script src="review-local-api-partners.js?v=3"></script><script src="data.js?v=19"></script>
+  <script src="content-overrides.js"></script><script src="content-runtime.js"></script>
   <script src="scripts/components/header.js"></script><script src="scripts/components/toast.js"></script><script src="scripts/pages/provider.js"></script>
 </body>
 </html>

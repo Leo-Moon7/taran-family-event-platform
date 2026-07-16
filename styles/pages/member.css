@@ -1,0 +1,100 @@
+/* 회원·도구·콘텐츠·정책 페이지 공통 레이아웃 */
+body > footer { margin-top: var(--space-12); padding: var(--space-8) var(--container-gutter); border-top: 1px solid var(--color-border); background: var(--color-surface); }
+body > footer > * { width: min(100%, var(--content-max)); margin-inline: auto; }
+body > footer .footer-links { display: flex; flex-wrap: wrap; gap: var(--space-4); margin-top: var(--space-3); font-size: var(--font-size-14); }
+.eyebrow, .mini-label, .step-label { color: var(--color-accent-700); font-size: var(--font-size-14); font-weight: var(--font-weight-bold); letter-spacing: .04em; }
+.text-link, .text-button { display: inline-flex; min-height: 44px; align-items: center; color: var(--color-brand-800); font-weight: var(--font-weight-semibold); }
+.button-primary { color: #fff; background: var(--color-brand-800); }
+.button-quiet, .button-secondary { color: var(--color-brand-900); border-color: var(--color-border-strong); background: var(--color-surface); }
+.field-label, .claim-form label, .contribution-form-card label { display: grid; gap: var(--space-2); color: var(--color-text); font-size: var(--font-size-14); font-weight: var(--font-weight-semibold); }
+.field-label input, .claim-form input:not([type="checkbox"]), .claim-form select, .contribution-form-card input:not([type="checkbox"]), .contribution-form-card select, .contribution-form-card textarea {
+  width: 100%; min-height: var(--control-height); padding: .75rem .875rem; border: 1px solid var(--color-border-strong); border-radius: var(--radius-md); background: var(--color-surface);
+}
+.field-label input:focus, .claim-form input:focus, .claim-form select:focus, .contribution-form-card input:focus, .contribution-form-card select:focus, .contribution-form-card textarea:focus { border-color: var(--color-accent-700); outline: 0; box-shadow: 0 0 0 3px rgb(199 161 122 / 25%); }
+.field-error, .form-error { min-height: 1.5em; color: var(--color-error); font-size: var(--font-size-14); }
+
+.policy-page, .account-page, .auth-page, .tool-page, .guide-page, .partner-page, .claim-page, .contribution-main, .community-page, .article-hub-page, .blog-article-page {
+  width: min(100% - 2rem, var(--content-max)); margin-inline: auto; padding-block: var(--space-10);
+}
+.policy-hero, .account-heading, .tool-page-hero, .guide-hero, .partner-hero, .claim-heading, .contribution-hero, .article-hub-hero, .blog-article-header { max-width: 54rem; margin-bottom: var(--space-8); }
+.policy-hero h1, .account-heading h1, .tool-page-hero h1, .guide-hero h1, .partner-hero h1, .claim-heading h1, .contribution-hero h1, .article-hub-hero h1, .blog-article-header h1 { margin-block: var(--space-3); font-family: var(--font-family-display); font-size: clamp(2.2rem, 6vw, 4.5rem); line-height: 1.18; }
+
+.policy-grid, .account-layout, .partner-feature-grid, .partner-pricing, .guide-list, .blog-post-grid, .related-grid, .verification-grid, .gift-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-5); }
+.policy-card, .policy-article, .account-card, .auth-card, .guide-list article, .partner-feature-grid article, .partner-pricing article, .gift-shop-card, .reward-policy-card, .point-wallet-card {
+  min-width: 0; padding: var(--space-5); border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface);
+}
+.policy-article { max-width: 54rem; }
+.policy-article h2, .blog-article h2 { margin-block: var(--space-8) var(--space-3); }
+.policy-article p, .policy-article li, .blog-article p, .blog-article li { color: #171411; line-height: 1.85; }
+.account-card-heading, .section-heading, .blog-section-heading, .form-section-heading { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-4); }
+.account-info > div { display: grid; grid-template-columns: 8rem minmax(0, 1fr); gap: var(--space-3); padding-block: var(--space-3); border-bottom: 1px solid var(--color-border); }
+.account-info dd { margin: 0; font-weight: var(--font-weight-semibold); }
+.account-tool-links, .saved-list { display: grid; gap: var(--space-2); margin-block: var(--space-4); }
+.account-tool-links a, .saved-list a { display: flex; min-height: 56px; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-md); }
+.account-actions { display: flex; gap: var(--space-2); margin-top: var(--space-5); }
+.danger-button { min-height: 44px; padding-inline: var(--space-4); color: var(--color-error); border: 1px solid #e4bcbc; border-radius: var(--radius-md); background: #fff; }
+
+.auth-shell { display: grid; grid-template-columns: minmax(0, .8fr) minmax(22rem, 1.2fr); gap: var(--space-8); align-items: start; max-width: 62rem; margin-inline: auto; }
+.auth-tabs { display: flex; gap: var(--space-2); margin-bottom: var(--space-5); }
+.auth-tabs button { min-height: 44px; padding-inline: var(--space-4); border-bottom: 2px solid transparent; }
+.auth-tabs button.is-active { border-color: var(--color-brand-800); font-weight: var(--font-weight-bold); }
+.real-auth-form { display: grid; gap: var(--space-4); }
+.simple-consent { display: flex; gap: var(--space-2); align-items: flex-start; font-size: var(--font-size-14); }
+
+.calculator-workspace, .checklist-page-grid, .claim-layout, .contribution-layout, .blog-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(18rem, .38fr); gap: var(--space-7); align-items: start; }
+.cost-form, .calculator-flow, .calculator-result-card, .event-date-card, .progress-wrap, .claim-form, .claim-side, .contribution-form-card, .reward-side {
+  min-width: 0; padding: var(--space-5); border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface);
+}
+.calculator-flow-options, .contribution-type-grid, .partner-event-tags, .partner-tag-checks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); }
+.calculator-flow-option, .contribution-type-grid label, .partner-event-tags label, .partner-tag-checks label { min-height: 60px; padding: var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); }
+.calculator-flow-option.is-selected, .contribution-type-grid label:has(input:checked), .partner-event-tags label:has(input:checked) { border-color: var(--color-brand-800); background: var(--color-bg-subtle); }
+.cost-breakdown, .checklist-grid, .journey-grid, .affiliate-mini-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
+.cost-breakdown > *, .checklist-grid > *, .journey-grid > *, .affiliate-mini-grid > * { min-width: 0; }
+.prototype-banner { padding: var(--space-3) var(--container-gutter); color: var(--color-text-muted); border-bottom: 1px solid var(--color-border); background: var(--color-bg-subtle); text-align: center; font-size: var(--font-size-14); }
+.task-row { display: flex; min-height: 48px; align-items: center; gap: var(--space-3); padding-block: var(--space-2); border-bottom: 1px solid var(--color-border); }
+.task-row label { flex: 1; font-size: var(--font-size-16); }
+.progress-track { height: .6rem; overflow: hidden; border-radius: 999px; background: var(--color-bg-subtle); }
+.affiliate-placeholder, .soft-monetization { margin-block: var(--space-6); padding: var(--space-5); border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-bg-subtle); }
+
+.claim-flow { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-4); }
+.claim-flow span { padding: .5rem .75rem; border-radius: var(--radius-sm); background: var(--color-bg-subtle); font-size: var(--font-size-14); }
+.claim-form { display: grid; gap: var(--space-6); }
+.claim-form-section { display: grid; gap: var(--space-4); padding-bottom: var(--space-5); border-bottom: 1px solid var(--color-border); }
+.claim-form-section > div:first-child { display: flex; align-items: center; gap: var(--space-3); }
+.claim-consent { display: flex !important; align-items: flex-start; grid-template-columns: auto 1fr; }
+.selected-listing, .claim-account-note, .claim-security { display: grid; gap: var(--space-2); padding: var(--space-4); border-radius: var(--radius-md); background: var(--color-bg-subtle); }
+
+.community-board-shell { border-top: 2px solid var(--color-brand-800); }
+.community-board-head { display: flex; align-items: end; justify-content: space-between; gap: var(--space-5); margin-bottom: var(--space-5); }
+.community-notice-list, .community-thread-list, .community-related-list { border-top: 1px solid var(--color-border); }
+.thread-row, .community-notice-list a, .community-related-list a { display: grid; gap: var(--space-2); min-height: 64px; padding: var(--space-3); border-bottom: 1px solid var(--color-border); }
+.community-filter-bar, .community-search { display: flex; flex-wrap: wrap; gap: var(--space-3); padding-block: var(--space-4); }
+.community-filter-bar select, .community-search input { min-height: 44px; padding-inline: var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-md); }
+.community-mock-form { display: grid; gap: var(--space-3); max-width: 48rem; margin-block: var(--space-5); padding: var(--space-5); border: 1px solid var(--color-border); border-radius: var(--radius-lg); }
+.community-mock-form input, .community-mock-form select, .community-mock-form textarea { width: 100%; min-height: 44px; padding: .75rem; border: 1px solid var(--color-border); border-radius: var(--radius-md); }
+
+.article-hub-hero { max-width: none; padding: var(--space-8); border-radius: var(--radius-lg); background: var(--color-brand-900); }
+.article-hub-hero h1, .article-hub-hero p { color: #fff; }
+.article-jump-list, .blog-category-links { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.article-jump-list a, .blog-category-links a { min-height: 44px; padding: .65rem .85rem; border: 1px solid var(--color-border); border-radius: var(--radius-md); }
+.blog-main-column { min-width: 0; }
+.blog-side-column { display: grid; gap: var(--space-4); }
+.blog-side-card, .blog-feature-card { padding: var(--space-5); border: 1px solid var(--color-border); border-radius: var(--radius-lg); }
+.blog-article { max-width: 48rem; margin-inline: auto; }
+.blog-article > p, .blog-article > ul, .blog-article-content p, .blog-article-content li { color: #171411; font-size: var(--font-size-18); line-height: 1.9; }
+
+.contribution-field-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
+.wide-field { grid-column: 1 / -1; }
+.point-preview { margin-block: var(--space-4); padding: var(--space-4); border-radius: var(--radius-md); color: #fff; background: var(--color-brand-900); }
+
+@media (max-width: 64rem) {
+  .policy-grid, .account-layout, .partner-feature-grid, .partner-pricing, .guide-list, .blog-post-grid, .related-grid, .verification-grid, .gift-grid { grid-template-columns: 1fr; }
+  .calculator-workspace, .checklist-page-grid, .claim-layout, .contribution-layout, .blog-layout, .auth-shell { grid-template-columns: 1fr; }
+}
+@media (max-width: 40rem) {
+  .policy-page, .account-page, .auth-page, .tool-page, .guide-page, .partner-page, .claim-page, .contribution-main, .community-page, .article-hub-page, .blog-article-page { width: min(100% - 1.5rem, var(--content-max)); padding-block: var(--space-7); }
+  .calculator-flow-options, .contribution-type-grid, .partner-event-tags, .partner-tag-checks, .cost-breakdown, .checklist-grid, .journey-grid, .affiliate-mini-grid, .contribution-field-grid { grid-template-columns: 1fr; }
+  .wide-field { grid-column: auto; }
+  .community-board-head, .account-card-heading { align-items: flex-start; flex-direction: column; }
+  .account-actions { align-items: stretch; flex-direction: column; }
+}

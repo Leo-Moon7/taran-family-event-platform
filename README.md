@@ -1,28 +1,38 @@
 # 따란(T'ARAN) 가족행사 플랫폼
 
-가족행사 장소와 서비스 업체를 비교하고 예상 비용과 준비 일정을 정리하는 정적 프론트엔드입니다. 현재 공개 데이터는 저장소의 JavaScript 데이터 파일을 읽으며, 온라인 관리자 저장은 Supabase 연결 전까지 비활성 상태입니다.
+가족행사 장소·업체 검색, 상세 조건, 비용 계산, 체크리스트, 후기, 견적 문의, 커뮤니티, 정보 공유 포인트, 업체 담당자 직접 수정과 운영 관리자 기능을 제공하는 정적 프론트엔드 + Supabase 프로젝트입니다.
 
-## 현재 공개 기능
-
-- 홈페이지 3개 조건 검색: 행사 종류, 지역, 예상 인원
-- 장소·업체 목록 검색, 필터, 정렬, 페이지네이션
-- 업체 상세 조건, 내부 후기, 외부 후기 원문 연결
-- 비용 계산기와 행사일 기준 체크리스트
-- 준비백과와 정책 페이지
-- 역할별 관리자 화면 구조
-
-## 실행
-
-정적 파일 서버의 루트를 이 폴더로 지정합니다. `file://`로 직접 열기보다 로컬 HTTP 서버 또는 Netlify/Vercel 같은 정적 호스팅을 권장합니다.
-
-주요 진입점:
+## 주요 화면
 
 - 공개 홈: `index.html`
-- 업체 목록: `venues.html`
-- 관리자: `admin/index.html`
+- 업체 검색: `venues.html`
+- 업체 상세: `provider.html?id=업체ID`
+- 비용 계산: `calculator.html`
+- 체크리스트: `checklist.html`
+- 준비백과: `articles.html`
+- 정보 공유·포인트: `contribute.html`
+- 커뮤니티: `community.html`, `community-post.html?id=게시글ID`
+- 업체 담당자 권한 요청: `claim.html?id=업체ID`
+- 승인된 업체 담당자 편집: `partner.html?id=업체ID`
+- 로그인·내 정보: `login.html`, `account.html`
+- 관리자: `admin/`
 
-## 운영 전 필수 연결
+## 로컬 실행
 
-관리자 로그인, 온라인 DB 저장, 파일 업로드, 견적 문의 접수는 아직 실제 백엔드가 연결되지 않았습니다. 연결 전에는 공개 호스팅에서 관리자 경로를 접근 제한하거나 배포 대상에서 제외해야 합니다. Supabase를 선택할 경우 Auth, PostgreSQL, Storage, RLS를 한 체계로 연결하고 서비스 역할 키는 브라우저 코드에 넣지 않습니다.
+`file://` 직접 열기보다 이 폴더를 로컬 HTTP 서버 루트로 사용합니다. Supabase 값이 비어 있으면 로그인·온라인 저장·견적 문의 버튼은 숨겨지고 공개 데이터 탐색만 동작합니다.
 
-자세한 내용은 `DEPENDENCY_MAP.md`, `BACKEND_AUDIT.md`, `BRAND_AUDIT.md`, `REFACTOR_REPORT.md`를 확인하세요.
+## 운영 배포
+
+1. `admin-schema.sql`을 Supabase SQL Editor에서 전체 실행
+2. Netlify 환경변수 `SUPABASE_URL`, `SUPABASE_ANON_KEY` 등록
+3. GitHub 저장소를 Netlify에 연결해 배포
+4. `SUPABASE-SETUP-GUIDE.md`의 최초 동작 확인 실행
+
+Netlify는 `netlify.toml`의 빌드 명령으로 공개 설정을 생성하고 보안 헤더·관리자 noindex를 적용합니다. 비밀인 `service_role` 키는 프론트엔드와 GitHub에 저장하지 않습니다.
+
+## 운영 문서
+
+- `SUPABASE-SETUP-GUIDE.md`: 최초 온라인 연결
+- `ADMIN-OPERATING-GUIDE.md`: 비개발자 운영 절차
+- `REFACTOR_REPORT.md`: 구조 변경·검증 결과
+- `OPEN-READINESS-CHECKLIST.md`: 오픈 전 최종 확인

@@ -6,8 +6,16 @@
   <meta name="description" content="가족행사 파트너의 진행 가능 행사, 포트폴리오, 견적과 리뷰 출처를 확인하는 따란 상세페이지입니다.">
   <meta name="theme-color" content="#4A3B32">
   <title>가족행사 파트너 상세 | 따란</title>
-  <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="upgrade.css?v=79">
+  <link rel="stylesheet" href="styles/tokens.css">
+  <link rel="stylesheet" href="styles/reset.css">
+  <link rel="stylesheet" href="styles/base.css">
+  <link rel="stylesheet" href="styles/layout.css">
+  <link rel="stylesheet" href="styles/components/header.css">
+  <link rel="stylesheet" href="styles/components/button.css">
+  <link rel="stylesheet" href="styles/components/form.css">
+  <link rel="stylesheet" href="styles/components/card.css">
+  <link rel="stylesheet" href="styles/components/badge.css">
+  <link rel="stylesheet" href="styles/pages/provider.css">
   <script src="scripts/core/storage.js"></script>
 </head>
 <body class="premium-detail-page taran-detail-page">
@@ -114,7 +122,7 @@
         <p id="side-address">주소</p>
         <div class="side-divider"></div>
         <span>상담 연결은 업체 정보 확인 후 순차적으로 제공합니다.</span>
-        <button class="button button-primary" id="inquiry-button" type="button">견적 문의 준비 중</button>
+        <button class="button button-primary" id="inquiry-button" type="button" hidden>견적 문의</button>
         <div class="claim-owner-box">
           <span>이 업체의 담당자이신가요?</span>
           <strong>직접 정보를 관리할 수 있습니다.</strong>
@@ -159,7 +167,7 @@
 
   <div class="detail-sticky-action" aria-label="업체 상세 고정 메뉴">
     <button type="button" id="sticky-save">♡ <span>저장하기</span></button>
-    <button type="button" id="sticky-inquiry">내 조건으로 1:1 견적 요청하기 <b>→</b></button>
+    <button type="button" id="sticky-inquiry" hidden>견적 문의 <b>→</b></button>
     <small>업체 정보 확인 후 연결합니다.</small>
   </div>
 
@@ -172,7 +180,7 @@
   <script src="data.js?v=18"></script>
   <script src="review-venue-candidates.js?v=2"></script>
   <script src="regions.js?v=1"></script>
-  <script src="auth.js?v=2"></script>
+  <script src="content-config.js"></script><script src="scripts/core/config.js"></script><script src="scripts/core/api.js"></script><script src="scripts/core/auth.js"></script>
   <script src="venue.js?v=15"></script>
   <script src="ui.js?v=18"></script>
 </body>

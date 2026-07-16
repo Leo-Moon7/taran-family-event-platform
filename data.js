@@ -441,7 +441,7 @@ window.publicDirectoryData = [
     verifiedAt: venue.verifiedAt,
     sourceStatus: venue.sourceStatus,
     publicationStatus: venue.publicationStatus,
-    detailUrl: `venue.html?id=${encodeURIComponent(venue.id)}`,
+    detailUrl: `provider.html?id=${encodeURIComponent(venue.id)}`,
     detailFacts: {
       "보증 인원": `${venue.minGuests}명 이상`,
       "최대 수용": `${venue.capacity}명`,

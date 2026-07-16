@@ -33,7 +33,7 @@ const reviewVenueDirectoryItems = reviewCandidates
       verifiedAt: displayReviewDate(item.latestMentionDate),
       sourceStatus: "후기 기반 등록",
       publicationStatus: "published",
-      detailUrl: `venue.html?id=${encodeURIComponent(item.id)}&event=kids`,
+      detailUrl: `provider.html?id=${encodeURIComponent(item.id)}&event=kids`,
       eventTags: ["kids"],
       serviceTags: ["venue"]
     };
@@ -332,7 +332,7 @@ function renderReviewCandidates(reset = false) {
     const spec = candidateSpecProfile(item);
     const eventLabel = candidateEvents(item).includes("kids") ? "우리아이 행사" : "가족행사";
     const activeEvent = document.querySelector("#review-candidate-event").value;
-    return `<a class="review-candidate-card review-venue-card vendor-first-card" href="venue.html?id=${encodeURIComponent(item.id)}&event=${encodeURIComponent(activeEvent)}" aria-label="${escapeHtml(item.name)} 업체 상세보기">
+    return `<a class="review-candidate-card review-venue-card vendor-first-card" href="provider.html?id=${encodeURIComponent(item.id)}&event=${encodeURIComponent(activeEvent)}" aria-label="${escapeHtml(item.name)} 업체 상세보기">
       <div class="review-card-media"><img src="${candidateImage(item)}" alt="" loading="lazy"><span class="review-card-heart" aria-hidden="true">♡</span></div>
       <div class="review-card-content">
       <div class="review-candidate-badges"><span>가족행사 장소</span><small>${escapeHtml(eventLabel)}</small></div>

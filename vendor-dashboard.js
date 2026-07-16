@@ -35,7 +35,7 @@ if (!vendorVenue) {
   statusBox.querySelector("strong").textContent = "수정 권한 승인";
   document.querySelector("#vendor-subtitle").textContent = "승인받은 업체의 예약 조건과 가격을 직접 관리합니다.";
   document.querySelector("#vendor-venue-name").textContent = vendorVenue.name;
-  document.querySelector("#vendor-public-link").href = `venue.html?id=${encodeURIComponent(vendorVenue.id)}`;
+  document.querySelector("#vendor-public-link").href = `provider.html?id=${encodeURIComponent(vendorVenue.id)}`;
   const fields = {
     "vendor-price": vendorVenue.price,
     "vendor-child-price": vendorVenue.childPrice,

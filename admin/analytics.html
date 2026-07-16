@@ -1,3 +1,18 @@
 <!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>통계 | 따란 운영센터</title><link rel="stylesheet" href="../styles/tokens.css"><link rel="stylesheet" href="../styles/reset.css"><link rel="stylesheet" href="../styles/base.css"><link rel="stylesheet" href="../styles/pages/admin.css"><script src="../scripts/core/brand.js"></script></head>
-<body class="admin-app" data-admin-view="analytics"><header class="admin-topbar" data-admin-header></header><div class="admin-layout"><nav class="admin-sidebar" data-admin-sidebar></nav><main class="admin-main"><header class="admin-page-head"><div><p>통계</p><h1>사이트 이용 현황</h1></div></header><div class="admin-empty"><strong>집계할 운영 데이터가 없습니다.</strong><p>온라인 분석 데이터가 연결되면 기준 기간과 마지막 집계 시간을 함께 표시합니다.</p></div></main></div><script src="../scripts/components/admin-shell.js"></script></body></html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>통계 | 따란 운영센터</title>
+  <link rel="stylesheet" href="../styles/tokens.css"><link rel="stylesheet" href="../styles/reset.css"><link rel="stylesheet" href="../styles/base.css"><link rel="stylesheet" href="../styles/pages/admin.css">
+  <script src="../scripts/core/brand.js"></script><script src="../scripts/core/storage.js"></script><script src="../content-config.js"></script><script src="../scripts/core/config.js"></script><script src="../scripts/core/api.js"></script><script src="../scripts/core/auth.js"></script>
+</head>
+<body class="admin-app" data-admin-view="analytics">
+  <header class="admin-topbar" data-admin-header></header>
+  <div class="admin-layout"><nav class="admin-sidebar" data-admin-sidebar></nav><main class="admin-main">
+    <header class="admin-page-head"><div><p>통계</p><h1>사이트 이용 현황</h1></div></header>
+    <p class="admin-result-count" data-admin-period></p>
+    <div class="admin-metrics" data-admin-metrics></div>
+    <section class="admin-section"><h2>최근 이용 기록</h2><div class="admin-table-wrap"><table><thead><tr><th>작업</th><th>화면</th><th>기록 시각</th></tr></thead><tbody data-admin-table></tbody></table></div><div class="admin-empty" data-admin-empty hidden>집계할 실제 이용 데이터가 없습니다.</div></section>
+  </main></div>
+  <script src="../scripts/components/admin-shell.js"></script><script src="../scripts/pages/admin/data.js"></script><script src="../scripts/pages/admin/common.js"></script><script src="../scripts/pages/admin/analytics.js"></script>
+</body></html>
