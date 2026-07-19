@@ -2,87 +2,43 @@
   "use strict";
 
   const PAGE_SIZE = 24;
-  const EVENT_LABELS = { kids: "아이 행사", wedding: "결혼 준비", parents: "부모님 행사", home: "가족 모임" };
-  const SERVICE_LABELS = ["공간 대여", "스냅·영상", "스타일링·케이터링", "의상·뷰티", "답례품·초대장"];
+  const EVENT_LABELS = { kids: "돌잔치·백일", wedding: "상견례·소규모 결혼식", parents: "환갑·칠순", home: "가족모임" };
+  const SERVICES = ["공간 대여", "스냅·영상", "스타일링·케이터링", "의상·뷰티", "답례품·초대장"];
   const state = { page: 1, items: [], filtered: [] };
-  const elements = {
-    form: document.querySelector("[data-filter-form]"), panel: document.querySelector("#directory-filter-panel"), query: document.querySelector("#directory-query"),
-    event: document.querySelector("#directory-event"), province: document.querySelector("#directory-province"), district: document.querySelector("#directory-district"),
-    guests: document.querySelector("#directory-guests"), budget: document.querySelector("#directory-budget"), category: document.querySelector("#directory-category"),
-    sort: document.querySelector("#directory-sort-quick"), chips: document.querySelector("#directory-filter-chips"),
-    summary: document.querySelector("#directory-result-summary"), results: document.querySelector("#directory-results"), pagination: document.querySelector("#directory-pagination")
-  };
-
+  const statusApi = window.TaranProviderStatus;
+  const compareStore = window.TaranCompareStore;
   const number = (value) => Number.isFinite(Number(value)) ? Number(value) : 0;
-  const text = (value) => String(value || "").trim();
+  const text = (value) => String(value ?? "").trim();
+  const $ = (selector) => document.querySelector(selector);
+  const controls = {
+    form: $("[data-filter-form]"), panel: $("#directory-filter-panel"), query: $("#directory-query"), event: $("#directory-event"),
+    province: $("#directory-province"), district: $("#directory-district"), guests: $("#directory-guests"), budget: $("#directory-budget"),
+    category: $("#directory-category"), guarantee: $("#directory-guarantee"), parking: $("#directory-parking"),
+    private: $("#directory-private"), wheelchair: $("#directory-wheelchair"), outsideFood: $("#directory-outside-food"),
+    outsideVendor: $("#directory-outside-vendor"), status: $("#directory-status"), sort: $("#directory-sort-quick"),
+    chips: $("#directory-filter-chips"), summary: $("#directory-result-summary"), results: $("#directory-results"), pagination: $("#directory-pagination")
+  };
 
   function validImageUrl(value) {
     const url = text(value);
-    if (/^(?:https?:|\/|\.\/|assets\/)/i.test(url) && !/^javascript:/i.test(url)) return url;
-    return "assets/images/venue-hotel.webp";
+    return /^(?:https?:|\/|\.\/|assets\/)/i.test(url) && !/^javascript:/i.test(url) ? url : "assets/images/venue-hotel.webp";
   }
 
-  function reviewSummary(item) {
-    const internal = Array.isArray(item.internalReviews) ? item.internalReviews : [];
-    const external = Array.isArray(item.externalReviews) ? item.externalReviews : [];
-    const ratings = internal.map((review) => number(review.rating ?? review.score ?? review.stars)).filter((rating) => rating > 0 && rating <= 5);
-    const explicitRating = number(item.internalReviewStats?.average || item.internalRating || item.averageRating || item.rating);
-    const rating = ratings.length ? ratings.reduce((sum, value) => sum + value, 0) / ratings.length : explicitRating;
-    const internalCount = Math.max(internal.length, number(item.internalReviewStats?.count || item.internalReviewCount));
-    return { count: internalCount + external.length, rating: rating > 0 && rating <= 5 ? rating : 0 };
-  }
-
-  function isPublic(item) {
-    if (!item || item.publicationStatus === "hidden") return false;
-    const review = reviewSummary(item);
-    return review.count > 0 || review.rating > 0;
+  function isReferenceImage(item) {
+    return /assets\/images\/venue-/i.test(validImageUrl(item.image));
   }
 
   function uniqueItems(items) {
-    const seen = new Set();
-    return items.filter((item) => {
-      const key = text(item.id) || `${text(item.name)}|${text(item.region)}|${text(item.area)}`;
-      if (!key || seen.has(key)) return false;
-      seen.add(key);
-      return true;
+    const map = new Map();
+    items.forEach((item) => {
+      const key = text(item?.id) || `${text(item?.name)}|${text(item?.region)}|${text(item?.area)}`;
+      if (key && !map.has(key)) map.set(key, item);
     });
+    return [...map.values()];
   }
-
-  function setupCategoryOptions() {
-    SERVICE_LABELS.filter((category) => state.items.some((item) => serviceGroup(item) === category)).forEach((category) => {
-      const option = document.createElement("option");
-      option.value = category;
-      option.textContent = category;
-      elements.category.append(option);
-    });
-  }
-
-  function setupRegions() {
-    if (window.taranSetupRegionSelects) return window.taranSetupRegionSelects(elements.province, elements.district);
-    [...new Set(state.items.map((item) => text(item.region)).filter(Boolean))].sort((a, b) => a.localeCompare(b, "ko-KR")).forEach((province) => {
-      const option = document.createElement("option");
-      option.value = province;
-      option.textContent = province;
-      elements.province.append(option);
-    });
-    return null;
-  }
-
-  function extractCapacity(item) {
-    const facts = item.detailFacts || {};
-    const candidates = [item.capacity, item.maxGuests, item.maxCapacity, facts["최대 수용인원"], facts["수용 인원"], facts["최소·최대 인원"]];
-    for (const candidate of candidates) {
-      if (typeof candidate === "number" && candidate > 0) return candidate;
-      const matches = text(candidate).match(/\d[\d,]*/g);
-      if (matches?.length) return Math.max(...matches.map((value) => number(value.replaceAll(",", ""))));
-    }
-    return 0;
-  }
-
-  const priceValue = (item) => number(item.price || item.startingPrice || item.basePrice);
 
   function serviceGroup(item) {
-    const source = `${text(item.category)} ${text(item.subcategory)} ${text(item.detailFacts?.["업종"])} ${(item.serviceTags || []).join(" ")}`;
+    const source = `${text(item.category)} ${text(item.subcategory)} ${statusApi.getProviderIndustry(item)} ${(item.serviceTags || []).join(" ")}`;
     if (/스냅|영상|사진|photo/i.test(source)) return "스냅·영상";
     if (/의상|뷰티|메이크업|한복|드레스/i.test(source)) return "의상·뷰티";
     if (/답례|초대장|기프트/i.test(source)) return "답례품·초대장";
@@ -91,43 +47,77 @@
   }
 
   function cardServiceLabel(item) {
-    if (serviceGroup(item) !== "공간 대여") return serviceGroup(item);
-    const industry = text(item.detailFacts?.["업종"] || item.officialVerification?.category);
-    return /음식|한식|일식|중식|양식|뷔페|레스토랑|카페/i.test(industry) ? "식사 · 공간 대여" : "공간 대여";
+    const group = serviceGroup(item);
+    if (group !== "공간 대여") return group;
+    return /음식|한식|일식|중식|양식|뷔페|레스토랑|카페/i.test(statusApi.getProviderIndustry(item)) ? "식사 · 공간 대여" : group;
   }
 
   function normalizedLocation(item) {
     const region = text(item.region);
-    const shortProvince = { "서울특별시":"서울", "부산광역시":"부산", "대구광역시":"대구", "인천광역시":"인천", "광주광역시":"광주", "대전광역시":"대전", "울산광역시":"울산", "세종특별자치시":"세종", "경기도":"경기", "강원특별자치도":"강원", "충청북도":"충북", "충청남도":"충남", "전북특별자치도":"전북", "전라남도":"전남", "경상북도":"경북", "경상남도":"경남", "제주특별자치도":"제주" }[region];
-    let area = text(item.area);
-    if (shortProvince && area.startsWith(`${shortProvince} `)) area = area.slice(shortProvince.length + 1);
+    let area = text(item.area).replace(/^(서울|부산|대구|인천|광주|대전|울산|경기|강원|충북|충남|전북|전남|경북|경남|제주)\s+/u, "");
     if (!area || area === region || region.includes(area)) return region;
     return `${region} ${area}`;
+  }
+
+  function reviewSummary(item) {
+    const internal = Array.isArray(item.internalReviews) ? item.internalReviews : [];
+    const external = Array.isArray(item.externalReviews) ? item.externalReviews : [];
+    const ratings = internal.map((review) => number(review.rating ?? review.score ?? review.stars)).filter((rating) => rating > 0 && rating <= 5);
+    const explicit = number(item.internalReviewStats?.average || item.internalRating || item.averageRating || item.rating);
+    const count = Math.max(internal.length, number(item.internalReviewStats?.count || item.internalReviewCount)) + external.length;
+    return { count, rating: ratings.length ? ratings.reduce((sum, value) => sum + value, 0) / ratings.length : (explicit > 0 && explicit <= 5 ? explicit : 0) };
+  }
+
+  function priceValue(item) {
+    const facts = statusApi.getProviderFacts(item);
+    return facts.adultMealMin || facts.rentalFee || number(item.price || item.startingPrice || item.basePrice);
+  }
+
+  function booleanFact(item, kind) {
+    const source = `${JSON.stringify(item.detailFacts || {})} ${(item.tags || []).join(" ")}`.toLowerCase();
+    const patterns = {
+      parking: /주차 가능|주차장|주차 \d|무료 주차/,
+      private: /단독|독립|프라이빗|개별 룸/,
+      wheelchair: /휠체어|장애인|엘리베이터|무장애/,
+      outsideFood: /외부 음식 (?:가능|허용)|음식 반입 (?:가능|허용)/,
+      outsideVendor: /외부 (?:업체|촬영|돌상|장식) (?:가능|허용)|반입 (?:가능|허용)/
+    };
+    return patterns[kind]?.test(source) || item[kind] === true || item[`${kind}_allowed`] === true;
   }
 
   function searchText(item) {
     return [item.name, item.category, item.subcategory, item.region, item.area, ...(item.tags || []), ...Object.values(item.detailFacts || {})].map(text).join(" ").toLowerCase();
   }
 
-  function itemMatchesRegion(item) {
-    const location = `${text(item.region)} ${text(item.area)} ${text(item.detailFacts?.["도로명 주소"])} ${text(item.officialVerification?.roadAddress)}`;
-    return (elements.province.value === "all" || location.includes(elements.province.value)) && (elements.district.value === "all" || location.includes(elements.district.value));
+  function regionMatches(item) {
+    const source = `${item.region || ""} ${item.area || ""} ${statusApi.getProviderAddress(item)}`;
+    return (controls.province.value === "all" || source.includes(controls.province.value)) && (controls.district.value === "all" || source.includes(controls.district.value));
   }
 
-  function itemMatchesGuests(item) {
-    const requested = number(elements.guests.value);
+  function guestsMatch(item) {
+    const requested = number(controls.guests.value);
     if (!requested) return true;
-    const capacity = extractCapacity(item);
-    if (!capacity) return true;
-    return requested === 101 ? capacity > 100 : capacity >= requested;
+    const max = statusApi.getProviderFacts(item).maxGuests;
+    return Boolean(max) && (requested === 101 ? max > 100 : max >= requested);
   }
 
-  function itemMatchesBudget(item) {
-    const requested = number(elements.budget.value);
+  function budgetMatches(item) {
+    const requested = number(controls.budget.value);
     if (!requested) return true;
     const price = priceValue(item);
-    if (!price) return true;
-    return requested === 5000001 ? price > 5000000 : price <= requested;
+    return Boolean(price) && (requested === 5000001 ? price > 5000000 : price <= requested);
+  }
+
+  function detailMatches(item) {
+    const facts = statusApi.getProviderFacts(item);
+    if (number(controls.guarantee.value) && (!facts.guarantee || facts.guarantee > number(controls.guarantee.value))) return false;
+    if (controls.parking.value === "yes" && !booleanFact(item, "parking")) return false;
+    if (controls.private.value === "yes" && !booleanFact(item, "private")) return false;
+    if (controls.wheelchair.value === "yes" && !booleanFact(item, "wheelchair")) return false;
+    if (controls.outsideFood.value === "yes" && !booleanFact(item, "outsideFood")) return false;
+    if (controls.outsideVendor.value === "yes" && !booleanFact(item, "outsideVendor")) return false;
+    if (controls.status.value !== "all" && statusApi.getProviderStatus(item).key !== controls.status.value) return false;
+    return true;
   }
 
   function regionKey(item) {
@@ -138,239 +128,290 @@
     return [provinceIndex < 0 ? 999 : provinceIndex, districtIndex < 0 ? 999 : districtIndex, location, text(item.name)];
   }
 
-  function compareRegion(left, right) {
-    const a = regionKey(left);
-    const b = regionKey(right);
-    return a[0] - b[0] || a[1] - b[1] || a[2].localeCompare(b[2], "ko-KR") || a[3].localeCompare(b[3], "ko-KR");
+  function compareRegion(a, b) {
+    const left = regionKey(a), right = regionKey(b);
+    return left[0] - right[0] || left[1] - right[1] || left[2].localeCompare(right[2], "ko-KR") || left[3].localeCompare(right[3], "ko-KR");
   }
 
   function sortItems(items) {
     const sorted = [...items];
-    if (elements.sort.value === "review-count") return sorted.sort((a, b) => reviewSummary(b).count - reviewSummary(a).count || compareRegion(a, b));
-    if (elements.sort.value === "rating-high") return sorted.sort((a, b) => reviewSummary(b).rating - reviewSummary(a).rating || reviewSummary(b).count - reviewSummary(a).count || compareRegion(a, b));
-    if (elements.sort.value === "rating-low") return sorted.sort((a, b) => {
-      const ar = reviewSummary(a).rating;
-      const br = reviewSummary(b).rating;
-      return (ar ? 0 : 1) - (br ? 0 : 1) || ar - br || compareRegion(a, b);
-    });
-    if (elements.sort.value === "price-low") return sorted.sort((a, b) => (priceValue(a) || Number.MAX_SAFE_INTEGER) - (priceValue(b) || Number.MAX_SAFE_INTEGER) || compareRegion(a, b));
-    if (elements.sort.value === "updated") return sorted.sort((a, b) => text(b.verifiedAt).localeCompare(text(a.verifiedAt)) || compareRegion(a, b));
+    const sort = controls.sort.value;
+    if (sort === "review-count") return sorted.sort((a, b) => reviewSummary(b).count - reviewSummary(a).count || compareRegion(a, b));
+    if (sort === "rating-high") return sorted.sort((a, b) => reviewSummary(b).rating - reviewSummary(a).rating || compareRegion(a, b));
+    if (sort === "rating-low") return sorted.sort((a, b) => (reviewSummary(a).rating || 99) - (reviewSummary(b).rating || 99) || compareRegion(a, b));
+    if (sort === "price-low") return sorted.sort((a, b) => (priceValue(a) || Number.MAX_SAFE_INTEGER) - (priceValue(b) || Number.MAX_SAFE_INTEGER) || compareRegion(a, b));
+    if (sort === "updated") return sorted.sort((a, b) => statusApi.getProviderStatus(b).date.localeCompare(statusApi.getProviderStatus(a).date) || compareRegion(a, b));
     return sorted.sort(compareRegion);
   }
 
-  function statusLabel(item) {
-    if (text(item.officialVerification?.status) === "verified") return "기본 정보 확인";
-    if (reviewSummary(item).count) return "후기 정보 있음";
-    return "정보 등록";
-  }
-
-  const isReferenceImage = (item) => /assets\/images\/venue-/i.test(validImageUrl(item.image));
-
-  function appendFact(container, label, value) {
-    if (!text(value)) return;
-    const wrapper = document.createElement("span");
-    wrapper.className = "directory-card__fact";
-    const small = document.createElement("small");
-    small.textContent = label;
-    const strong = document.createElement("strong");
-    strong.textContent = value;
-    wrapper.append(small, strong);
-    container.append(wrapper);
+  function makeAction(label, className, onClick) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = className;
+    button.textContent = label;
+    button.addEventListener("click", onClick);
+    return button;
   }
 
   function createCard(item) {
-    const link = document.createElement("a");
-    link.className = "directory-card";
-    link.href = item.detailUrl || `provider.html?id=${encodeURIComponent(text(item.id))}`;
-    link.setAttribute("aria-label", `${text(item.name)} 상세 보기`);
-    const visual = document.createElement("div");
-    visual.className = "directory-card__visual";
+    const card = document.createElement("article");
+    card.className = "directory-card";
+    const href = item.detailUrl || `provider.html?id=${encodeURIComponent(text(item.id))}`;
+    const media = document.createElement("a");
+    media.className = "directory-card__visual";
+    media.href = href;
+    media.setAttribute("aria-label", `${text(item.name)} 상세 보기`);
     const image = document.createElement("img");
     image.src = validImageUrl(item.image);
     image.alt = isReferenceImage(item) ? "" : `${text(item.name)} 대표 이미지`;
     image.loading = "lazy";
-    visual.append(image);
+    media.append(image);
     if (isReferenceImage(item)) {
       const note = document.createElement("span");
       note.className = "directory-card__image-note";
-      note.textContent = "카테고리 참고 이미지";
-      visual.append(note);
+      note.textContent = "업체 사진 등록 전";
+      media.append(note);
     }
     const body = document.createElement("div");
     body.className = "directory-card__body";
+    const status = statusApi.getProviderStatus(item);
     const head = document.createElement("div");
     head.className = "directory-card__head";
-    const status = document.createElement("span");
-    status.className = "badge badge--success";
-    status.textContent = statusLabel(item);
+    const statusBadge = document.createElement("span");
+    statusBadge.className = `badge ${status.key === "verified" ? "badge--success" : ""}`;
+    statusBadge.textContent = status.label;
     const type = document.createElement("span");
     type.className = "badge";
     type.textContent = cardServiceLabel(item);
-    head.append(status, type);
+    head.append(statusBadge, type);
+    const titleLink = document.createElement("a");
+    titleLink.href = href;
     const title = document.createElement("h2");
     title.textContent = text(item.name);
+    titleLink.append(title);
     const location = document.createElement("p");
     location.className = "directory-card__location";
     location.textContent = normalizedLocation(item);
     const review = reviewSummary(item);
-    const metrics = document.createElement("div");
-    metrics.className = "directory-card__meta";
-    if (review.rating) {
-      const rating = document.createElement("span");
-      rating.textContent = `★ ${review.rating.toFixed(1)}`;
-      metrics.append(rating);
-    }
-    if (review.count) {
-      const count = document.createElement("span");
-      count.className = "directory-card__reviews";
-      count.textContent = `후기 ${review.count.toLocaleString("ko-KR")}개`;
-      metrics.append(count);
-    }
-    const facts = document.createElement("div");
-    facts.className = "directory-card__facts";
-    const capacity = extractCapacity(item);
-    const price = priceValue(item);
-    if (capacity) appendFact(facts, "수용 인원", `최대 ${capacity.toLocaleString("ko-KR")}명`);
-    if (price) appendFact(facts, "예상 가격", `${price.toLocaleString("ko-KR")}원부터`);
-    const eventTags = (item.eventTags || []).map((value) => EVENT_LABELS[value]).filter(Boolean).slice(0, 2);
-    if (eventTags.length) appendFact(facts, "가능 행사", eventTags.join(" · "));
-    const foot = document.createElement("div");
-    foot.className = "directory-card__foot";
-    const confirmed = document.createElement("span");
-    confirmed.textContent = item.verifiedAt ? `정보 확인 ${text(item.verifiedAt)}` : statusLabel(item);
-    const action = document.createElement("strong");
-    action.textContent = "상세 보기 →";
-    foot.append(confirmed, action);
-    body.append(head, title, location, metrics);
-    if (facts.childElementCount) body.append(facts);
-    body.append(foot);
-    link.append(visual, body);
-    return link;
+    const reviewLine = document.createElement("p");
+    reviewLine.className = "directory-card__reviews";
+    reviewLine.textContent = [review.rating ? `★ ${review.rating.toFixed(1)}` : "", review.count ? `후기 ${review.count.toLocaleString("ko-KR")}개` : ""].filter(Boolean).join(" · ");
+    const facts = statusApi.getProviderFacts(item);
+    const factList = document.createElement("dl");
+    factList.className = "directory-card__facts";
+    const cardFacts = [
+      facts.maxGuests ? ["최대 인원", `${facts.maxGuests.toLocaleString("ko-KR")}명`] : null,
+      facts.guarantee ? ["최소 보증 인원", `${facts.guarantee.toLocaleString("ko-KR")}명`] : null,
+      priceValue(item) ? ["식대·시작 가격", `${priceValue(item).toLocaleString("ko-KR")}원부터`] : null,
+      facts.parking ? ["주차", `${facts.parking.toLocaleString("ko-KR")}대`] : (booleanFact(item, "parking") ? ["주차", "가능"] : null)
+    ].filter(Boolean);
+    cardFacts.forEach(([label, value]) => {
+      const wrapper = document.createElement("div");
+      const dt = document.createElement("dt"), dd = document.createElement("dd");
+      dt.textContent = label; dd.textContent = value; wrapper.append(dt, dd); factList.append(wrapper);
+    });
+    const events = document.createElement("p");
+    events.className = "directory-card__events";
+    events.textContent = (item.eventTags || []).map((key) => EVENT_LABELS[key]).filter(Boolean).join(" · ");
+    const freshness = document.createElement("small");
+    freshness.className = "directory-card__freshness";
+    const freshnessState = statusApi.getProviderFreshness(item);
+    freshness.textContent = freshnessState.state === "unknown" ? "" : freshnessState.label;
+    const actions = document.createElement("div");
+    actions.className = "directory-card__actions";
+    const saved = JSON.parse(window.TaranStorage?.get("saved-providers", "[]") || "[]");
+    const saveButton = makeAction(saved.includes(item.id) ? "관심 저장됨" : "관심 저장", "button button--secondary button--sm", () => {
+      const ids = JSON.parse(window.TaranStorage?.get("saved-providers", "[]") || "[]");
+      const next = ids.includes(item.id) ? ids.filter((id) => id !== item.id) : [...ids, item.id];
+      window.TaranStorage?.set("saved-providers", JSON.stringify(next));
+      saveButton.textContent = next.includes(item.id) ? "관심 저장됨" : "관심 저장";
+    });
+    const compareButton = makeAction(compareStore.has(item.id) ? "비교함에 담김" : "비교 담기", "button button--primary button--sm", () => {
+      const result = compareStore.toggle(item.id);
+      if (!result.ok) {
+        window.TaranToast?.show?.("비교함에는 최대 3개 업체를 담을 수 있습니다.", { actionLabel: "비교함 보기", onAction: () => { location.href = "compare.html"; } });
+        return;
+      }
+      compareButton.textContent = compareStore.has(item.id) ? "비교함에 담김" : "비교 담기";
+      compareButton.setAttribute("aria-pressed", String(compareStore.has(item.id)));
+    });
+    compareButton.setAttribute("aria-pressed", String(compareStore.has(item.id)));
+    actions.append(saveButton, compareButton);
+    body.append(head, titleLink, location);
+    if (reviewLine.textContent) body.append(reviewLine);
+    if (events.textContent) body.append(events);
+    if (factList.children.length) body.append(factList);
+    if (freshness.textContent) body.append(freshness);
+    body.append(actions);
+    card.append(media, body);
+    return card;
   }
 
+  const filterDefinitions = [
+    ["event", controls.event, "행사"], ["province", controls.province, "지역"], ["district", controls.district, "지역"], ["guests", controls.guests, "인원"],
+    ["budget", controls.budget, "예산"], ["category", controls.category, "유형"], ["guarantee", controls.guarantee, "보증 인원"],
+    ["parking", controls.parking, "주차"], ["private", controls.private, "단독 공간"], ["wheelchair", controls.wheelchair, "휠체어"],
+    ["outsideFood", controls.outsideFood, "외부 음식"], ["outsideVendor", controls.outsideVendor, "외부 업체"], ["status", controls.status, "상태"]
+  ];
+
   function activeFilters() {
-    return [["event", elements.event, "행사"], ["province", elements.province, "지역"], ["district", elements.district, "지역"], ["guests", elements.guests, "인원"], ["budget", elements.budget, "예산"], ["category", elements.category, "서비스"]]
-      .filter(([, select]) => select.value !== "all" && select.value !== "0");
+    return filterDefinitions.filter(([, control]) => control && control.value && !["all", "0"].includes(control.value));
   }
 
   function renderChips() {
-    elements.chips.replaceChildren();
-    activeFilters().forEach(([key, select, prefix]) => {
-      const label = select.options[select.selectedIndex]?.textContent || select.value;
-      elements.chips.append(window.TaranFilters.createChip(`${prefix}: ${label}`, key, removeFilter));
+    controls.chips.replaceChildren();
+    activeFilters().forEach(([key, control]) => {
+      const label = control.tagName === "SELECT" ? control.options[control.selectedIndex]?.textContent : control.value;
+      controls.chips.append(window.TaranFilters.createChip(label, key, () => {
+        control.value = control.querySelector?.('option[value="all"]') ? "all" : (control.querySelector?.('option[value="0"]') ? "0" : "");
+        if (key === "province") control.dispatchEvent(new Event("change"));
+        state.page = 1; applyFilters();
+      }));
     });
-  }
-
-  function removeFilter(key) {
-    const select = elements[key];
-    if (!select) return;
-    select.value = select.querySelector('option[value="all"]') ? "all" : "0";
-    if (key === "province") {
-      select.dispatchEvent(new Event("change"));
-      elements.district.value = "all";
-    }
-    state.page = 1;
-    applyFilters();
   }
 
   function updateUrl() {
     const params = new URLSearchParams();
-    if (elements.query.value.trim()) params.set("query", elements.query.value.trim());
-    activeFilters().forEach(([key, select]) => params.set(key, select.value));
-    if (elements.sort.value !== "region") params.set("sort", elements.sort.value);
-    const query = params.toString();
-    history.replaceState(null, "", `${location.pathname}${query ? `?${query}` : ""}`);
+    if (controls.query.value.trim()) params.set("query", controls.query.value.trim());
+    activeFilters().forEach(([key, control]) => params.set(key, control.value));
+    if (controls.sort.value !== "region") params.set("sort", controls.sort.value);
+    history.replaceState(null, "", `${location.pathname}${params.size ? `?${params}` : ""}`);
+    window.TaranSearchContext?.save(window.TaranSearchContext.fromParams(params));
   }
 
   function render(updateHistory = true) {
     const total = state.filtered.length;
     const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
     state.page = Math.min(state.page, totalPages);
-    const pageItems = state.filtered.slice((state.page - 1) * PAGE_SIZE, state.page * PAGE_SIZE);
-    elements.summary.textContent = total ? `${total.toLocaleString("ko-KR")}개의 공개 파트너` : "검색 결과가 없습니다.";
-    elements.results.replaceChildren();
-    elements.results.setAttribute("aria-busy", "false");
-    if (!total) elements.results.append(window.TaranStates.message({ title: "조건에 맞는 업체가 없습니다.", description: "지역이나 인원, 예산 조건을 줄여 다시 찾아보세요.", actionLabel: "조건 초기화", onAction: resetFilters }));
-    else pageItems.forEach((item) => elements.results.append(createCard(item)));
-    window.TaranPagination.render(elements.pagination, { page: state.page, totalPages, onChange(page) { state.page = page; render(); document.querySelector(".result-toolbar")?.scrollIntoView({ behavior: "smooth", block: "start" }); } });
+    controls.summary.textContent = total ? `${total.toLocaleString("ko-KR")}개의 공개 업체` : "검색 결과가 없습니다.";
+    controls.results.replaceChildren();
+    controls.results.setAttribute("aria-busy", "false");
+    if (!total) controls.results.append(window.TaranStates.message({ title: "조건에 맞는 업체가 없습니다.", description: "지역이나 인원, 예산 조건을 줄여 다시 찾아보세요.", actionLabel: "조건 초기화", onAction: resetFilters }));
+    else state.filtered.slice((state.page - 1) * PAGE_SIZE, state.page * PAGE_SIZE).forEach((item) => controls.results.append(createCard(item)));
+    window.TaranPagination.render(controls.pagination, { page: state.page, totalPages, onChange(page) { state.page = page; render(); $(".result-toolbar")?.scrollIntoView({ behavior: "smooth" }); } });
     renderChips();
     if (updateHistory) updateUrl();
   }
 
   function applyFilters(updateHistory = true) {
-    const query = elements.query.value.trim().toLowerCase();
-    state.filtered = sortItems(state.items.filter((item) => (!query || searchText(item).includes(query)) && (elements.event.value === "all" || (item.eventTags || []).includes(elements.event.value)) && (elements.category.value === "all" || serviceGroup(item) === elements.category.value) && itemMatchesRegion(item) && itemMatchesGuests(item) && itemMatchesBudget(item)));
+    const query = controls.query.value.trim().toLowerCase();
+    state.filtered = sortItems(state.items.filter((item) => (!query || searchText(item).includes(query)) &&
+      (controls.event.value === "all" || (item.eventTags || []).includes(controls.event.value)) &&
+      (controls.category.value === "all" || serviceGroup(item) === controls.category.value) &&
+      regionMatches(item) && guestsMatch(item) && budgetMatches(item) && detailMatches(item)));
     render(updateHistory);
   }
 
   function resetFilters(updateHistory = true) {
-    elements.form.reset();
-    elements.event.value = "all";
-    elements.province.value = "all";
-    elements.province.dispatchEvent(new Event("change"));
-    elements.district.value = "all";
-    elements.sort.value = "region";
-    state.page = 1;
-    applyFilters();
+    controls.form.reset();
+    controls.event.value = controls.province.value = controls.district.value = controls.category.value = controls.parking.value = controls.private.value = controls.wheelchair.value = controls.outsideFood.value = controls.outsideVendor.value = controls.status.value = "all";
+    controls.guests.value = controls.budget.value = controls.guarantee.value = "0";
+    controls.sort.value = "region";
+    controls.province.dispatchEvent(new Event("change"));
+    state.page = 1; applyFilters(updateHistory);
   }
 
-  function selectFromUrl(control, value) {
-    if (value && [...control.options].some((option) => option.value === value)) control.value = value;
+  function selectUrl(control, value) {
+    if (!value || !control) return;
+    const option = [...(control.options || [])].find((item) => item.value === value);
+    if (option) control.value = value;
+    else if (control.tagName === "INPUT") control.value = value;
   }
 
   function readUrl() {
     const params = new URLSearchParams(location.search);
-    selectFromUrl(elements.event, params.get("event"));
-    const province = params.get("province");
-    selectFromUrl(elements.province, province);
-    if (province) elements.province.dispatchEvent(new Event("change"));
-    selectFromUrl(elements.district, params.get("district"));
-    selectFromUrl(elements.guests, params.get("guests"));
-    selectFromUrl(elements.budget, params.get("budget"));
-    selectFromUrl(elements.category, params.get("category"));
-    selectFromUrl(elements.sort, params.get("sort"));
-    if (params.get("query")) elements.query.value = params.get("query");
+    selectUrl(controls.event, params.get("event")); selectUrl(controls.province, params.get("province"));
+    if (params.get("province")) controls.province.dispatchEvent(new Event("change"));
+    selectUrl(controls.district, params.get("district")); selectUrl(controls.guests, params.get("guests"));
+    const budget = number(params.get("budget"));
+    if (budget) {
+      const options = [...controls.budget.options].map((option) => number(option.value)).filter(Boolean).sort((a, b) => a - b);
+      controls.budget.value = String(options.find((value) => value >= budget) || options.at(-1));
+    }
+    selectUrl(controls.category, params.get("category")); selectUrl(controls.guarantee, params.get("guarantee"));
+    selectUrl(controls.parking, params.get("parking")); selectUrl(controls.private, params.get("private")); selectUrl(controls.wheelchair, params.get("wheelchair"));
+    selectUrl(controls.outsideFood, params.get("outsideFood")); selectUrl(controls.outsideVendor, params.get("outsideVendor")); selectUrl(controls.status, params.get("status"));
+    selectUrl(controls.sort, params.get("sort"));
+    if (params.get("query")) controls.query.value = params.get("query");
   }
 
-  function openFilter() {
-    elements.panel.dataset.open = "true";
-    document.querySelector("[data-filter-open]")?.setAttribute("aria-expanded", "true");
-    document.body.style.overflow = "hidden";
-    elements.query.focus();
-  }
-  function closeFilter() {
-    delete elements.panel.dataset.open;
-    document.querySelector("[data-filter-open]")?.setAttribute("aria-expanded", "false");
-    document.body.style.removeProperty("overflow");
-    document.querySelector("[data-filter-open]")?.focus();
-  }
-
-  function init() {
-    if (!elements.form || !elements.results) return;
-    elements.results.append(window.TaranStates.skeletonCards(6));
-    state.items = uniqueItems(window.publicDirectoryData || []).filter(isPublic);
-    setupCategoryOptions();
-    setupRegions();
-    readUrl();
-    elements.form.addEventListener("submit", (event) => { event.preventDefault(); state.page = 1; applyFilters(); closeFilter(); });
-    elements.form.addEventListener("reset", (event) => { event.preventDefault(); resetFilters(); });
-    elements.sort.addEventListener("change", () => { state.page = 1; applyFilters(); });
-    document.querySelector("[data-filter-open]")?.addEventListener("click", openFilter);
-    document.querySelector("[data-filter-close]")?.addEventListener("click", closeFilter);
-    document.addEventListener("keydown", (event) => { if (event.key === "Escape" && elements.panel.dataset.open === "true") closeFilter(); });
-    window.addEventListener("popstate", () => {
-      resetFilters(false);
-      readUrl();
-      state.page = 1;
-      applyFilters(false);
+  function renderDock(ids) {
+    const dock = $("[data-compare-dock]");
+    if (!dock) return;
+    dock.hidden = !ids.length;
+    $("[data-compare-dock-count]").textContent = String(ids.length);
+    const list = $("[data-compare-dock-items]");
+    list.replaceChildren();
+    ids.forEach((id) => {
+      const item = state.items.find((provider) => provider.id === id);
+      const button = document.createElement("button");
+      button.type = "button"; button.textContent = `${item?.name || "선택 업체"} ×`; button.addEventListener("click", () => compareStore.remove(id)); list.append(button);
     });
+    document.querySelectorAll(".directory-card").forEach((card) => {
+      const button = card.querySelector("[aria-pressed]");
+      if (!button) return;
+      const id = new URL(card.querySelector("a")?.href || location.href).searchParams.get("id");
+      button.textContent = compareStore.has(id) ? "비교함에 담김" : "비교 담기";
+      button.setAttribute("aria-pressed", String(compareStore.has(id)));
+    });
+  }
+
+  function setupOptions() {
+    SERVICES.filter((group) => state.items.some((item) => serviceGroup(item) === group)).forEach((group) => {
+      const option = document.createElement("option"); option.value = option.textContent = group; controls.category.append(option);
+    });
+    if (window.taranSetupRegionSelects) window.taranSetupRegionSelects(controls.province, controls.district);
+  }
+
+  function openFilter() { controls.panel.dataset.open = "true"; $("[data-filter-open]")?.setAttribute("aria-expanded", "true"); document.body.style.overflow = "hidden"; controls.query.focus(); }
+  function closeFilter() { delete controls.panel.dataset.open; $("[data-filter-open]")?.setAttribute("aria-expanded", "false"); document.body.style.removeProperty("overflow"); }
+
+  async function attachPublishedReviewStats(items) {
+    if (!window.TaranConfig?.isSupabaseConfigured || !window.TaranApi) return items;
+    try {
+      const rows = await window.TaranApi.select(window.TaranConfig.tables.reviews, {
+        status: "eq.published",
+        select: "provider_id,rating"
+      });
+      const grouped = new Map();
+      rows.forEach((row) => {
+        const key = String(row.provider_id || "");
+        if (!key) return;
+        const current = grouped.get(key) || { count: 0, total: 0 };
+        current.count += 1;
+        current.total += number(row.rating);
+        grouped.set(key, current);
+      });
+      return items.map((item) => {
+        const stats = grouped.get(String(item.id));
+        return stats ? {
+          ...item,
+          internalReviewStats: { count: stats.count, average: stats.count ? stats.total / stats.count : 0 }
+        } : item;
+      });
+    } catch (error) {
+      console.warn("공개 후기 통계를 불러오지 못했습니다.", error);
+      return items;
+    }
+  }
+
+  async function init() {
+    if (!controls.form || !controls.results) return;
+    controls.results.append(window.TaranStates.skeletonCards(6));
+    const publicItems = uniqueItems(window.publicDirectoryData || []).filter(statusApi.isProviderPublic);
+    state.items = await attachPublishedReviewStats(publicItems);
+    setupOptions(); readUrl();
+    controls.form.addEventListener("submit", (event) => { event.preventDefault(); state.page = 1; applyFilters(); closeFilter(); });
+    controls.form.addEventListener("reset", (event) => { event.preventDefault(); resetFilters(); });
+    controls.sort.addEventListener("change", () => { state.page = 1; applyFilters(); });
+    $("[data-filter-open]")?.addEventListener("click", openFilter); $("[data-filter-close]")?.addEventListener("click", closeFilter);
+    document.addEventListener("keydown", (event) => { if (event.key === "Escape") closeFilter(); });
+    compareStore.subscribe(renderDock);
     applyFilters(false);
   }
 
   Promise.resolve(window.taranContentReady).then(init).catch((error) => {
     console.error("업체 목록을 표시하지 못했습니다.", error);
-    elements.results?.replaceChildren(window.TaranStates.message({ title: "업체 정보를 불러오지 못했습니다.", description: "잠시 후 다시 시도해 주세요.", actionLabel: "다시 시도", onAction: () => window.location.reload() }));
-    elements.results?.setAttribute("aria-busy", "false");
-    if (elements.summary) elements.summary.textContent = "불러오기 오류";
+    controls.results?.replaceChildren(window.TaranStates.message({ title: "업체 정보를 불러오지 못했습니다.", description: "잠시 후 다시 시도해 주세요.", actionLabel: "다시 시도", onAction: () => location.reload() }));
   });
 })();

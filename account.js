@@ -43,6 +43,66 @@
     } catch (_error) { /* 업체 권한이 없는 일반 회원에게는 별도 영역을 표시하지 않습니다. */ }
   }
 
+  async function loadInquiries() {
+    const list = document.querySelector("#account-inquiry-list");
+    const empty = document.querySelector("#account-inquiry-empty");
+    const count = document.querySelector("#inquiry-count");
+    if (!window.TaranAuth.isConfigured()) {
+      const drafts = JSON.parse(window.TaranStorage?.get("inquiry-drafts", "[]") || "[]");
+      count.textContent = `${drafts.length}건`;
+      empty.hidden = Boolean(drafts.length);
+      drafts.forEach((item) => {
+        const card = document.createElement("article");
+        const title = document.createElement("strong");
+        title.textContent = `${item.event_type || "가족행사"} · ${item.guest_count || "-"}명`;
+        const state = document.createElement("span");
+        state.textContent = "브라우저 임시 저장";
+        card.append(title, state);
+        list.append(card);
+      });
+      return;
+    }
+    const groups = await window.TaranApi.select(window.TaranConfig.tables.inquiryGroups, {
+      user_id: `eq.${account.id}`,
+      order: "created_at.desc",
+      limit: 100
+    });
+    count.textContent = `${groups.length}건`;
+    empty.hidden = Boolean(groups.length);
+    if (!groups.length) return;
+    const ids = groups.map((item) => item.id);
+    const [recipients, responses] = await Promise.all([
+      window.TaranApi.select(window.TaranConfig.tables.inquiryRecipients, { inquiry_group_id: `in.(${ids.join(",")})`, limit: 300 }),
+      window.TaranApi.select(window.TaranConfig.tables.inquiryResponses, { limit: 300 })
+    ]);
+    groups.forEach((group) => {
+      const groupRecipients = recipients.filter((item) => item.inquiry_group_id === group.id);
+      const responseIds = new Set(responses.map((item) => item.inquiry_recipient_id));
+      const answered = groupRecipients.filter((item) => responseIds.has(item.id) || item.status === "responded").length;
+      const card = document.createElement("article");
+      card.className = "account-inquiry-item";
+      const heading = document.createElement("div");
+      const title = document.createElement("strong");
+      title.textContent = `${group.event_type} · ${group.region}`;
+      const date = document.createElement("span");
+      date.textContent = String(group.created_at || "").slice(0, 10);
+      heading.append(title, date);
+      const summary = document.createElement("p");
+      summary.textContent = `${group.guest_count}명 · ${groupRecipients.length}곳 문의 · ${answered}곳 답변`;
+      const state = document.createElement("span");
+      state.className = "badge";
+      state.textContent = answered ? "답변 도착" : "업체 확인 중";
+      card.append(heading, summary, state);
+      list.append(card);
+    });
+  }
+  await loadInquiries().catch(() => {
+    const empty = document.querySelector("#account-inquiry-empty");
+    empty.hidden = false;
+    empty.querySelector("strong").textContent = "문의 내역을 불러오지 못했습니다.";
+    empty.querySelector("span").textContent = "잠시 후 다시 확인해 주세요.";
+  });
+
   let savedSlugs = [];
   try {
     const saved = await window.TaranAuth.api("/api/member/saved-venues");

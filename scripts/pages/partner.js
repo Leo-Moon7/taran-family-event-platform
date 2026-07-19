@@ -7,6 +7,9 @@
   const form = document.querySelector("#partner-form");
   const error = document.querySelector("#partner-error");
   const saveButton = document.querySelector("#partner-save");
+  const inquirySection = document.querySelector("#partner-inquiries");
+  const inquiryList = document.querySelector("#partner-inquiry-list");
+  const inquiryEmpty = document.querySelector("#partner-inquiry-empty");
   let row = null;
 
   const setNotice = (message, isError = false) => {
@@ -17,6 +20,117 @@
   const value = (id) => document.querySelector(id).value.trim();
   const setValue = (id, next) => { document.querySelector(id).value = String(next || ""); };
   const fact = (facts, ...keys) => keys.map((key) => facts?.[key]).find((item) => String(item || "").trim()) || "";
+  const money = (value) => value ? `${Number(value).toLocaleString("ko-KR")}원` : "미정";
+
+  async function submitResponse(recipient, group, formElement) {
+    const data = new FormData(formElement);
+    const available = data.get("available") === "true";
+    const response = {
+      inquiry_recipient_id: recipient.id,
+      provider_user_id: account.id,
+      available,
+      estimated_price: Number(data.get("estimatedPrice") || 0) || null,
+      meal_price: Number(data.get("mealPrice") || 0) || null,
+      rental_fee: Number(data.get("rentalFee") || 0) || null,
+      minimum_guarantee: Number(data.get("minimumGuarantee") || 0) || null,
+      included_items: String(data.get("includedItems") || "").split(",").map((item) => item.trim()).filter(Boolean),
+      extra_costs: String(data.get("extraCosts") || "").split(",").map((item) => item.trim()).filter(Boolean),
+      response_note: String(data.get("responseNote") || "").trim(),
+      updated_at: new Date().toISOString()
+    };
+    const button = formElement.querySelector('[type="submit"]');
+    button.disabled = true;
+    try {
+      await window.TaranApi.upsert(window.TaranConfig.tables.inquiryResponses, response, "inquiry_recipient_id");
+      await window.TaranApi.update(window.TaranConfig.tables.inquiryRecipients, {
+        status: available ? "responded" : "declined",
+        responded_at: new Date().toISOString()
+      }, { id: `eq.${recipient.id}` });
+      formElement.replaceChildren();
+      const complete = document.createElement("p");
+      complete.className = "notice";
+      complete.textContent = available ? "답변을 보냈습니다." : "진행 불가로 답변했습니다.";
+      formElement.append(complete);
+    } catch (responseError) {
+      const message = formElement.querySelector("[data-response-error]");
+      message.textContent = responseError.message || "답변을 보내지 못했습니다.";
+      button.disabled = false;
+    }
+  }
+
+  function inquiryCard(recipient, group) {
+    const article = document.createElement("article");
+    article.className = "partner-inquiry-card";
+    const heading = document.createElement("div");
+    heading.className = "partner-inquiry-card__heading";
+    const title = document.createElement("h3");
+    title.textContent = `${group.event_type} · ${group.guest_count}명`;
+    const status = document.createElement("span");
+    status.className = "badge";
+    status.textContent = recipient.status === "viewed" ? "열람" : "신규 문의";
+    heading.append(title, status);
+    const facts = document.createElement("dl");
+    [
+      ["희망 지역", group.region],
+      ["행사일", group.event_date || (group.date_flexible ? "날짜 협의" : "미정")],
+      ["예산", `${money(group.budget_min)} ~ ${money(group.budget_max)}`],
+      ["필수 조건", Array.isArray(group.requirements) ? group.requirements.join(", ") : "-"],
+      ["요청사항", group.request_note || "-"]
+    ].forEach(([label, value]) => {
+      const wrapper = document.createElement("div");
+      const term = document.createElement("dt");
+      term.textContent = label;
+      const description = document.createElement("dd");
+      description.textContent = value;
+      wrapper.append(term, description);
+      facts.append(wrapper);
+    });
+    const responseForm = document.createElement("form");
+    responseForm.className = "partner-response-form";
+    responseForm.innerHTML = `
+      <label>진행 가능 여부<select class="select" name="available" required><option value="true">진행 가능</option><option value="false">진행 불가</option></select></label>
+      <label>예상 총액<input class="input" name="estimatedPrice" type="number" min="0" step="10000" placeholder="예: 2500000"></label>
+      <label>1인 식대<input class="input" name="mealPrice" type="number" min="0" step="1000"></label>
+      <label>대관료<input class="input" name="rentalFee" type="number" min="0" step="10000"></label>
+      <label>최소 보증 인원<input class="input" name="minimumGuarantee" type="number" min="0"></label>
+      <label class="field--full">포함 항목<input class="input" name="includedItems" placeholder="식사, 대관, 기본 상차림"></label>
+      <label class="field--full">추가 비용<input class="input" name="extraCosts" placeholder="주말 가산금, 외부 업체 반입비"></label>
+      <label class="field--full">답변 메모<textarea class="textarea" name="responseNote" rows="3"></textarea></label>
+      <p class="field__message field__message--error" data-response-error></p>
+      <button class="button button--primary" type="submit">고객에게 답변 보내기</button>`;
+    responseForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      submitResponse(recipient, group, responseForm);
+    });
+    article.append(heading, facts, responseForm);
+    return article;
+  }
+
+  async function loadInquiries() {
+    const recipients = await window.TaranApi.select(window.TaranConfig.tables.inquiryRecipients, {
+      provider_id: `eq.${row.id}`,
+      status: "in.(sent,viewed)",
+      order: "sent_at.desc",
+      limit: 100
+    });
+    inquirySection.hidden = false;
+    inquiryList.replaceChildren();
+    if (!recipients.length) {
+      inquiryEmpty.hidden = false;
+      return;
+    }
+    inquiryEmpty.hidden = true;
+    const ids = [...new Set(recipients.map((item) => item.inquiry_group_id))];
+    const groups = await window.TaranApi.select(window.TaranConfig.tables.inquiryGroups, {
+      id: `in.(${ids.join(",")})`,
+      limit: 100
+    });
+    const groupMap = new Map(groups.map((item) => [item.id, item]));
+    recipients.forEach((recipient) => {
+      const group = groupMap.get(recipient.inquiry_group_id);
+      if (group) inquiryList.append(inquiryCard(recipient, group));
+    });
+  }
 
   if (!account) {
     location.href = window.TaranAuth.loginUrl(`partner.html${requestedId ? `?id=${encodeURIComponent(requestedId)}` : ""}`);
@@ -57,6 +171,11 @@
     document.querySelector("#partner-preview").href = `provider.html?id=${encodeURIComponent(row.id)}`;
     notice.hidden = true;
     form.hidden = false;
+    loadInquiries().catch((inquiryError) => {
+      inquirySection.hidden = false;
+      inquiryEmpty.hidden = false;
+      inquiryEmpty.textContent = inquiryError.message || "견적 문의를 불러오지 못했습니다.";
+    });
   } catch (loadError) {
     setNotice(loadError.message || "업체 정보를 불러오지 못했습니다.", true);
   }

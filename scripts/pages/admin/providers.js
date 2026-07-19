@@ -15,6 +15,9 @@
   const claimTable = document.querySelector("[data-claim-table]");
   const claimSection = document.querySelector("[data-claim-section]");
   const claimEmpty = document.querySelector("[data-claim-empty]");
+  const registrationTable = document.querySelector("[data-registration-table]");
+  const registrationSection = document.querySelector("[data-registration-section]");
+  const registrationEmpty = document.querySelector("[data-registration-empty]");
   const fields = [
     { name: "id", label: "업체 관리 번호", required: true, placeholder: "예: provider-seoul-001" },
     { name: "name", label: "업체명", required: true },
@@ -201,6 +204,94 @@
     });
     if (claimEmpty) claimEmpty.hidden = Boolean(rows.length);
   }
+
+  async function moderateRegistration(item, status, button) {
+    button.disabled = true;
+    try {
+      const access = await window.TaranAdminData.context();
+      if (status === "approved") {
+        const data = item.data || {};
+        const id = safeId(data.id || data.name || data.provider_name || `provider-${item.id}`);
+        const providerData = {
+          name: data.name || data.provider_name,
+          category: data.industry || "업체",
+          address: data.address || data.region || "",
+          eventTypes: data.event_tags || [],
+          minGuests: data.minimum_guests || null,
+          maxGuests: data.maximum_guests || null,
+          minimumGuarantee: data.minimum_guarantee || null,
+          rentalFee: data.rental_fee || null,
+          adultMealPriceMin: data.adult_meal_price_min || null,
+          parkingCount: data.parking_count || null,
+          phone: data.phone || "",
+          website: data.official_link || "",
+          ownerRegistered: true,
+          informationCheckedAt: new Date().toISOString().slice(0, 10)
+        };
+        await window.TaranAdminData.upsert("providers", {
+          id,
+          data: providerData,
+          status: "published",
+          owner_user_id: item.user_id,
+          profile_status: "claimed",
+          event_types: providerData.eventTypes,
+          minimum_guests: providerData.minGuests,
+          maximum_guests: providerData.maxGuests,
+          minimum_guarantee: providerData.minimumGuarantee,
+          adult_meal_price_min: providerData.adultMealPriceMin,
+          rental_fee: providerData.rentalFee,
+          parking_count: providerData.parkingCount,
+          inquiry_enabled: true,
+          updated_at: new Date().toISOString()
+        }, "id");
+      }
+      await window.TaranAdminData.update("providerRegistrations", {
+        status,
+        reviewed_by: access.account.id,
+        reviewed_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }, { id: `eq.${item.id}` });
+      await loadRegistrations();
+      await load();
+    } catch (error) {
+      alert(error.message || "등록 요청을 처리하지 못했습니다.");
+      button.disabled = false;
+    }
+  }
+
+  async function loadRegistrations() {
+    if (!online || !registrationTable || !registrationSection) return;
+    registrationSection.hidden = false;
+    const rows = await window.TaranAdminData.list("providerRegistrations", { order: "created_at.asc", limit: 200 });
+    registrationTable.replaceChildren();
+    rows.forEach((item) => {
+      const data = item.data || {};
+      const row = document.createElement("tr");
+      [
+        String(item.created_at || "").slice(0, 10),
+        data.name || data.provider_name || "-",
+        data.industry || "-",
+        data.address || data.region || "-",
+        data.owner_name || data.owner_email || "-"
+      ].forEach((value) => row.append(element("td", value)));
+      row.append(element("td", item.status === "approved" ? "승인" : item.status === "rejected" ? "반려" : "대기"));
+      const manage = document.createElement("td");
+      if (item.status === "pending") {
+        const approve = element("button", "승인·공개", "admin-text-button");
+        approve.type = "button";
+        approve.addEventListener("click", () => moderateRegistration(item, "approved", approve));
+        const reject = element("button", "반려", "admin-text-button");
+        reject.type = "button";
+        reject.addEventListener("click", () => moderateRegistration(item, "rejected", reject));
+        manage.append(approve, reject);
+      } else {
+        manage.textContent = "처리 완료";
+      }
+      row.append(manage);
+      registrationTable.append(row);
+    });
+    if (registrationEmpty) registrationEmpty.hidden = Boolean(rows.length);
+  }
   async function init() {
     const access = await window.TaranAdminReady;
     if (!access.allowed) return;
@@ -210,6 +301,7 @@
     await load();
     await loadReviews();
     await loadClaims();
+    await loadRegistrations();
   }
   init().catch(error => console.error("업체 관리 목록을 불러오지 못했습니다.", error));
 })();

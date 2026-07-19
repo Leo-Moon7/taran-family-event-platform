@@ -9,6 +9,9 @@ window.taranContentConfig = window.taranContentConfig || {
     articles: "taran_articles",
     banners: "taran_banners",
     inquiries: "taran_inquiries",
+    inquiryGroups: "taran_inquiry_groups",
+    inquiryRecipients: "taran_inquiry_recipients",
+    inquiryResponses: "taran_inquiry_responses",
     reviews: "taran_reviews",
     contributions: "taran_contributions",
     points: "taran_point_ledger",
@@ -22,6 +25,9 @@ window.taranContentConfig = window.taranContentConfig || {
     revisions: "taran_content_revisions",
     adminProfiles: "taran_admin_profiles",
     providerClaims: "taran_provider_claims",
+    providerRegistrations: "taran_provider_registrations",
+    userComparisons: "taran_user_comparisons",
+    userChecklists: "taran_user_checklists",
     communityPosts: "taran_community_posts",
     communityComments: "taran_community_comments"
   }

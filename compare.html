@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="description" content="선택한 가족행사 업체를 인원, 가격, 주차와 이용 조건으로 한눈에 비교하세요.">
+  <title>업체 비교함 | 따란</title>
+  <link rel="stylesheet" href="styles/tokens.css"><link rel="stylesheet" href="styles/reset.css"><link rel="stylesheet" href="styles/base.css"><link rel="stylesheet" href="styles/layout.css">
+  <link rel="stylesheet" href="styles/components/header.css"><link rel="stylesheet" href="styles/components/button.css"><link rel="stylesheet" href="styles/components/card.css"><link rel="stylesheet" href="styles/components/badge.css"><link rel="stylesheet" href="styles/pages/compare.css">
+  <script src="scripts/core/brand.js"></script><script src="scripts/core/storage.js"></script>
+</head>
+<body>
+  <header class="site-header" data-site-header>
+    <div class="site-header__inner">
+      <a class="brand" href="index.html" aria-label="따란 홈"><span class="brand__name"><span>따란</span><small>T'ARAN</small></span></a>
+      <button class="site-header__toggle" type="button" aria-controls="site-navigation" aria-expanded="false" data-menu-toggle><span class="visually-hidden">메뉴 열기</span>☰</button>
+      <nav class="site-nav" id="site-navigation" aria-label="주요 메뉴">
+        <a href="venues.html">업체 찾기</a><a aria-current="page" href="compare.html">비교함 <span class="nav-count" data-compare-count hidden></span></a>
+        <div class="nav-menu"><button type="button" aria-haspopup="true" aria-expanded="false" data-nav-menu-button>무료 도구</button><div class="nav-menu__panel"><a href="calculator.html"><strong>비용 계산기</strong><span>예상 비용 범위 확인</span></a><a href="checklist.html"><strong>준비 체크리스트</strong><span>행사일 기준 할 일</span></a></div></div>
+        <a href="articles.html">준비 가이드</a><a href="provider-register.html">업체 등록</a><a class="site-nav__auth" href="login.html" data-auth-link>로그인</a>
+      </nav>
+    </div>
+  </header>
+  <main>
+    <section class="compare-hero"><div class="container"><p class="eyebrow">업체 비교함</p><h1>선택한 업체를<br>같은 기준으로 비교하세요.</h1><p>최대 3곳의 인원, 가격, 주차와 이용 조건을 한 화면에서 확인할 수 있습니다.</p></div></section>
+    <section class="page-section">
+      <div class="container">
+        <div class="compare-toolbar"><p id="compare-summary" aria-live="polite">비교할 업체를 불러오는 중입니다.</p><div><a class="button button--secondary" href="venues.html">업체 더 찾기</a><a class="button button--primary" id="compare-inquiry-link" href="inquiry.html" hidden>선택 업체에 한 번에 문의</a></div></div>
+        <div class="compare-table-wrap" id="compare-table-wrap"><table class="compare-table" id="compare-table"><caption class="visually-hidden">선택 업체 조건 비교</caption><tbody id="compare-table-body"></tbody></table></div>
+        <div class="empty-state" id="compare-empty" hidden><h2>비교함이 비어 있습니다.</h2><p>업체 목록에서 비교할 곳을 최대 3곳까지 선택해 주세요.</p><a class="button button--primary" href="venues.html">업체 찾기</a></div>
+      </div>
+    </section>
+  </main>
+  <footer class="site-footer"><div class="container site-footer__inner"><div><strong>따란</strong><small>T'ARAN · 가족행사 장소 비교와 견적 문의</small></div><nav aria-label="정책 메뉴"><a href="about.html">서비스 소개</a><a href="privacy.html">개인정보처리방침</a><a href="terms.html">이용약관</a><a href="contact.html">문의</a></nav></div></footer>
+  <script src="review-provider-candidates.js?v=1"></script><script src="review-lifecycle-candidates.js?v=1"></script><script src="review-lifecycle-verified.js?v=6"></script><script src="review-local-api-partners.js?v=3"></script><script src="data.js?v=19"></script>
+  <script src="content-config.js"></script><script src="scripts/core/config.js"></script><script src="scripts/core/api.js"></script><script src="scripts/core/auth.js"></script><script src="scripts/core/analytics.js"></script>
+  <script src="scripts/core/provider-status.js"></script><script src="scripts/core/compare-store.js"></script><script src="scripts/components/header.js"></script><script src="scripts/components/toast.js"></script><script src="scripts/pages/compare.js"></script>
+</body>
+</html>

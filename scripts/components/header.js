@@ -8,6 +8,51 @@
   const toggle = header.querySelector("[data-menu-toggle]");
   const navigation = header.querySelector("#site-navigation");
   const menuButtons = header.querySelectorAll("[data-nav-menu-button]");
+  const page = location.pathname.split("/").pop() || "index.html";
+
+  function compareIds() {
+    return window.TaranCompareStore?.read?.() || [];
+  }
+
+  function updateCompareCounts(ids = compareIds()) {
+    document.querySelectorAll("[data-compare-count]").forEach((badge) => {
+      badge.textContent = String(ids.length);
+      badge.hidden = !ids.length;
+    });
+  }
+
+  function appendMobileNavigation() {
+    if (document.querySelector(".mobile-bottom-nav") || /^admin(?:\/|\.html)/.test(location.pathname)) return;
+    const mobile = document.createElement("nav");
+    mobile.className = "mobile-bottom-nav";
+    mobile.setAttribute("aria-label", "모바일 주요 메뉴");
+    [
+      ["index.html", "홈", "⌂"],
+      ["venues.html", "업체 찾기", "⌕"],
+      ["compare.html", "비교함", "⇄"],
+      ["checklist.html", "체크리스트", "✓"],
+      ["account.html", "마이페이지", "●"]
+    ].forEach(([href, label, icon]) => {
+      const link = document.createElement("a");
+      link.href = href;
+      if (page === href || (href === "account.html" && page === "login.html")) link.setAttribute("aria-current", "page");
+      const symbol = document.createElement("span");
+      symbol.setAttribute("aria-hidden", "true");
+      symbol.textContent = icon;
+      const name = document.createElement("strong");
+      name.textContent = label;
+      link.append(symbol, name);
+      if (href === "compare.html") {
+        const count = document.createElement("b");
+        count.className = "mobile-bottom-nav__count";
+        count.dataset.compareCount = "";
+        count.hidden = true;
+        link.append(count);
+      }
+      mobile.append(link);
+    });
+    document.body.append(mobile);
+  }
 
   function closeNavigation() {
     header.dataset.menuOpen = "false";
@@ -59,4 +104,8 @@
       link.href = account ? "account.html" : "login.html";
     });
   });
+
+  appendMobileNavigation();
+  updateCompareCounts();
+  window.TaranCompareStore?.subscribe?.(updateCompareCounts);
 })();

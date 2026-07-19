@@ -32,6 +32,16 @@ body > footer .footer-links { display: flex; flex-wrap: wrap; gap: var(--space-4
 .account-tool-links, .saved-list { display: grid; gap: var(--space-2); margin-block: var(--space-4); }
 .account-tool-links a, .saved-list a { display: flex; min-height: 56px; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-md); }
 .account-actions { display: flex; gap: var(--space-2); margin-top: var(--space-5); }
+.account-card--wide { grid-column: 1 / -1; }
+.account-inquiry-list { display: grid; gap: var(--space-3); }
+.account-inquiry-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--space-2) var(--space-4); padding: var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-md); }
+.account-inquiry-item > div { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.account-inquiry-item p { margin: 0; color: var(--color-text-muted); }
+.account-inquiry-item > .badge { grid-column: 2; grid-row: 1 / span 2; }
+@media (max-width: 520px) {
+  .account-inquiry-item { grid-template-columns: 1fr; }
+  .account-inquiry-item > .badge { grid-column: auto; grid-row: auto; justify-self: start; }
+}
 .danger-button { min-height: 44px; padding-inline: var(--space-4); color: var(--color-error); border: 1px solid #e4bcbc; border-radius: var(--radius-md); background: #fff; }
 
 .auth-shell { display: grid; grid-template-columns: minmax(0, .8fr) minmax(22rem, 1.2fr); gap: var(--space-8); align-items: start; max-width: 62rem; margin-inline: auto; }
@@ -82,6 +92,10 @@ body > footer .footer-links { display: flex; flex-wrap: wrap; gap: var(--space-4
 .blog-side-card, .blog-feature-card { padding: var(--space-5); border: 1px solid var(--color-border); border-radius: var(--radius-lg); }
 .blog-article { max-width: 48rem; margin-inline: auto; }
 .blog-article > p, .blog-article > ul, .blog-article-content p, .blog-article-content li { color: #171411; font-size: var(--font-size-18); line-height: 1.9; }
+.article-conversion { display: grid; gap: var(--space-3); margin-top: var(--space-8); padding: var(--space-6); border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-bg-subtle); }
+.article-conversion > span { color: var(--color-accent-700); font-size: var(--font-size-14); font-weight: var(--font-weight-bold); }
+.article-conversion > strong { color: var(--color-text); font-size: clamp(1.25rem, 3vw, 1.75rem); line-height: 1.4; }
+.article-conversion .button { width: max-content; }
 
 .contribution-field-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
 .wide-field { grid-column: 1 / -1; }

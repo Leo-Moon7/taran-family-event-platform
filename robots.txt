@@ -4,5 +4,9 @@ Disallow: /admin/
 Disallow: /admin-review.html
 Disallow: /vendor-dashboard.html
 Disallow: /claim.html
+Disallow: /account.html
+Disallow: /compare.html
+Disallow: /inquiry.html
+Disallow: /login.html
 
-Sitemap: https://sage-mousse-0c02f1.netlify.app/sitemap.xml
+Sitemap: https://taran-family-event-test.netlify.app/sitemap.xml

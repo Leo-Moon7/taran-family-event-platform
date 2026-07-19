@@ -11,6 +11,8 @@
     "nopoom-saved-venues": "taran-saved-venues",
     "nopoom-calculator": "taran-calculator",
     "nopoom-checklist": "taran-checklist",
+    "compare-providers": "taran-compare-providers",
+    "saved-providers": "taran-saved-providers",
     "sonpum-haebang-crawl-review": "taran-crawl-review",
     "sonpum-haebang-claims": "taran-provider-claims",
     "sonpum-haebang-vendor-edits": "taran-provider-edits"

@@ -5,6 +5,7 @@
   --color-brand-700: #604d41;
   --color-brand-100: #efe6dc;
   --color-accent-700: #9f7650;
+  --color-accent-800: #835f3f;
   --color-accent-600: #b98b61;
   --color-accent-500: #c7a17a;
   --color-accent-100: #f6eadc;
@@ -26,6 +27,8 @@
 
   --font-sans: Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-display: "Noto Serif KR", Batang, serif;
+  --font-family-base: var(--font-sans);
+  --font-family-display: var(--font-display);
   --font-size-12: 0.75rem;
   --font-size-14: 0.875rem;
   --font-size-16: 1rem;
@@ -35,6 +38,9 @@
   --font-size-32: 2rem;
   --font-size-40: 2.5rem;
   --font-size-52: 3.25rem;
+  --font-size-sm: var(--font-size-14);
+  --font-size-xl: var(--font-size-20);
+  --font-size-2xl: var(--font-size-24);
   --font-weight-regular: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
@@ -47,8 +53,11 @@
   --space-2: 0.5rem;
   --space-3: 0.75rem;
   --space-4: 1rem;
+  --space-5: 1.25rem;
   --space-6: 1.5rem;
+  --space-7: 1.75rem;
   --space-8: 2rem;
+  --space-10: 2.5rem;
   --space-12: 3rem;
   --space-16: 4rem;
   --radius-sm: 0.5rem;
@@ -58,6 +67,8 @@
   --shadow-sm: 0 1px 2px rgb(35 31 28 / 6%);
   --shadow-md: 0 10px 30px rgb(63 48 40 / 9%);
   --content-max: 75rem;
+  --container-gutter: clamp(1rem, 3vw, 2rem);
+  --color-brand: var(--color-brand-800);
   --header-height: 4.5rem;
   --control-height: 3rem;
   --breakpoint-mobile: 40rem;

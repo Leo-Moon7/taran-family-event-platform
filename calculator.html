@@ -1,93 +1,31 @@
 <!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="스몰웨딩, 돌·백일, 환갑·칠순, 홈파티 등 가족행사 예상 총예산을 계산합니다.">
-  <meta name="theme-color" content="#153c36">
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="행사 종류, 인원, 장소와 필요한 서비스를 선택해 가족행사 예상 비용을 계산하세요.">
   <title>가족행사 비용 계산기 | 따란</title>
-  <link rel="stylesheet" href="styles/tokens.css">
-  <link rel="stylesheet" href="styles/reset.css">
-  <link rel="stylesheet" href="styles/base.css">
-  <link rel="stylesheet" href="styles/layout.css">
-  <link rel="stylesheet" href="styles/components/header.css">
-  <link rel="stylesheet" href="styles/components/button.css">
-  <link rel="stylesheet" href="styles/components/form.css">
-  <link rel="stylesheet" href="styles/components/card.css">
-  <link rel="stylesheet" href="styles/components/badge.css">
-  <link rel="stylesheet" href="styles/pages/member.css">
-  <script src="scripts/core/storage.js"></script>
+  <link rel="stylesheet" href="styles/tokens.css"><link rel="stylesheet" href="styles/reset.css"><link rel="stylesheet" href="styles/base.css"><link rel="stylesheet" href="styles/layout.css"><link rel="stylesheet" href="styles/components/header.css"><link rel="stylesheet" href="styles/components/button.css"><link rel="stylesheet" href="styles/components/form.css"><link rel="stylesheet" href="styles/components/card.css"><link rel="stylesheet" href="styles/pages/calculator.css">
+  <script src="scripts/core/brand.js"></script><script src="scripts/core/storage.js"></script>
 </head>
 <body>
-  <header class="site-header"><a class="brand" href="index.html"><span class="brand-mark">m</span><span>따란</span><small>T'ARAN</small></a><nav aria-label="주요 메뉴"><a href="index.html#finder">조건 찾기</a><a href="calculator.html" aria-current="page">비용 계산기</a><a href="checklist.html">체크리스트</a><a href="articles.html">준비백과</a><a href="community.html">커뮤니티</a><a href="venues.html">업체 전체</a><a class="auth-link" href="login.html" data-auth-link>로그인</a></nav></header>
-  <div class="prototype-banner">계산 결과는 준비용 예상 금액입니다. 실제 계약 전 업체 견적을 다시 확인하세요.</div>
-
-  <main class="tool-page calculator-page">
-    <section class="tool-page-hero">
-      <div><p class="eyebrow">비용 계산기</p><h1>행사 종류에 맞춰<br>예상 비용을 계산해보세요.</h1><p id="calculator-event-note">아이 행사, 결혼 준비, 부모님 행사, 홈파티까지 필요한 항목만 입력하면 됩니다.</p></div>
-      <aside class="account-save-note"><span>계정 저장</span><strong id="calculator-save-status">로그인 상태 확인 중</strong><a id="calculator-login-link" href="login.html?return=calculator.html">로그인하고 이어보기</a></aside>
-    </section>
-
-    <section class="calculator-workspace">
-      <form class="cost-form upgraded-cost-form calculator-full-form" id="calculator-form">
-        <div class="calculator-flow" id="calculator-flow" aria-label="비용 계산 조건 선택"></div>
-        <div class="calculator-form-heading"><span>먼저 입력할 항목</span><h2 id="calculator-basic-title">행사 종류와 인원</h2><p>행사에 맞는 기본값을 먼저 고른 뒤 필요한 항목만 수정하세요.</p></div>
-        <label class="wide calculator-event-select-label">행사 종류<select id="event-type">
-          <option value="kids" selected>아이 행사</option>
-          <option value="wedding">결혼 준비</option>
-          <option value="parents">부모님 행사</option>
-          <option value="home">가족·홈파티</option>
-        </select><span></span></label>
-        <label>성인 인원<input type="number" id="adult-count" min="0" max="300" value="20" inputmode="numeric"><span>명</span></label>
-        <label>성인 1인 식대<input type="number" id="adult-price" min="0" step="1000" value="70000" inputmode="numeric"><span>원</span></label>
-        <label>어린이 인원<input type="number" id="child-count" min="0" max="100" value="5" inputmode="numeric"><span>명</span></label>
-        <label>어린이 1인 식대<input type="number" id="child-price" min="0" step="1000" value="35000" inputmode="numeric"><span>원</span></label>
-
-        <div class="calculator-form-heading optional"><span>선택해서 입력할 항목</span><h2>장소와 준비 비용</h2><p>아직 정하지 않은 항목은 0원으로 두어도 됩니다.</p></div>
-        <label>장소 대관료<input type="number" id="venue-cost" min="0" step="10000" value="0" inputmode="numeric"><span>원</span></label>
-        <label>상차림·스타일링<input type="number" id="table-cost" min="0" step="10000" value="500000" inputmode="numeric"><span>원</span></label>
-        <label>스냅·영상<input type="number" id="photo-cost" min="0" step="10000" value="600000" inputmode="numeric"><span>원</span></label>
-        <label>의상·헤어·메이크업<input type="number" id="outfit-cost" min="0" step="10000" value="300000" inputmode="numeric"><span>원</span></label>
-        <label>답례품·선물 수량<input type="number" id="gift-count" min="0" max="500" value="25" inputmode="numeric"><span>개</span></label>
-        <label>답례품·선물 1개 가격<input type="number" id="gift-price" min="0" step="500" value="8000" inputmode="numeric"><span>원</span></label>
-        <label class="wide">교통·추가 주문 등 기타 비용<input type="number" id="extra-cost" min="0" step="10000" value="100000" inputmode="numeric"><span>원</span></label>
-        <button class="text-button calculator-reset" id="calculator-reset" type="button">입력값 초기화</button>
+  <header class="site-header" data-site-header><div class="site-header__inner"><a class="brand" href="index.html" aria-label="따란 홈"><span class="brand__name"><span>따란</span><small>T'ARAN</small></span></a><button class="site-header__toggle" type="button" aria-controls="site-navigation" aria-expanded="false" data-menu-toggle><span class="visually-hidden">메뉴 열기</span>☰</button><nav class="site-nav" id="site-navigation" aria-label="주요 메뉴"><a href="venues.html">업체 찾기</a><a href="compare.html">비교함 <span class="nav-count" data-compare-count hidden></span></a><a aria-current="page" href="calculator.html">비용 계산기</a><a href="checklist.html">준비 체크리스트</a><a href="articles.html">준비 가이드</a><a class="site-nav__auth" href="login.html" data-auth-link>로그인</a></nav></div></header>
+  <main>
+    <section class="calculator-hero"><div class="container"><p class="eyebrow">가족행사 비용 계산기</p><h1>행사에 맞는 항목만 골라<br>예상 비용을 계산해보세요.</h1><p>행사 종류에 따라 필요한 항목과 기본 범위가 달라집니다. 결과는 실제 견적이 아닌 준비 예산 참고용입니다.</p></div></section>
+    <section class="page-section"><div class="container calculator-layout">
+      <form class="calculator-flow" id="calculator-form">
+        <div class="calculator-progress"><span id="calculator-step-label">1 / 4</span><div><i id="calculator-progress-bar"></i></div></div>
+        <section class="calculator-step" data-step="1"><h2>어떤 행사를 준비하시나요?</h2><p>행사 종류를 선택하면 다음 질문이 행사에 맞게 바뀝니다.</p><div class="option-grid" data-single-options>
+          <button type="button" data-value="kids"><strong>아이 행사</strong><span>백일 · 돌잔치 · 키즈 생일파티</span></button><button type="button" data-value="wedding"><strong>결혼 준비</strong><span>상견례 · 스몰웨딩 · 브라이덜 샤워</span></button><button type="button" data-value="parents"><strong>부모님 행사</strong><span>환갑 · 칠순 · 팔순 · 퇴임식</span></button><button type="button" data-value="home"><strong>가족·홈파티</strong><span>집들이 · 명절 · 기념일 · 가족모임</span></button>
+        </div></section>
+        <section class="calculator-step" data-step="2" hidden><h2>몇 분이 함께하나요?</h2><p id="calculator-guests-guide"></p><div class="option-grid" data-single-options><button type="button" data-value="10"><strong>10명 이하</strong><span>가족 중심 소규모</span></button><button type="button" data-value="30"><strong>11~30명</strong><span>가까운 가족과 지인</span></button><button type="button" data-value="50"><strong>31~50명</strong><span>가족행사 일반 규모</span></button><button type="button" data-value="80"><strong>51~80명</strong><span>연회·소규모 예식</span></button><button type="button" data-value="120"><strong>81명 이상</strong><span>대형 연회</span></button></div></section>
+        <section class="calculator-step" data-step="3" hidden><h2>어떤 공간을 생각하시나요?</h2><p id="calculator-space-guide"></p><div class="option-grid" id="calculator-space-options" data-single-options></div></section>
+        <section class="calculator-step" data-step="4" hidden><h2>어떤 준비가 더 필요한가요?</h2><p>필요한 항목은 여러 개 선택할 수 있습니다.</p><div class="option-grid" id="calculator-service-options" data-multi-options></div></section>
+        <div class="calculator-actions"><button class="button button--secondary" type="button" id="calculator-prev" hidden>이전</button><button class="button button--primary" type="button" id="calculator-next" disabled>다음</button></div>
       </form>
-
-      <aside class="total-card upgraded-total-card calculator-result-card">
-        <span>우리 가족 예상 총예산</span><strong id="total-cost">0원</strong><p>참석자 1인당 약 <b id="per-person">0원</b></p>
-        <div class="cost-breakdown" id="cost-breakdown"></div>
-        <div class="budget-recommendation"><span id="budget-band">예산 분석 중</span><strong id="budget-recommendation">입력한 항목을 기준으로 안내합니다.</strong></div>
-        <a class="button button-primary" href="venues.html">업체 비교하기</a><a class="calculator-secondary-link" href="checklist.html">준비 일정 확인하기</a>
-      </aside>
-    </section>
-
-    <section class="monetization-row calculator-monetization" aria-label="계산기 하단 추천 정보">
-      <aside class="soft-monetization calculator-page-ad">
-        <span>계산 팁</span>
-        <div>
-          <strong>총액이 커 보일 때는 고정비와 선택비를 나눠보세요.</strong>
-          <p>식대와 대관료는 고정비, 스타일링·촬영·답례품은 조정 가능한 선택비로 보면 예산 조절이 쉬워집니다.</p>
-        </div>
-      </aside>
-      <aside class="affiliate-placeholder calculator-affiliate-placeholder">
-        <div class="monetization-heading"><span>다음 준비</span><strong>예산을 정한 뒤 확인하면 좋은 항목</strong></div>
-        <p>답례품, 초대장, 케이크, 감사패처럼 금액 차이가 생기기 쉬운 항목을 따로 비교해보세요.</p>
-      </aside>
-    </section>
+      <aside class="calculator-result" aria-live="polite"><span>현재 예상 비용</span><strong id="calculator-total">0원 ~ 0원</strong><p id="calculator-result-note">행사 종류를 선택하면 예상 범위를 계산합니다.</p><div class="calculator-breakdown" id="calculator-breakdown"></div><a class="button button--primary" id="calculator-venues-link" href="venues.html">이 조건으로 업체 보기</a><a class="button button--secondary" id="calculator-checklist-link" href="checklist.html">준비 체크리스트 만들기</a></aside>
+    </div></section>
   </main>
-
-  <footer><a class="brand footer-brand" href="index.html"><span class="brand-mark">m</span><span>따란</span></a><p>필요한 항목만 입력해 예산을 정리하세요.</p><p class="footer-links"><a href="articles.html">준비백과</a><a href="community.html">커뮤니티</a><a href="about.html">서비스 소개</a><a href="terms.html">이용약관</a><a href="privacy.html">개인정보처리방침</a><a href="contact.html">문의</a></p><p class="legal">계산 결과는 실제 견적이 아닙니다.</p></footer>
-  <script src="content-config.js"></script><script src="scripts/core/config.js"></script><script src="scripts/core/api.js"></script><script src="scripts/core/auth.js"></script><script src="scripts/core/analytics.js"></script><script src="calculator.js?v=5"></script><script src="ui.js?v=18"></script>
+  <footer class="site-footer"><div class="container site-footer__inner"><div><strong>따란</strong><small>T'ARAN · 가족행사 장소 비교와 견적 문의</small></div><nav aria-label="정책 메뉴"><a href="privacy.html">개인정보처리방침</a><a href="terms.html">이용약관</a><a href="contact.html">문의</a></nav></div></footer>
+  <script src="content-config.js"></script><script src="scripts/core/config.js"></script><script src="scripts/core/api.js"></script><script src="scripts/core/auth.js"></script><script src="scripts/core/analytics.js"></script><script src="scripts/core/compare-store.js"></script><script src="scripts/components/header.js"></script><script src="scripts/pages/calculator.js"></script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-

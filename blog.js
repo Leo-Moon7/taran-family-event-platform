@@ -161,6 +161,12 @@
     const slug = params.get("slug") || "contract-questions";
     const post = bySlug.get(slug) || posts[0];
     if (!post) return;
+    const topicCta = (() => {
+      const source = `${post.category} ${post.title} ${(post.tags || []).join(" ")}`;
+      if (/예산|비용|견적/.test(source)) return { href: "calculator.html", eyebrow: "예상 비용 확인", title: "내 행사 조건으로 예상 비용을 계산해보세요.", label: "비용 계산기 열기" };
+      if (/일정|체크|당일|준비 순서/.test(source)) return { href: "checklist.html", eyebrow: "준비 일정 만들기", title: "행사일에 맞춘 체크리스트로 이어가세요.", label: "체크리스트 만들기" };
+      return { href: "venues.html", eyebrow: "업체 비교", title: "읽은 기준으로 실제 업체 조건을 비교해보세요.", label: "업체 찾아보기" };
+    })();
 
     document.title = `${post.title} | 따란`;
     const description = document.querySelector("meta[name='description']");
@@ -203,6 +209,11 @@
         </div>
         ${renderArticleListBox("읽고 바로 이어서 할 일", post.nextActions, "is-actions")}
         <div class="blog-tag-row">${renderTags(post.tags)}</div>
+        <aside class="article-conversion">
+          <span>${escapeHtml(topicCta.eyebrow)}</span>
+          <strong>${escapeHtml(topicCta.title)}</strong>
+          <a class="button button--primary" href="${topicCta.href}">${escapeHtml(topicCta.label)}</a>
+        </aside>
       </section>
     `;
 

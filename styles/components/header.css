@@ -1,7 +1,7 @@
 .site-header { position: sticky; z-index: 50; top: 0; border-bottom: 1px solid var(--color-border); background: rgb(255 255 255 / 96%); backdrop-filter: blur(12px); }
 .site-header__inner { display: flex; width: min(100% - 2rem, var(--content-max)); min-height: var(--header-height); align-items: center; justify-content: space-between; gap: var(--space-6); margin-inline: auto; }
 .brand { display: inline-flex; min-height: 44px; align-items: center; gap: var(--space-3); font-weight: var(--font-weight-bold); }
-.brand__mark { display: grid; width: 2.5rem; height: 2.5rem; place-items: center; border-radius: var(--radius-md); color: #fff; background: var(--color-brand-800); font-family: var(--font-display); font-size: var(--font-size-24); }
+.brand__mark { display: none; }
 .brand-mark { display: grid; width: 2.5rem; height: 2.5rem; place-items: center; border-radius: var(--radius-md); color: #fff; background: var(--color-brand-800); font-family: var(--font-display); font-size: var(--font-size-20); }
 .brand__name { display: grid; line-height: 1.05; }
 .brand__name small { color: var(--color-accent-700); font-size: var(--font-size-12); letter-spacing: 0.08em; }
@@ -9,6 +9,8 @@
 .site-nav a, .site-nav button { display: inline-flex; min-height: 44px; align-items: center; padding-inline: var(--space-3); border: 0; border-radius: var(--radius-sm); color: var(--color-text); background: transparent; font-weight: var(--font-weight-semibold); }
 .site-nav a:hover, .site-nav button:hover, .site-nav a[aria-current="page"] { color: var(--color-brand-800); background: var(--color-bg-subtle); }
 .site-nav__auth { margin-left: var(--space-2); color: #fff !important; background: var(--color-brand-800) !important; }
+.site-nav__cta { margin-left: var(--space-1); color: #fff !important; }
+.nav-count, .mobile-bottom-nav__count { display: inline-grid; min-width: 1.25rem; height: 1.25rem; place-items: center; border-radius: 50%; color: #fff; background: var(--color-accent-700); font-size: .7rem; line-height: 1; }
 .nav-menu { position: relative; }
 .nav-menu__panel { position: absolute; top: calc(100% + var(--space-2)); right: 0; display: none; width: min(22rem, calc(100vw - 2rem)); padding: var(--space-2); border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); box-shadow: var(--shadow-md); }
 .nav-menu:focus-within .nav-menu__panel, .nav-menu:hover .nav-menu__panel, .nav-menu[data-open="true"] .nav-menu__panel { display: grid; }
@@ -21,9 +23,21 @@
   .site-header[data-menu-open="true"] .site-nav { display: flex; }
   .site-nav a, .site-nav button { width: 100%; justify-content: flex-start; }
   .site-nav__auth { margin: var(--space-2) 0 0; justify-content: center !important; }
+  .site-nav__cta { margin: var(--space-2) 0 0; justify-content: center !important; }
   .nav-menu__panel { position: static; width: 100%; margin-block: var(--space-1) var(--space-2); box-shadow: none; }
 }
 @media (max-width: 40rem) { .site-header__inner { width: min(100% - 1.5rem, var(--content-max)); } }
+
+.mobile-bottom-nav { position: fixed; z-index: 80; right: 0; bottom: 0; left: 0; display: none; min-height: calc(4rem + env(safe-area-inset-bottom)); padding: .35rem .45rem env(safe-area-inset-bottom); border-top: 1px solid var(--color-border); background: rgb(255 255 255 / 98%); box-shadow: 0 -4px 16px rgb(65 49 39 / 8%); }
+.mobile-bottom-nav a { position: relative; display: grid; min-width: 0; min-height: 48px; flex: 1; place-items: center; align-content: center; gap: .1rem; color: var(--color-text-muted); font-size: .72rem; }
+.mobile-bottom-nav a > span { font-size: 1.2rem; line-height: 1; }
+.mobile-bottom-nav a[aria-current="page"] { color: var(--color-brand-800); }
+.mobile-bottom-nav__count { position: absolute; top: .1rem; left: calc(50% + .45rem); }
+@media (max-width: 40rem) {
+  body { padding-bottom: calc(4rem + env(safe-area-inset-bottom)); }
+  .mobile-bottom-nav { display: flex; }
+  .site-footer { padding-bottom: var(--space-12); }
+}
 
 /* 기존 페이지의 의미 있는 HTML 내비게이션도 새 공통 헤더에서 유지합니다. */
 .site-header:not(:has(.site-header__inner)) { display: flex; min-height: var(--header-height); align-items: center; justify-content: space-between; gap: var(--space-5); padding-inline: max(var(--container-gutter), calc((100% - var(--content-max)) / 2)); }

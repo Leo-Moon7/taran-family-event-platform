@@ -1,54 +1,24 @@
 <!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="따란에서 가족행사 장소와 업체를 행사 종류, 지역, 인원과 예산 기준으로 찾아보세요.">
-  <meta name="theme-color" content="#ffffff">
-  <title>장소·업체 찾기 | 따란 T'ARAN</title>
-  <link rel="stylesheet" href="styles/tokens.css">
-  <link rel="stylesheet" href="styles/reset.css">
-  <link rel="stylesheet" href="styles/base.css">
-  <link rel="stylesheet" href="styles/layout.css">
-  <link rel="stylesheet" href="styles/components/header.css">
-  <link rel="stylesheet" href="styles/components/button.css">
-  <link rel="stylesheet" href="styles/components/form.css">
-  <link rel="stylesheet" href="styles/components/card.css">
-  <link rel="stylesheet" href="styles/components/badge.css">
-  <link rel="stylesheet" href="styles/components/filter.css">
-  <link rel="stylesheet" href="styles/components/modal.css">
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="가족행사 장소와 업체를 행사 종류, 지역, 인원, 예산과 이용 조건으로 비교하세요.">
+  <meta name="theme-color" content="#ffffff"><title>가족행사 장소·업체 찾기 | 따란</title>
+  <link rel="stylesheet" href="styles/tokens.css"><link rel="stylesheet" href="styles/reset.css"><link rel="stylesheet" href="styles/base.css"><link rel="stylesheet" href="styles/layout.css">
+  <link rel="stylesheet" href="styles/components/header.css"><link rel="stylesheet" href="styles/components/button.css"><link rel="stylesheet" href="styles/components/form.css"><link rel="stylesheet" href="styles/components/card.css"><link rel="stylesheet" href="styles/components/badge.css"><link rel="stylesheet" href="styles/components/filter.css"><link rel="stylesheet" href="styles/components/modal.css">
   <link rel="stylesheet" href="styles/pages/venues.css">
-  <script src="scripts/core/brand.js"></script>
-  <script src="scripts/core/storage.js"></script>
+  <script src="scripts/core/brand.js"></script><script src="scripts/core/storage.js"></script>
 </head>
 <body class="taran-directory">
   <header class="site-header" data-site-header>
     <div class="site-header__inner">
-      <a class="brand" href="index.html" aria-label="따란 홈">
-        <span class="brand__mark" aria-hidden="true">T</span>
-        <span class="brand__name"><span>따란</span><small>T'ARAN</small></span>
-      </a>
+      <a class="brand" href="index.html" aria-label="따란 홈"><span class="brand__name"><span>따란</span><small>T'ARAN</small></span></a>
       <button class="site-header__toggle" type="button" aria-controls="site-navigation" aria-expanded="false" data-menu-toggle><span class="visually-hidden">메뉴 열기</span>☰</button>
       <nav class="site-nav" id="site-navigation" aria-label="주요 메뉴">
-        <div class="nav-menu">
-          <button type="button" aria-haspopup="true" aria-expanded="false" data-nav-menu-button>행사 찾기</button>
-          <div class="nav-menu__panel">
-            <a href="venues.html?event=kids"><strong>아이 행사</strong><span>백일·돌잔치·키즈파티</span></a>
-            <a href="venues.html?event=wedding"><strong>결혼 준비</strong><span>상견례·스몰웨딩</span></a>
-            <a href="venues.html?event=parents"><strong>부모님 행사</strong><span>환갑·칠순·퇴임식</span></a>
-            <a href="venues.html?event=home"><strong>가족 모임</strong><span>집들이·명절·기념일</span></a>
-          </div>
-        </div>
-        <a aria-current="page" href="venues.html">업체·장소</a>
-        <a href="calculator.html">비용 계산기</a>
-        <div class="nav-menu">
-          <button type="button" aria-haspopup="true" aria-expanded="false" data-nav-menu-button>준비 가이드</button>
-          <div class="nav-menu__panel">
-            <a href="articles.html"><strong>준비백과</strong><span>계약·예산·준비 노하우</span></a>
-            <a href="checklist.html"><strong>체크리스트</strong><span>행사일 기준 준비 일정</span></a>
-          </div>
-        </div>
-        <a href="community.html">커뮤니티</a>
+        <a aria-current="page" href="venues.html">업체 찾기</a>
+        <a href="compare.html">비교함 <span class="nav-count" data-compare-count hidden></span></a>
+        <div class="nav-menu"><button type="button" aria-haspopup="true" aria-expanded="false" data-nav-menu-button>무료 도구</button><div class="nav-menu__panel"><a href="calculator.html"><strong>비용 계산기</strong><span>예상 비용 범위 확인</span></a><a href="checklist.html"><strong>준비 체크리스트</strong><span>행사일 기준 할 일</span></a></div></div>
+        <a href="articles.html">준비 가이드</a><a href="provider-register.html">업체 등록</a>
         <a class="site-nav__auth" href="login.html" data-auth-link>로그인</a>
       </nav>
     </div>
@@ -56,95 +26,58 @@
 
   <main>
     <section class="directory-heading">
-      <div class="container directory-heading__inner">
-        <div>
-          <span class="badge">장소·업체 찾기</span>
-          <h1>가족행사 파트너를<br>조건별로 비교하세요.</h1>
-          <p>공개된 후기 또는 평점이 있는 업체만 보여드리며, 가격과 수용 인원은 확인된 정보만 표시합니다.</p>
-        </div>
-      </div>
+      <div class="container directory-heading__inner"><div><p class="directory-heading__eyebrow">가족행사 장소·업체 찾기</p><h1>가족행사 장소와 업체를<br>같은 기준으로 비교해보세요.</h1><p>행사 종류, 지역, 인원과 예산을 선택하면 조건에 맞는 업체를 확인할 수 있습니다.</p></div></div>
     </section>
 
     <section class="directory-search page-section" aria-labelledby="directory-search-title">
       <div class="container">
-        <div class="section-header directory-search__header">
-          <div class="section-header__copy">
-            <h2 id="directory-search-title">검색 조건</h2>
-            <p>행사 종류와 지역을 먼저 선택하고 필요한 조건을 더해보세요.</p>
-          </div>
-          <button class="button button--secondary mobile-filter-button" type="button" data-filter-open aria-controls="directory-filter-panel" aria-expanded="false">필터 열기</button>
-        </div>
-
+        <div class="section-header directory-search__header"><div class="section-header__copy"><h2 id="directory-search-title">검색 조건</h2><p>원하는 조건을 선택한 뒤 결과를 비교함에 담아보세요.</p></div><button class="button button--secondary mobile-filter-button" type="button" data-filter-open aria-controls="directory-filter-panel" aria-expanded="false">필터 열기</button></div>
         <form class="filter-panel" id="directory-filter-panel" data-filter-form aria-labelledby="directory-filter-title">
-          <div class="filter-panel__mobile-head">
-            <strong id="directory-filter-title">검색 조건</strong>
-            <button class="button button--text" type="button" data-filter-close>닫기</button>
-          </div>
+          <div class="filter-panel__mobile-head"><strong id="directory-filter-title">검색 조건</strong><button class="button button--text" type="button" data-filter-close>닫기</button></div>
           <div class="filter-panel__grid">
-            <div class="field filter-panel__query">
-              <label class="field__label" for="directory-query">업체명·지역 검색</label>
-              <input class="input" id="directory-query" type="search" placeholder="예: 한정식, 강남구, 야외">
-            </div>
-            <div class="field">
-              <label class="field__label" for="directory-event">행사 종류</label>
-              <select class="select" id="directory-event"><option value="all">전체 행사</option><option value="kids">아이 행사</option><option value="wedding">결혼 준비</option><option value="parents">부모님 행사</option><option value="home">가족 모임</option></select>
-            </div>
-            <div class="field">
-              <label class="field__label" for="directory-province">시·도</label>
-              <select class="select" id="directory-province"><option value="all">전체 시·도</option></select>
-            </div>
-            <div class="field">
-              <label class="field__label" for="directory-district">시·군·구</label>
-              <select class="select" id="directory-district" disabled><option value="all">전체 시·군·구</option></select>
-            </div>
-            <div class="field">
-              <label class="field__label" for="directory-guests">예상 인원</label>
-              <select class="select" id="directory-guests"><option value="0">인원 무관</option><option value="10">10명 이하</option><option value="30">30명 이하</option><option value="50">50명 이하</option><option value="100">100명 이하</option><option value="101">100명 초과</option></select>
-            </div>
-            <div class="field">
-              <label class="field__label" for="directory-budget">예산</label>
-              <select class="select" id="directory-budget"><option value="0">예산 무관</option><option value="1000000">100만 원 이하</option><option value="2000000">200만 원 이하</option><option value="3000000">300만 원 이하</option><option value="5000000">500만 원 이하</option><option value="5000001">500만 원 초과</option></select>
-            </div>
+            <div class="field filter-panel__query"><label class="field__label" for="directory-query">업체명·지역 검색</label><input class="input" id="directory-query" type="search" placeholder="예: 한정식, 강남구, 호텔"></div>
+            <div class="field"><label class="field__label" for="directory-event">행사 종류</label><select class="select" id="directory-event"><option value="all">전체 행사</option><option value="kids">돌잔치·백일</option><option value="parents">환갑·칠순</option><option value="wedding">상견례·소규모 결혼식</option><option value="home">가족모임</option></select></div>
+            <div class="field"><label class="field__label" for="directory-province">시·도</label><select class="select" id="directory-province"><option value="all">전체 시·도</option></select></div>
+            <div class="field"><label class="field__label" for="directory-district">시·군·구</label><select class="select" id="directory-district" disabled><option value="all">전체 시·군·구</option></select></div>
+            <div class="field"><label class="field__label" for="directory-guests">예상 인원</label><select class="select" id="directory-guests"><option value="0">인원 무관</option><option value="10">10명 이하</option><option value="30">30명 이하</option><option value="50">50명 이하</option><option value="100">100명 이하</option><option value="101">100명 초과</option></select></div>
+            <div class="field"><label class="field__label" for="directory-budget">예산</label><select class="select" id="directory-budget"><option value="0">예산 무관</option><option value="1000000">100만 원 이하</option><option value="2000000">200만 원 이하</option><option value="3000000">300만 원 이하</option><option value="5000000">500만 원 이하</option><option value="5000001">500만 원 초과</option></select></div>
+            <div class="field"><label class="field__label" for="directory-category">업체 유형</label><select class="select" id="directory-category"><option value="all">전체 유형</option></select></div>
           </div>
           <details class="detail-filter">
-            <summary>상세 필터</summary>
+            <summary>상세 조건</summary>
             <div class="detail-filter__grid">
-              <div class="field"><label class="field__label" for="directory-category">서비스 유형</label><select class="select" id="directory-category"><option value="all">전체 서비스</option></select></div>
+              <div class="field"><label class="field__label" for="directory-guarantee">최소 보증 인원</label><select class="select" id="directory-guarantee"><option value="0">무관</option><option value="10">10명 이하</option><option value="30">30명 이하</option><option value="50">50명 이하</option></select></div>
+              <div class="field"><label class="field__label" for="directory-parking">주차</label><select class="select" id="directory-parking"><option value="all">무관</option><option value="yes">주차 가능</option></select></div>
+              <div class="field"><label class="field__label" for="directory-private">단독 공간</label><select class="select" id="directory-private"><option value="all">무관</option><option value="yes">단독 공간</option></select></div>
+              <div class="field"><label class="field__label" for="directory-wheelchair">휠체어 접근</label><select class="select" id="directory-wheelchair"><option value="all">무관</option><option value="yes">접근 가능</option></select></div>
+              <div class="field"><label class="field__label" for="directory-outside-food">외부 음식</label><select class="select" id="directory-outside-food"><option value="all">무관</option><option value="yes">반입 가능</option></select></div>
+              <div class="field"><label class="field__label" for="directory-outside-vendor">외부 업체</label><select class="select" id="directory-outside-vendor"><option value="all">무관</option><option value="yes">이용 가능</option></select></div>
+              <div class="field"><label class="field__label" for="directory-status">정보 상태</label><select class="select" id="directory-status"><option value="all">전체 상태</option><option value="verified">정보 확인</option><option value="claimed">업체 담당자 등록</option><option value="basic">기본 정보</option></select></div>
             </div>
           </details>
-          <div class="filter-panel__actions">
-            <button class="button button--text" type="reset" data-filter-reset>조건 초기화</button>
-            <button class="button button--primary" type="submit">결과 보기</button>
-          </div>
+          <div class="filter-panel__actions"><button class="button button--text" type="reset" data-filter-reset>조건 초기화</button><button class="button button--primary" type="submit">조건 적용</button></div>
         </form>
-
         <div class="filter-chips" id="directory-filter-chips" aria-label="선택된 검색 조건"></div>
-        <div class="result-toolbar">
-          <strong id="directory-result-summary">업체 정보를 불러오는 중입니다.</strong>
-          <label class="result-toolbar__sort" for="directory-sort-quick">정렬
-            <select class="select select--compact" id="directory-sort-quick"><option value="region">지역순</option><option value="review-count">후기 많은 순</option><option value="rating-high">평점 높은 순</option><option value="rating-low">평점 낮은 순</option><option value="price-low">가격 낮은 순</option><option value="updated">최근 확인 순</option></select>
-          </label>
-        </div>
+      </div>
+    </section>
+
+    <section class="directory-results-section page-section page-section--subtle">
+      <div class="container">
+        <div class="result-toolbar"><strong id="directory-result-summary" aria-live="polite">업체 정보를 불러오는 중입니다.</strong><label for="directory-sort-quick">정렬<select class="select" id="directory-sort-quick"><option value="region">지역순</option><option value="updated">최근 확인순</option><option value="price-low">가격 낮은순</option><option value="review-count">후기 많은순</option><option value="rating-high">평점 높은순</option><option value="rating-low">평점 낮은순</option></select></label></div>
         <div class="directory-results" id="directory-results" aria-live="polite" aria-busy="true"></div>
         <nav class="pagination" id="directory-pagination" aria-label="검색 결과 페이지"></nav>
       </div>
     </section>
   </main>
 
-  <footer class="site-footer"><div class="container site-footer__inner"><div><strong>따란</strong><small>T'ARAN · 가족행사 장소와 업체 비교</small></div><nav aria-label="정책 메뉴"><a href="about.html">서비스 소개</a><a href="privacy.html">개인정보처리방침</a><a href="terms.html">이용약관</a><a href="contact.html">문의</a></nav></div></footer>
+  <aside class="compare-dock" data-compare-dock hidden aria-live="polite"><div><strong>비교할 업체 <span data-compare-dock-count>0</span>개 선택</strong><div data-compare-dock-items></div></div><a class="button button--primary" href="compare.html">비교하기</a></aside>
+  <footer class="site-footer"><div class="container site-footer__inner"><div><strong>따란</strong><small>T'ARAN · 가족행사 장소 비교와 견적 문의</small></div><nav aria-label="정책 메뉴"><a href="about.html">서비스 소개</a><a href="privacy.html">개인정보처리방침</a><a href="terms.html">이용약관</a><a href="contact.html">문의</a></nav></div></footer>
 
-  <script src="review-provider-candidates.js?v=1"></script>
-  <script src="review-lifecycle-candidates.js?v=1"></script>
-  <script src="review-lifecycle-verified.js?v=6"></script>
-  <script src="review-local-api-partners.js?v=3"></script>
-  <script src="data.js?v=19"></script>
-  <script src="regions.js?v=1"></script>
+  <script src="review-provider-candidates.js?v=1"></script><script src="review-lifecycle-candidates.js?v=1"></script><script src="review-lifecycle-verified.js?v=6"></script><script src="review-local-api-partners.js?v=3"></script><script src="data.js?v=19"></script><script src="regions.js?v=1"></script>
   <script src="content-config.js"></script><script src="scripts/core/config.js"></script><script src="scripts/core/api.js"></script><script src="scripts/core/auth.js"></script><script src="scripts/core/analytics.js"></script>
+  <script src="scripts/core/provider-status.js"></script><script src="scripts/core/compare-store.js"></script><script src="scripts/core/search-context.js"></script>
   <script src="content-overrides.js"></script><script src="content-runtime.js"></script>
-  <script src="scripts/components/header.js"></script>
-  <script src="scripts/components/filters.js"></script>
-  <script src="scripts/components/states.js"></script>
-  <script src="scripts/components/pagination.js"></script>
+  <script src="scripts/components/header.js"></script><script src="scripts/components/filters.js"></script><script src="scripts/components/states.js"></script><script src="scripts/components/pagination.js"></script><script src="scripts/components/toast.js"></script>
   <script src="scripts/pages/venues.js"></script>
 </body>
 </html>

@@ -12,7 +12,7 @@
   const brand = window.PlatformBrand || { nameKo: "따란", nameEn: "T'ARAN" };
   const items = [
     ["dashboard", "index.html", "오늘 할 일"],
-    ["inquiries", "inquiries.html", "견적 관리"],
+    ["inquiries", "inquiries.html", "운영 예외"],
     ["providers", "providers.html", "업체 관리"],
     ["content", "content.html", "콘텐츠 관리"],
     ["banners", "banners.html", "배너 관리"],

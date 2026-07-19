@@ -34,6 +34,7 @@ function fail(message) {
 const files = walk(root);
 const scripts = files.filter(file => /\.(?:js|mjs)$/i.test(file));
 const htmlFiles = files.filter(file => /\.html$/i.test(file));
+const cssFiles = files.filter(file => /\.css$/i.test(file));
 
 for (const file of scripts) {
   const result = spawnSync(process.execPath, ["--check", file], { encoding: "utf8" });
@@ -72,6 +73,21 @@ for (const file of htmlFiles) {
   if (/upgrade\.css|styles\.css/i.test(source)) {
     fail(`삭제된 레거시 CSS 참조: ${relative(file)}`);
   }
+}
+
+const cssSource = cssFiles.map(file => fs.readFileSync(file, "utf8")).join("\n");
+const cssVariables = new Set(
+  [...cssSource.matchAll(/--([\w-]+)\s*:/g)].map(match => match[1])
+);
+const missingCssVariables = [
+  ...new Set(
+    [...cssSource.matchAll(/var\(--([\w-]+)/g)]
+      .map(match => match[1])
+      .filter(name => !cssVariables.has(name))
+  )
+].sort();
+if (missingCssVariables.length) {
+  fail(`정의되지 않은 CSS 변수: ${missingCssVariables.join(", ")}`);
 }
 
 const adminSchema = fs.readFileSync(path.join(root, "admin-schema.sql"), "utf8");

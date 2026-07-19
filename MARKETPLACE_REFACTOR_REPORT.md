@@ -1,0 +1,72 @@
+# 따란 업체 비교 마켓플레이스 전환 보고서
+
+기준일: 2026-07-20
+
+## 전환 결과
+
+따란의 핵심 이용 흐름을 `행사 조건 입력 → 업체 검색 → 최대 3곳 비교 → 한 번에 견적 문의 → 업체 응답 확인`으로 정리했습니다. 후기 수는 업체 공개 조건으로 사용하지 않으며, 업체명·지역·업종이 있는 기본 정보 업체도 목록에 포함합니다. 업체 상태는 `기본 정보`, `업체 담당자 등록`, `정보 확인`으로 구분합니다.
+
+## 새로 만든 핵심 화면
+
+- `compare.html`: 최대 3곳의 인원·가격·주차·이용 조건 비교
+- `inquiry.html`: 선택 업체에 같은 조건으로 통합 견적 문의
+- `provider-register.html`: 업체 담당자 직접 등록 신청
+
+## 주요 변경 파일
+
+- 홈페이지: `index.html`, `scripts/pages/home.js`, `styles/pages/home.css`
+- 업체 목록: `venues.html`, `scripts/pages/venues.js`, `styles/pages/venues.css`
+- 업체 상세: `provider.html`, `scripts/pages/provider.js`, `styles/pages/provider.css`
+- 계산기·체크리스트: `calculator.html`, `checklist.html` 및 각 페이지 전용 CSS·JS
+- 비교·문의·업체 등록: 각 신규 HTML, CSS, JS
+- 계정·업체 응답: `account.html`, `account.js`, `partner.html`, `scripts/pages/partner.js`
+- 관리자 예외 처리: `admin/inquiries.html`, `admin/providers.html`, 대시보드와 관련 스크립트
+- 공통 상태·저장: `scripts/core/provider-status.js`, `compare-store.js`, `inquiry-flow.js`, `search-context.js`
+
+## 데이터 구조
+
+`migrations/003_marketplace_comparison_flow.sql`에 다음 구조를 추가했습니다.
+
+- 업체의 행사 유형, 활동 지역, 수용 인원, 보증 인원, 식대, 대관료, 주차, 정책, 정보 상태
+- 문의 그룹, 문의 대상 업체, 업체 응답
+- 업체 직접 등록 신청
+- 회원 비교함과 체크리스트
+- 고객·업체·운영자 역할별 RLS
+- 통합 문의 생성 및 업체 등록 신청 RPC
+
+마이그레이션은 `create table if not exists`, `add column if not exists`, `drop policy if exists`를 사용해 재실행 가능한 형태로 작성했습니다.
+
+## 공개 및 검증 기준
+
+- 공개 최소 기준: 업체명, 지역 또는 주소, 업종
+- 후기가 없다는 이유만으로 숨기지 않음
+- 값이 없는 가격·인원·주차 정보는 숫자를 만들어내지 않음
+- 고객 화면에는 실제 값이 있는 항목을 우선 노출
+- 업체 담당자 등록 후 본인 업체 정보만 수정 가능
+- `정보 확인` 상태는 운영자가 확인한 정보에만 사용
+
+## 숨기거나 운영 예외로 이동한 기능
+
+- 핵심 내비게이션과 홈페이지에서 커뮤니티·포인트 리워드 홍보를 제거
+- 연결되지 않은 문의·저장 기능은 온라인 설정 전 공개 배포에서 숨김
+- 관리자는 정상 문의를 대신 처리하지 않고, 전달 실패·장기 미응답·업체 등록 승인 같은 예외만 처리
+- 샘플 통계와 가짜 방문자·매출 수치는 사용하지 않음
+
+## 자동 검사
+
+- JavaScript 문법 검사
+- HTML 중복 ID, 중복 스크립트, 로컬 파일 참조 검사
+- 핵심 운영 파일과 보안 정책 검사
+- 비교함 최대 3곳, 공개 기준, 통합 문의, RLS 구조 검사
+- 배포용 `dist/`에서 SQL·운영 문서·테스트 파일 제외 여부 검사
+
+## 운영 연결에 필요한 외부 작업
+
+코드에 비밀키를 넣지 않았습니다. 실제 온라인 문의·로그인·업체 응답을 사용하려면 운영자가 아래 작업을 완료해야 합니다.
+
+1. Supabase SQL Editor에서 기존 스키마와 `migrations/003_marketplace_comparison_flow.sql` 실행
+2. Netlify 환경변수에 `SUPABASE_URL`, `SUPABASE_ANON_KEY` 등록
+3. 관리자·업체·고객 테스트 계정으로 RLS 동작 확인
+4. 개인정보처리방침의 실제 사업자명, 연락처, 주소 확정
+
+Supabase 연결 전에는 고객 문의가 업체로 전송됐다고 표시하지 않고, 로컬 테스트 상태임을 명확히 알립니다.

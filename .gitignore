@@ -13,6 +13,7 @@ _verify/
 design-references/
 dist/
 .netlify/
+node_modules/
 
 # Archives
 *.zip
