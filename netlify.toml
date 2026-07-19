@@ -1,6 +1,6 @@
 [build]
-  command = "node scripts/build/write-config.mjs"
-  publish = "."
+  command = "node scripts/build/prepare-dist.mjs"
+  publish = "dist"
 
 [[redirects]]
   from = "/admin"
@@ -21,6 +21,11 @@
   from = "/venue.html"
   to = "/provider.html"
   status = 301
+
+[[redirects]]
+  from = "/favicon.ico"
+  to = "/assets/images/taran-logo-mark.svg"
+  status = 200
 
 [[headers]]
   for = "/*"

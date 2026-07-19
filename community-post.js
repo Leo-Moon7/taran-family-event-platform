@@ -79,21 +79,22 @@
     }
     const button = form.querySelector("[type='submit']");
     button.disabled = true;
+    button.textContent = "접수하는 중…";
     try {
-      const rows = await window.TaranApi.upsert(window.TaranConfig.tables.communityComments, {
+      await window.TaranApi.upsert(window.TaranConfig.tables.communityComments, {
         post_id: post.id,
         user_id: account.id,
         author_name: account.display_name || "따란 회원",
         content,
-        status: "published"
+        status: "pending"
       });
-      const created = rows?.[0];
-      if (created) comments.push(created);
       textarea.value = "";
-      render();
+      if (message) message.textContent = "댓글이 접수되었습니다. 개인정보와 광고성 내용을 확인한 뒤 공개합니다.";
     } catch (error) {
       if (message) message.textContent = error.message || "댓글을 등록하지 못했습니다.";
+    } finally {
       button.disabled = false;
+      button.textContent = "댓글 등록";
     }
   }
 

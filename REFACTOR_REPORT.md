@@ -1,6 +1,6 @@
 # 따란 구조 리팩터링 완료 보고서
 
-기준일: 2026-07-16
+기준일: 2026-07-19
 
 ## 완료 범위
 
@@ -18,6 +18,12 @@
 - 관리자 화면을 대시보드, 견적, 업체, 콘텐츠, 배너, 회원, 통계, 설정으로 분리했습니다.
 - 관리자 역할을 최고관리자, 운영관리자, 콘텐츠관리자, 업체관리자로 구분했습니다.
 - Netlify 배포 설정, 보안 헤더, 404, robots.txt, sitemap.xml을 추가했습니다.
+- 업체 역할의 전체 업체·후기·권한 요청 관리 권한을 제거하고 본인 업체 수정 RPC만 허용했습니다.
+- 커뮤니티 글과 댓글은 항상 검수 대기로 접수되며, 회원의 직접 상태 변경을 차단했습니다.
+- 기존 `editor` 역할을 `content`로 이전하고 관리자 메뉴와 DB 역할 범위를 일치시켰습니다.
+- 세션별 통계 이벤트 중복을 줄이고 임의 메타데이터 저장을 제한했습니다.
+- GitHub Actions와 저장소 자체 검사 스크립트를 추가했습니다.
+- Netlify 공개 묶음을 `dist/`로 분리해 SQL·마이그레이션·운영 문서·테스트 파일이 외부에 배포되지 않도록 했습니다.
 
 ## 생성한 핵심 파일
 
@@ -28,6 +34,9 @@
 - `scripts/pages/admin/*.js`, `scripts/pages/home.js`, `venues.js`, `provider.js`
 - `admin/*.html`, `admin-schema.sql`, `netlify.toml`, `_headers`, `_redirects`
 - `partner.html`, `scripts/pages/partner.js`
+- `migrations/002_security_hardening.sql`
+- `scripts/build/prepare-dist.mjs`
+- `scripts/tests/validate.mjs`, `scripts/tests/validate-dist.mjs`, `.github/workflows/quality.yml`
 
 ## 삭제한 레거시 파일
 
@@ -56,6 +65,8 @@
 - 관리자 파일 열람은 짧은 만료 시간의 서명 URL만 사용합니다.
 - 사용자·업체 입력은 일반 텍스트로 렌더링하고 URL 프로토콜을 제한합니다.
 - 관리자 경로는 검색 제외와 no-store 헤더를 적용합니다.
+- 업체 계정은 관리자 전체 데이터에 접근할 수 없고 승인된 본인 업체만 RPC로 수정합니다.
+- 커뮤니티 공개·숨김 상태는 운영 역할만 변경할 수 있습니다.
 
 ## 배포 시 필요한 외부 설정
 

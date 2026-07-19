@@ -13,6 +13,8 @@
   async function init() {
     const access = await window.TaranAdminReady;
     if (!access.allowed) return;
+    const offlineSection = document.querySelector("[data-offline-only]");
+    if (offlineSection) offlineSection.hidden = access.mode !== "preview";
     let values;
     if (access.mode === "online") {
       const [inquiries, contributions, providers, articles, banners] = await Promise.all([

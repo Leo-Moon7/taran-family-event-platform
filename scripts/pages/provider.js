@@ -286,7 +286,7 @@
       if (firstEvent && EVENT_LABELS[firstEvent]) form.elements.eventType.value = firstEvent;
       dialog.showModal();
       form.elements.eventType.focus();
-      window.TaranApi.rpc("taran_track_event", { p_event_name: "inquiry_started", p_page_path: "provider.html", p_metadata: {} }).catch(() => {});
+      window.TaranAnalytics?.track("inquiry_started", "provider.html").catch(() => {});
     });
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -311,7 +311,7 @@
           details: { note: String(values.get("note") || "").trim(), consentedAt: new Date().toISOString() },
           status: "pending"
         });
-        window.TaranApi.rpc("taran_track_event", { p_event_name: "inquiry_submitted", p_page_path: "provider.html", p_metadata: {} }).catch(() => {});
+        window.TaranAnalytics?.track("inquiry_submitted", "provider.html").catch(() => {});
         form.reset();
         dialog.close();
         window.TaranToast?.show("견적 문의를 접수했습니다.");

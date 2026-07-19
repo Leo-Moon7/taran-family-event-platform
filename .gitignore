@@ -11,6 +11,8 @@ backend/
 _tools/
 _verify/
 design-references/
+dist/
+.netlify/
 
 # Archives
 *.zip

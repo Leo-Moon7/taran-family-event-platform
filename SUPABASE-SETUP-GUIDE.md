@@ -9,6 +9,8 @@
 3. 저장소의 `admin-schema.sql` 전체를 붙여넣고 `Run`을 누릅니다.
 4. 오류 없이 완료되는지 확인합니다. 같은 SQL을 다시 실행해도 기존 표를 지우지 않도록 작성되어 있습니다.
 
+기존 프로젝트에 이전 스키마를 이미 실행했다면 `migrations/002_security_hardening.sql`만 추가로 실행합니다. 이 마이그레이션은 기존 업체·회원·콘텐츠 데이터를 삭제하지 않고 권한 정책과 검수 규칙만 강화합니다.
+
 ## 2. 로그인 주소 설정
 
 `Authentication > URL Configuration`에서 다음을 설정합니다.
@@ -31,7 +33,13 @@ where email = '내관리자이메일@example.com'
 on conflict (user_id) do update set role = 'owner', email = excluded.email;
 ```
 
-관리자 역할은 `owner`, `admin`, `operations`, `content`, `provider` 중 하나입니다.
+관리자 역할은 `owner`, `admin`, `operations`, `content` 중 하나입니다. 업체 담당자는 `provider` 역할을 사용하지만 관리자 화면이 아닌 `/partner.html`에서 자신에게 승인된 업체만 관리합니다.
+
+- `owner`: 전체 설정과 관리자 권한
+- `admin`: 전체 운영
+- `operations`: 견적·업체·회원 관리
+- `content`: 준비백과·배너·커뮤니티 관리
+- `provider`: 자신의 업체 정보만 관리
 
 ## 4. Netlify에 공개 설정값 넣기
 

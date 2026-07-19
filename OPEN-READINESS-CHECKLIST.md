@@ -1,6 +1,6 @@
 # 따란 운영 배포 점검표
 
-기준일: 2026-07-16
+기준일: 2026-07-19
 
 ## 소스 코드 완료
 
@@ -17,10 +17,16 @@
 - [x] 개인정보처리방침·이용약관
 - [x] 404·robots.txt·sitemap·보안 헤더
 - [x] 관리자·구형 운영 화면 검색 제외 및 리디렉션
+- [x] 업체 역할의 다른 업체 수정·후기 검수·권한 요청 관리 차단
+- [x] 커뮤니티 글·댓글의 공개 상태 우회 차단
+- [x] 관리자 역할과 메뉴 범위 일치
+- [x] JavaScript·HTML·보안 정책 자동 검사와 GitHub Actions
+- [x] 공개 배포 파일과 운영용 SQL·문서 분리
 
 ## 최초 배포 때 운영자가 입력할 값
 
 - [ ] Supabase에서 `admin-schema.sql` 실행
+- [ ] 기존 Supabase 프로젝트라면 `migrations/002_security_hardening.sql` 실행
 - [ ] Supabase Auth에서 첫 관리자 생성 후 owner 역할 등록
 - [ ] Netlify 환경변수 `SUPABASE_URL`, `SUPABASE_ANON_KEY` 입력
 - [ ] Supabase Auth의 Site URL과 Redirect URL에 실제 도메인 입력

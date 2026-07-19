@@ -21,10 +21,11 @@
     ["settings", "settings.html", "설정"]
   ];
   const roleViews = {
-    owner: items.map(item => item[0]), admin: items.map(item => item[0]), editor: items.map(item => item[0]),
-    operations: ["dashboard", "inquiries", "providers", "banners", "members", "analytics"],
-    content: ["dashboard", "content", "banners", "analytics"],
-    provider: ["dashboard", "providers"]
+    owner: items.map(item => item[0]),
+    admin: items.map(item => item[0]),
+    operations: ["dashboard", "inquiries", "providers", "members"],
+    content: ["dashboard", "content", "banners"],
+    provider: []
   };
 
   function makeLink([id, href, label]) {
@@ -117,6 +118,15 @@
       const logout = document.querySelector("[data-admin-logout]");
       if (logout) logout.hidden = false;
       if (!allowedViews.includes(view)) {
+        if (profile.role === "provider") {
+          accessMessage(
+            "업체 전용 관리 화면을 이용해 주세요.",
+            "승인된 업체 담당자는 자신의 업체 정보만 확인하고 수정할 수 있습니다.",
+            "../partner.html",
+            "내 업체 관리"
+          );
+          return { allowed: false, mode: "provider", role: profile.role, account, profile };
+        }
         accessMessage("이 메뉴를 사용할 권한이 없습니다.", "담당 업무에 필요한 관리자 메뉴만 사용할 수 있습니다.");
         return { allowed: false, mode: "forbidden", role: profile.role, account, profile };
       }

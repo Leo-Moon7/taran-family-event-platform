@@ -1,0 +1,11 @@
+{
+  "name": "taran-family-event-platform",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build/prepare-dist.mjs",
+    "test": "node scripts/tests/validate.mjs",
+    "test:dist": "node scripts/tests/validate-dist.mjs"
+  }
+}
