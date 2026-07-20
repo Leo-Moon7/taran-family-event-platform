@@ -1,6 +1,6 @@
 # 따란 운영 배포 점검표
 
-기준일: 2026-07-19
+기준일: 2026-07-20
 
 ## 소스 코드 완료
 
@@ -22,13 +22,20 @@
 - [x] 관리자 역할과 메뉴 범위 일치
 - [x] JavaScript·HTML·보안 정책 자동 검사와 GitHub Actions
 - [x] 공개 배포 파일과 운영용 SQL·문서 분리
+- [x] 업체 프로필 완성도·정보 갱신 상태 표시
+- [x] 문의 열람·응답률·평균 응답 시간 집계
+- [x] 문의 접수·12시간 리마인드 웹 알림 예약
+- [x] 24시간 문의 만료와 반복 미응답 업체 자동 제외
+- [x] 관리자 운영 예외 큐와 실제 성과 지표
 
 ## 최초 배포 때 운영자가 입력할 값
 
-- [ ] Supabase에서 `admin-schema.sql` 실행
-- [ ] 기존 Supabase 프로젝트라면 `migrations/002_security_hardening.sql` 실행
-- [ ] Supabase Auth에서 첫 관리자 생성 후 owner 역할 등록
-- [ ] Netlify 환경변수 `SUPABASE_URL`, `SUPABASE_ANON_KEY` 입력
+- [x] Supabase에서 `admin-schema.sql` 실행
+- [x] 기존 Supabase 프로젝트라면 `migrations/002_security_hardening.sql` 실행
+- [ ] Supabase SQL Editor에서 `migrations/003_marketplace_comparison_flow.sql` 실행 여부 확인
+- [ ] Supabase SQL Editor에서 `migrations/004_provider_automation.sql` 실행
+- [x] Supabase Auth에서 첫 관리자 생성 후 owner 역할 등록
+- [x] Netlify 환경변수 `SUPABASE_URL`, `SUPABASE_ANON_KEY` 입력
 - [ ] Supabase Auth의 Site URL과 Redirect URL에 실제 도메인 입력
 - [ ] 개인정보처리방침·푸터에 실제 사업자명, 대표자, 사업자등록번호, 연락처, 이메일 반영
 - [ ] sitemap.xml의 테스트 주소를 실제 도메인으로 교체
@@ -40,7 +47,7 @@
 1. 회원가입·로그인
 2. 관심 업체 저장 후 새로고침
 3. 계산기와 체크리스트 저장
-4. 견적 문의 접수 후 관리자 견적 화면 확인
+4. 견적 문의 접수 후 업체 관리 화면에서 즉시 알림·열람 상태 확인
 5. 내부 후기 등록 후 관리자 공개 처리
 6. 견적서 파일 공유 후 포인트 승인
 7. 업체 권한 요청 후 관리자 서류 보기·승인
@@ -48,3 +55,4 @@
 9. 커뮤니티 글 등록 후 관리자 공개·댓글 작성
 10. 모바일 390px, 태블릿 768px, PC 1440px 확인
 11. 관리자 URL을 로그아웃 상태에서 열었을 때 로그인 화면으로 이동하는지 확인
+12. 12시간 리마인드와 24시간 만료가 운영 예외 화면에 반영되는지 확인

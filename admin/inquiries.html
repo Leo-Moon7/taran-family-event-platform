@@ -26,7 +26,7 @@
         <div><p>운영 예외</p><h1>확인이 필요한 항목</h1></div>
       </header>
       <section class="admin-section admin-section--plain">
-        <p class="admin-help">정상적으로 전달되고 답변되는 문의에는 관리자가 개입하지 않습니다. 실패·장기 미응답·업체 인증 요청만 이곳에 표시됩니다.</p>
+        <p class="admin-help">정상적으로 전달되고 답변되는 문의에는 관리자가 개입하지 않습니다. 24시간 미응답, 알림 실패, 오래된 업체 정보와 인증 요청만 표시됩니다.</p>
       </section>
       <form class="admin-filter" data-exception-filter>
         <label>유형
@@ -35,7 +35,10 @@
             <option value="claim">업체 소유권</option>
             <option value="registration">신규 업체 등록</option>
             <option value="delivery">문의 전송 실패</option>
-            <option value="unanswered">장기 미응답</option>
+            <option value="unanswered">24시간 미응답</option>
+            <option value="notification">알림 처리 실패</option>
+            <option value="nonresponse">반복 미응답 업체</option>
+            <option value="stale">업체 정보 갱신</option>
           </select>
         </label>
         <label>검색<input name="query" placeholder="업체명 또는 문의 번호"></label>

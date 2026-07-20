@@ -31,6 +31,7 @@
       inquiryGroups: "taran_inquiry_groups",
       inquiryRecipients: "taran_inquiry_recipients",
       inquiryResponses: "taran_inquiry_responses",
+      notificationJobs: "taran_notification_jobs",
       reviews: "taran_reviews",
       contributions: "taran_contributions",
       points: "taran_point_ledger",

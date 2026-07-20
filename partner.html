@@ -33,6 +33,27 @@
       <header class="section-header partner-manage__heading"><div class="section-header__copy"><span class="badge badge--success">승인된 업체 담당자 전용</span><h1>내 업체 정보 관리</h1><p>고객에게 공개할 기본 정보와 이용 조건을 최신 내용으로 수정하세요.</p></div></header>
 
       <div class="notice" id="partner-notice" role="status" aria-live="polite">업체 정보를 불러오는 중입니다.</div>
+      <section class="partner-profile-health" id="partner-profile-health" hidden aria-labelledby="partner-profile-health-title">
+        <div class="partner-profile-health__main">
+          <div class="partner-profile-health__heading">
+            <div>
+              <span class="badge">업체 정보 상태</span>
+              <h2 id="partner-profile-health-title">고객이 비교할 수 있는 정보를 채워주세요</h2>
+            </div>
+            <strong id="partner-completeness">0%</strong>
+          </div>
+          <div class="partner-progress" role="progressbar" aria-label="업체 정보 완성도" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <span id="partner-progress-bar"></span>
+          </div>
+          <p id="partner-missing-fields"></p>
+          <p class="partner-freshness" id="partner-freshness"></p>
+        </div>
+        <dl class="partner-profile-health__metrics">
+          <div><dt>문의 응답률</dt><dd id="partner-response-rate">집계 전</dd></div>
+          <div><dt>평균 응답 시간</dt><dd id="partner-response-time">집계 전</dd></div>
+          <div><dt>문의 수신</dt><dd id="partner-inquiry-status">확인 중</dd></div>
+        </dl>
+      </section>
       <form class="partner-manage__form" id="partner-form" hidden novalidate>
         <div class="partner-manage__section">
           <h2>기본 정보</h2>
@@ -86,6 +107,6 @@
   </main>
 
   <footer class="site-footer"><div class="container site-footer__inner"><div><strong>따란 T'ARAN</strong><p>가족행사 장소와 업체를 조건별로 비교합니다.</p></div><nav aria-label="정책 메뉴"><a href="privacy.html">개인정보처리방침</a><a href="terms.html">이용약관</a></nav></div></footer>
-  <script src="content-config.js"></script><script src="scripts/core/config.js"></script><script src="scripts/core/api.js"></script><script src="scripts/core/auth.js"></script><script src="scripts/components/header.js"></script><script src="scripts/pages/partner.js"></script>
+  <script src="content-config.js"></script><script src="scripts/core/config.js"></script><script src="scripts/core/api.js"></script><script src="scripts/core/auth.js"></script><script src="scripts/core/provider-profile.js"></script><script src="scripts/components/header.js"></script><script src="scripts/pages/partner.js"></script>
 </body>
 </html>

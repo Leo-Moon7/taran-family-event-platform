@@ -10,6 +10,15 @@
   const inquirySection = document.querySelector("#partner-inquiries");
   const inquiryList = document.querySelector("#partner-inquiry-list");
   const inquiryEmpty = document.querySelector("#partner-inquiry-empty");
+  const profileHealth = document.querySelector("#partner-profile-health");
+  const completenessOutput = document.querySelector("#partner-completeness");
+  const progress = document.querySelector(".partner-progress");
+  const progressBar = document.querySelector("#partner-progress-bar");
+  const missingFields = document.querySelector("#partner-missing-fields");
+  const freshnessOutput = document.querySelector("#partner-freshness");
+  const responseRate = document.querySelector("#partner-response-rate");
+  const responseTime = document.querySelector("#partner-response-time");
+  const inquiryStatus = document.querySelector("#partner-inquiry-status");
   let row = null;
 
   const setNotice = (message, isError = false) => {
@@ -21,6 +30,38 @@
   const setValue = (id, next) => { document.querySelector(id).value = String(next || ""); };
   const fact = (facts, ...keys) => keys.map((key) => facts?.[key]).find((item) => String(item || "").trim()) || "";
   const money = (value) => value ? `${Number(value).toLocaleString("ko-KR")}원` : "미정";
+  const firstNumber = (next) => window.TaranProviderProfile.firstNumber(next);
+
+  function renderProfileHealth(provider) {
+    const checks = window.TaranProviderProfile.checks(provider);
+    const score = window.TaranProviderProfile.completeness(provider);
+    const missing = checks.filter((item) => !item.done).map((item) => item.label);
+    const freshness = window.TaranProviderProfile.freshness(provider);
+    completenessOutput.textContent = `${score}%`;
+    progress.setAttribute("aria-valuenow", String(score));
+    progressBar.style.width = `${score}%`;
+    missingFields.textContent = missing.length
+      ? `추가하면 좋은 정보: ${missing.slice(0, 4).join(", ")}${missing.length > 4 ? ` 외 ${missing.length - 4}개` : ""}`
+      : "고객 비교에 필요한 기본 정보가 모두 입력되었습니다.";
+    freshnessOutput.textContent = freshness.days === null
+      ? freshness.label
+      : `마지막 확인 ${freshness.days}일 전 · ${freshness.label}`;
+    freshnessOutput.dataset.level = freshness.level;
+    responseRate.textContent = provider.response_rate === null || provider.response_rate === undefined
+      ? "집계 전"
+      : `${Math.round(Number(provider.response_rate))}%`;
+    responseTime.textContent = window.TaranProviderProfile.responseTime(provider.average_response_minutes);
+    inquiryStatus.textContent = provider.inquiry_enabled ? "받는 중" : "일시 중지";
+    profileHealth.hidden = false;
+  }
+
+  function deadlineLabel(expiresAt) {
+    const remaining = new Date(expiresAt || 0).getTime() - Date.now();
+    if (!Number.isFinite(remaining) || remaining <= 0) return "답변 시간이 종료되었습니다.";
+    const hours = Math.floor(remaining / 3600000);
+    const minutes = Math.max(1, Math.ceil((remaining % 3600000) / 60000));
+    return hours > 0 ? `답변 마감까지 ${hours}시간 ${minutes}분` : `답변 마감까지 ${minutes}분`;
+  }
 
   async function submitResponse(recipient, group, formElement) {
     const data = new FormData(formElement);
@@ -69,6 +110,9 @@
     status.className = "badge";
     status.textContent = recipient.status === "viewed" ? "열람" : "신규 문의";
     heading.append(title, status);
+    const deadline = document.createElement("p");
+    deadline.className = "partner-inquiry-card__deadline";
+    deadline.textContent = deadlineLabel(recipient.expires_at);
     const facts = document.createElement("dl");
     [
       ["희망 지역", group.region],
@@ -102,11 +146,19 @@
       event.preventDefault();
       submitResponse(recipient, group, responseForm);
     });
-    article.append(heading, facts, responseForm);
+    article.append(heading, deadline, facts, responseForm);
     return article;
   }
 
   async function loadInquiries() {
+    try {
+      await window.TaranApi.rpc("taran_apply_marketplace_maintenance");
+      await window.TaranApi.rpc("taran_acknowledge_provider_notifications", {
+        p_provider_id: row.id
+      });
+    } catch (_error) {
+      /* 004 마이그레이션 적용 전에도 기존 문의 목록은 계속 표시합니다. */
+    }
     const recipients = await window.TaranApi.select(window.TaranConfig.tables.inquiryRecipients, {
       provider_id: `eq.${row.id}`,
       status: "in.(sent,viewed)",
@@ -120,6 +172,17 @@
       return;
     }
     inquiryEmpty.hidden = true;
+    const newlyViewed = recipients.filter((recipient) => recipient.status === "sent");
+    if (newlyViewed.length) {
+      const results = await Promise.allSettled(
+        newlyViewed.map((recipient) => window.TaranApi.rpc("taran_mark_inquiry_viewed", {
+          p_recipient_id: recipient.id
+        }))
+      );
+      results.forEach((result, index) => {
+        if (result.status === "fulfilled") newlyViewed[index].status = "viewed";
+      });
+    }
     const ids = [...new Set(recipients.map((item) => item.inquiry_group_id))];
     const groups = await window.TaranApi.select(window.TaranConfig.tables.inquiryGroups, {
       id: `in.(${ids.join(",")})`,
@@ -169,6 +232,7 @@
     setValue("#partner-policy", fact(facts, "취소·환불", "취소 규정", "환불 규정"));
     document.querySelectorAll('input[name="event"]').forEach((input) => { input.checked = (item.eventTags || []).includes(input.value); });
     document.querySelector("#partner-preview").href = `provider.html?id=${encodeURIComponent(row.id)}`;
+    renderProfileHealth(row);
     notice.hidden = true;
     form.hidden = false;
     loadInquiries().catch((inquiryError) => {
@@ -201,7 +265,16 @@
     const data = {
       name: value("#partner-name"), category: value("#partner-category"), subcategory: value("#partner-category"),
       region: value("#partner-region"), area: value("#partner-area"), address: value("#partner-address"),
+      price: value("#partner-price"),
       eventTags: [...document.querySelectorAll('input[name="event"]:checked')].map((input) => input.value),
+      serviceRegions: [value("#partner-region"), value("#partner-area")].filter(Boolean),
+      minimumGuests: firstNumber(value("#partner-ideal")),
+      maximumGuests: firstNumber(value("#partner-maximum")),
+      minimumGuarantee: firstNumber(value("#partner-guarantee")),
+      parkingCount: firstNumber(value("#partner-parking")),
+      outsideFoodPolicy: value("#partner-food"),
+      outsideVendorPolicy: value("#partner-external"),
+      cancellationSummary: value("#partner-policy"),
       detailFacts: details
     };
     saveButton.disabled = true;
@@ -209,6 +282,7 @@
     try {
       const updated = await window.TaranApi.rpc("taran_update_owned_provider", { p_provider_id: row.id, p_data: data });
       row = Array.isArray(updated) ? updated[0] : updated;
+      renderProfileHealth(row);
       setNotice("변경 내용이 저장되었습니다.");
       form.hidden = false;
     } catch (saveError) {
