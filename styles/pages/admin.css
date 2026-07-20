@@ -63,6 +63,10 @@ body.admin-app { min-width: 0; background: #f5f6f8; color: #20242a; }
 .admin-editor-field textarea { resize: vertical; line-height: 1.65; }
 .admin-editor-field input:focus-visible, .admin-editor-field select:focus-visible, .admin-editor-field textarea:focus-visible { outline: 3px solid rgba(118,87,63,.2); border-color: #76573f; }
 .admin-editor-field small { color: #68717d; font-size: .8125rem; font-weight: 450; }
+.admin-editor-field:has(.admin-editor-checks) { grid-column: 1 / -1; }
+.admin-editor-checks { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .5rem; margin: 0; padding: .75rem; border: 1px solid #cbd1d8; border-radius: 8px; }
+.admin-editor-checks label { display: flex; min-height: 44px; align-items: center; gap: .55rem; padding: .5rem .625rem; border-radius: 6px; background: #f7f8f9; font-weight: 600; }
+.admin-editor-checks input { width: 1.15rem; min-height: 1.15rem; margin: 0; }
 .admin-editor-error { margin: 0 1.5rem; padding: .75rem; border-radius: 8px; background: #fff0f0; color: #9a2e2e; }
 .admin-editor-actions { display: flex; justify-content: flex-end; gap: .75rem; padding: 1rem 1.5rem; border-top: 1px solid #e3e6ea; }
 
@@ -85,6 +89,8 @@ body.admin-app { min-width: 0; background: #f5f6f8; color: #20242a; }
   .admin-role-list li { grid-template-columns: 1fr; gap: .25rem; }
   .admin-editor-body { grid-template-columns: 1fr; padding: 1rem; }
   .admin-editor-field:has(textarea) { grid-column: auto; }
+  .admin-editor-field:has(.admin-editor-checks) { grid-column: auto; }
+  .admin-editor-checks { grid-template-columns: 1fr; }
   .admin-editor-actions { padding: 1rem; }
   .admin-editor-actions .button { flex: 1; }
 }

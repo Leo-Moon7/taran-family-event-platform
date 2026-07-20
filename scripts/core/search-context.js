@@ -1,7 +1,8 @@
 (function () {
   "use strict";
 
-  const KEYS = ["event", "detail", "province", "district", "guests", "budget", "date", "category"];
+  const KEYS = ["event", "detail", "province", "district", "guests", "budget", "budgetMin", "budgetMax", "date", "category", "sort", "source"];
+  const defaults = window.SonpumDisplayDefaults || { event: "kids", province: "서울특별시", sort: "recommended" };
 
   function fromParams(params = new URLSearchParams(location.search)) {
     return KEYS.reduce((result, key) => {
@@ -28,10 +29,14 @@
     catch (_error) { return {}; }
   }
 
+  function resolve(params = new URLSearchParams(location.search)) {
+    return { ...defaults, ...load(), ...fromParams(params) };
+  }
+
   function venuesUrl(context) {
     const params = toParams(context);
     return `venues.html${params.size ? `?${params}` : ""}`;
   }
 
-  window.TaranSearchContext = Object.freeze({ keys: KEYS, fromParams, toParams, save, load, venuesUrl });
+  window.TaranSearchContext = Object.freeze({ keys: KEYS, defaults, fromParams, toParams, save, load, resolve, venuesUrl });
 })();

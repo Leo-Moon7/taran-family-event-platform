@@ -25,7 +25,7 @@
     { name: "region", label: "시·도", required: true, placeholder: "예: 서울특별시" },
     { name: "area", label: "시·군·구", placeholder: "예: 강남구" },
     { name: "address", label: "도로명 주소" },
-    { name: "eventTypesText", label: "가능한 행사", placeholder: "돌잔치, 칠순, 상견례", help: "쉼표로 구분해 주세요." },
+    { name: "eventTypes", label: "진행 가능한 행사", type: "checkbox-group", options: (window.SonpumEventTypes?.items || []).map(item => ({ value: item.id, label: item.label })), help: "해당 업체가 실제로 진행할 수 있는 행사를 모두 선택해 주세요." },
     { name: "minGuests", label: "최소 인원", type: "number" },
     { name: "maxGuests", label: "최대 인원", type: "number" },
     { name: "price", label: "대표 가격 안내", placeholder: "예: 1인 65,000원부터" },
@@ -38,7 +38,9 @@
 
   function safeId(value) { return String(value || "").trim().toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-+|-+$/g, ""); }
   function editorValues(item = {}) {
-    return { ...item, eventTypesText: (item.eventTypes || item.events || []).join(", "), status: item.publicationStatus === "hidden" ? "archived" : item.publicationStatus || "draft" };
+    const rawEvents = item.eventTypes || item.events || [];
+    const eventTypes = rawEvents.map(value => window.SonpumEventTypes?.normalize(value, rawEvents) || value).filter(value => value !== "legacyWedding");
+    return { ...item, eventTypes, status: item.publicationStatus === "hidden" ? "archived" : item.publicationStatus || "draft" };
   }
   async function save(values, originalId) {
     const id = safeId(values.id);
@@ -48,7 +50,7 @@
     if (minGuests && maxGuests && minGuests > maxGuests) throw new Error("최소 인원은 최대 인원보다 클 수 없습니다.");
     const data = {
       name: values.name.trim(), category: values.category.trim(), region: values.region.trim(), area: values.area.trim(),
-      address: values.address.trim(), eventTypes: values.eventTypesText.split(",").map(value => value.trim()).filter(Boolean),
+      address: values.address.trim(), eventTypes: Array.isArray(values.eventTypes) ? values.eventTypes : [],
       minGuests, maxGuests, price: values.price.trim(), phone: values.phone.trim(), website: values.website.trim(),
       informationCheckedAt: new Date().toISOString().slice(0, 10)
     };

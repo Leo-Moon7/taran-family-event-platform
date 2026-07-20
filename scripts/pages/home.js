@@ -3,13 +3,19 @@
 
   const form = document.querySelector("#home-search");
   const recommended = document.querySelector("#home-recommended");
+  const recentVerified = document.querySelector("#home-recent-verified");
   const regions = document.querySelector("#home-regions");
   const collections = document.querySelector("#home-collections");
   const text = (value, fallback = "") => String(value ?? fallback).trim();
   const statusApi = window.TaranProviderStatus;
-  const providerCta = document.querySelector(".provider-cta");
+  const placeholderApi = window.SonpumProviderPlaceholder;
 
-  if (providerCta && !window.TaranConfig?.isSupabaseConfigured) providerCta.hidden = true;
+  const initialContext = window.TaranSearchContext?.resolve?.() || { event: "kids", province: "서울특별시" };
+  if (form) {
+    if (form.elements.event) form.elements.event.value = initialContext.event || "kids";
+    if (form.elements.province) form.elements.province.value = initialContext.province || "서울특별시";
+    if (form.elements.guests) form.elements.guests.value = initialContext.guests || "";
+  }
 
   form?.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -18,9 +24,9 @@
     window.location.href = window.TaranSearchContext?.venuesUrl(context) || `venues.html?${new URLSearchParams(context)}`;
   });
 
-  function imageUrl(value) {
+  function imageUrl(value, item) {
     const url = text(value);
-    return !url || /^(?:javascript|data):/i.test(url) ? "assets/images/venue-hanjeongsik.webp" : url;
+    return !url || /^(?:javascript|data):/i.test(url) ? placeholderApi.get(item) : url;
   }
 
   function source() {
@@ -36,10 +42,16 @@
     const media = document.createElement("div");
     media.className = "card__media";
     const image = document.createElement("img");
-    image.src = imageUrl(item.image);
-    image.alt = /assets\/images\/venue-/i.test(image.src) ? "" : `${text(item.name)} 대표 이미지`;
+    const requestedImage = item.imageVerified ? imageUrl(item.image, item) : "";
+    placeholderApi.apply(image, item, requestedImage);
     image.loading = "lazy";
     media.append(image);
+    if (!requestedImage) {
+      const note = document.createElement("span");
+      note.className = "card__image-note";
+      note.textContent = "업체 사진 준비 중";
+      media.append(note);
+    }
     const body = document.createElement("div");
     body.className = "card__body";
     const status = statusApi.getProviderStatus(item);
@@ -61,8 +73,10 @@
       facts.append(span);
     });
     const freshness = document.createElement("small");
-    freshness.textContent = statusApi.getProviderFreshness(item).label;
-    body.append(badge, title, meta, facts, freshness);
+    const freshnessState = statusApi.getProviderFreshness(item);
+    freshness.textContent = freshnessState.date ? `정보 확인 ${freshnessState.date}` : "";
+    body.append(badge, title, meta, facts);
+    if (freshness.textContent) body.append(freshness);
     link.append(media, body);
     return link;
   }
@@ -70,11 +84,24 @@
   function renderRegions(items) {
     if (!regions) return;
     const counts = items.reduce((map, item) => map.set(text(item.region), (map.get(text(item.region)) || 0) + 1), new Map());
-    [...counts.entries()].filter(([name]) => name).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "ko-KR")).slice(0, 10).forEach(([name, count]) => {
+    const featured = ["서울특별시", "경기도", "인천광역시", "부산광역시", "대구광역시", "대전광역시", "광주광역시", "전북특별자치도", "경상남도", "제주특별자치도"];
+    featured.forEach((name) => {
+      const count = counts.get(name) || 0;
       const link = document.createElement("a");
       link.href = `venues.html?province=${encodeURIComponent(name)}`;
-      link.textContent = `${name.replace(/특별자치도|특별시|광역시|도$/u, "")} 가족행사 업체 ${count.toLocaleString("ko-KR")}곳`;
+      link.textContent = count ? `${name.replace(/특별자치도|특별시|광역시|도$/u, "")} · ${count.toLocaleString("ko-KR")}곳` : `${name.replace(/특별자치도|특별시|광역시|도$/u, "")} · 등록 준비 중`;
       regions.append(link);
+    });
+    const all = document.createElement("a"); all.href = "venues.html?province=all"; all.textContent = "전체 지역 보기"; regions.append(all);
+  }
+
+  function renderEventCounts(items) {
+    document.querySelectorAll(".event-shortcuts a").forEach((link) => {
+      const event = new URL(link.href, location.href).searchParams.get("event");
+      const count = items.filter((item) => (item.eventTags || item.eventTypes || []).some((value) => window.SonpumEventTypes?.normalize?.(value, item.tags || []) === event)).length;
+      const small = document.createElement("small");
+      small.textContent = count ? `등록 업체 ${count.toLocaleString("ko-KR")}곳` : "업체 등록 준비 중";
+      link.append(small);
     });
   }
 
@@ -98,9 +125,20 @@
   function init() {
     const items = source();
     renderRegions(items);
+    renderEventCounts(items);
     renderCollections(items);
+    if (recentVerified) {
+      const recent = [...items].filter((item) => statusApi.getProviderFreshness(item).date).sort((a, b) => statusApi.getProviderFreshness(b).date.localeCompare(statusApi.getProviderFreshness(a).date)).slice(0, 6);
+      if (recent.length) recent.forEach((item) => recentVerified.append(createPartnerCard(item)));
+      else recentVerified.append(window.TaranStates.message({ title: "최근 확인된 업체가 없습니다.", description: "정보 확인이 끝난 업체부터 순서대로 표시합니다." }));
+    }
     if (!recommended) return;
-    const latest = [...items].sort((a, b) => text(b.verifiedAt).localeCompare(text(a.verifiedAt))).slice(0, 6);
+    const seoulKids = items.filter((item) => {
+      const location = `${text(item.region)} ${text(item.area)} ${text(item.address)}`;
+      const events = (item.eventTags || item.eventTypes || []).map((value) => window.SonpumEventTypes?.normalize?.(value) || value);
+      return location.includes("서울") && (events.includes("kids") || /돌잔치|백일|키즈/i.test(`${item.subcategory || ""} ${(item.tags || []).join(" ")}`));
+    });
+    const latest = [...seoulKids].sort((a, b) => text(b.verifiedAt).localeCompare(text(a.verifiedAt))).slice(0, 6);
     if (latest.length) latest.forEach((item) => recommended.append(createPartnerCard(item)));
     else recommended.append(window.TaranStates.message({ title: "공개된 업체 정보가 없습니다.", description: "업체 정보 확인 후 이 영역에 표시됩니다." }));
   }

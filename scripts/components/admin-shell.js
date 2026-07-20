@@ -9,7 +9,7 @@
   }
 
   const view = document.body.dataset.adminView || "dashboard";
-  const brand = window.PlatformBrand || { nameKo: "따란", nameEn: "T'ARAN" };
+  const brand = window.PlatformBrand || { nameKo: "손품해방", nameEn: "SONPUM HAEBANG" };
   const items = [
     ["dashboard", "index.html", "오늘 할 일"],
     ["inquiries", "inquiries.html", "운영 예외"],

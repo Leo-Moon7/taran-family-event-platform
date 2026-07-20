@@ -2,17 +2,18 @@
   "use strict";
 
   const PAGE_SIZE = 24;
-  const EVENT_LABELS = { kids: "돌잔치·백일", wedding: "상견례·소규모 결혼식", parents: "환갑·칠순", home: "가족모임" };
+  const EVENT_LABELS = window.SonpumEventTypes?.labels || { kids: "아이 행사", parents: "부모님 행사", meeting: "상견례", smallWedding: "소규모 결혼식", familyGathering: "가족 모임" };
   const SERVICES = ["공간 대여", "스냅·영상", "스타일링·케이터링", "의상·뷰티", "답례품·초대장"];
   const state = { page: 1, items: [], filtered: [] };
   const statusApi = window.TaranProviderStatus;
   const compareStore = window.TaranCompareStore;
+  const placeholderApi = window.SonpumProviderPlaceholder;
   const number = (value) => Number.isFinite(Number(value)) ? Number(value) : 0;
   const text = (value) => String(value ?? "").trim();
   const $ = (selector) => document.querySelector(selector);
   const controls = {
     form: $("[data-filter-form]"), panel: $("#directory-filter-panel"), query: $("#directory-query"), event: $("#directory-event"),
-    province: $("#directory-province"), district: $("#directory-district"), guests: $("#directory-guests"), budget: $("#directory-budget"),
+    province: $("#directory-province"), district: $("#directory-district"), guests: $("#directory-guests"), budget: $("#directory-budget"), date: $("#directory-date"),
     category: $("#directory-category"), guarantee: $("#directory-guarantee"), parking: $("#directory-parking"),
     private: $("#directory-private"), wheelchair: $("#directory-wheelchair"), outsideFood: $("#directory-outside-food"),
     outsideVendor: $("#directory-outside-vendor"), status: $("#directory-status"), sort: $("#directory-sort-quick"),
@@ -21,11 +22,12 @@
 
   function validImageUrl(value) {
     const url = text(value);
-    return /^(?:https?:|\/|\.\/|assets\/)/i.test(url) && !/^javascript:/i.test(url) ? url : "assets/images/venue-hotel.webp";
+    return /^(?:https?:|\/|\.\/|assets\/)/i.test(url) && !/^javascript:/i.test(url) ? url : "";
   }
 
-  function isReferenceImage(item) {
-    return /assets\/images\/venue-/i.test(validImageUrl(item.image));
+  function verifiedImage(item) {
+    const url = validImageUrl(item.image);
+    return item.imageVerified && url && !/assets\/images\/venue-/i.test(url) ? url : "";
   }
 
   function uniqueItems(items) {
@@ -66,6 +68,11 @@
     const explicit = number(item.internalReviewStats?.average || item.internalRating || item.averageRating || item.rating);
     const count = Math.max(internal.length, number(item.internalReviewStats?.count || item.internalReviewCount)) + external.length;
     return { count, rating: ratings.length ? ratings.reduce((sum, value) => sum + value, 0) / ratings.length : (explicit > 0 && explicit <= 5 ? explicit : 0) };
+  }
+
+  function hasPublishedReviewOrRating(item) {
+    const summary = reviewSummary(item);
+    return summary.count > 0 || summary.rating > 0;
   }
 
   function priceValue(item) {
@@ -109,6 +116,15 @@
     return Boolean(price) && (requested === 5000001 ? price > 5000000 : price <= requested);
   }
 
+  function normalizedEventTags(item) {
+    const contextTags = [item.category, item.subcategory, ...(item.tags || []), ...(item.serviceTags || [])].map(text);
+    return [...new Set((item.eventTags || item.eventTypes || []).map((value) => window.SonpumEventTypes?.normalize?.(value, contextTags) || value))];
+  }
+
+  function eventMatches(item) {
+    return controls.event.value === "all" || normalizedEventTags(item).includes(controls.event.value);
+  }
+
   function detailMatches(item) {
     const facts = statusApi.getProviderFacts(item);
     if (number(controls.guarantee.value) && (!facts.guarantee || facts.guarantee > number(controls.guarantee.value))) return false;
@@ -134,15 +150,36 @@
     return left[0] - right[0] || left[1] - right[1] || left[2].localeCompare(right[2], "ko-KR") || left[3].localeCompare(right[3], "ko-KR");
   }
 
+  function completeness(item) {
+    const facts = statusApi.getProviderFacts(item);
+    return [statusApi.getProviderAddress(item), facts.maxGuests, facts.guarantee, priceValue(item), facts.parking, verifiedImage(item)].filter(Boolean).length;
+  }
+
+  function recommendationScore(item) {
+    const facts = statusApi.getProviderFacts(item);
+    let score = 0;
+    if (eventMatches(item)) score += 20;
+    if (controls.province.value !== "all" && `${item.region || ""} ${item.area || ""}`.includes(controls.province.value)) score += 25;
+    if (controls.category.value !== "all" && serviceGroup(item) === controls.category.value) score += 12;
+    if (number(controls.guests.value) && facts.maxGuests >= number(controls.guests.value)) score += 20;
+    if (number(controls.budget.value) && priceValue(item) && priceValue(item) <= number(controls.budget.value)) score += 15;
+    if (["parking", "private", "wheelchair", "outsideFood", "outsideVendor"].some((key) => controls[key].value === "yes" && booleanFact(item, key))) score += 15;
+    score += Math.min(8, completeness(item));
+    if (statusApi.getProviderFreshness(item).state === "fresh") score += 7;
+    if (number(item.responseRate) >= 80 || /빠른 응답/i.test((item.tags || []).join(" "))) score += 10;
+    return score;
+  }
+
   function sortItems(items) {
     const sorted = [...items];
     const sort = controls.sort.value;
-    if (sort === "review-count") return sorted.sort((a, b) => reviewSummary(b).count - reviewSummary(a).count || compareRegion(a, b));
-    if (sort === "rating-high") return sorted.sort((a, b) => reviewSummary(b).rating - reviewSummary(a).rating || compareRegion(a, b));
-    if (sort === "rating-low") return sorted.sort((a, b) => (reviewSummary(a).rating || 99) - (reviewSummary(b).rating || 99) || compareRegion(a, b));
-    if (sort === "price-low") return sorted.sort((a, b) => (priceValue(a) || Number.MAX_SAFE_INTEGER) - (priceValue(b) || Number.MAX_SAFE_INTEGER) || compareRegion(a, b));
-    if (sort === "updated") return sorted.sort((a, b) => statusApi.getProviderStatus(b).date.localeCompare(statusApi.getProviderStatus(a).date) || compareRegion(a, b));
-    return sorted.sort(compareRegion);
+    if (["recommended", "match"].includes(sort)) return sorted.sort((a, b) => recommendationScore(b) - recommendationScore(a) || compareRegion(a, b));
+    if (sort === "price") return sorted.sort((a, b) => (priceValue(a) || Number.MAX_SAFE_INTEGER) - (priceValue(b) || Number.MAX_SAFE_INTEGER) || compareRegion(a, b));
+    if (sort === "minimum-guarantee") return sorted.sort((a, b) => (statusApi.getProviderFacts(a).guarantee || Number.MAX_SAFE_INTEGER) - (statusApi.getProviderFacts(b).guarantee || Number.MAX_SAFE_INTEGER));
+    if (sort === "capacity") return sorted.sort((a, b) => statusApi.getProviderFacts(b).maxGuests - statusApi.getProviderFacts(a).maxGuests);
+    if (sort === "response") return sorted.sort((a, b) => number(b.responseRate) - number(a.responseRate) || compareRegion(a, b));
+    if (sort === "recent") return sorted.sort((a, b) => statusApi.getProviderStatus(b).date.localeCompare(statusApi.getProviderStatus(a).date) || compareRegion(a, b));
+    return sorted.sort((a, b) => recommendationScore(b) - recommendationScore(a) || compareRegion(a, b));
   }
 
   function makeAction(label, className, onClick) {
@@ -163,14 +200,14 @@
     media.href = href;
     media.setAttribute("aria-label", `${text(item.name)} 상세 보기`);
     const image = document.createElement("img");
-    image.src = validImageUrl(item.image);
-    image.alt = isReferenceImage(item) ? "" : `${text(item.name)} 대표 이미지`;
+    const requestedImage = verifiedImage(item);
+    placeholderApi.apply(image, item, requestedImage);
     image.loading = "lazy";
     media.append(image);
-    if (isReferenceImage(item)) {
+    if (!requestedImage) {
       const note = document.createElement("span");
       note.className = "directory-card__image-note";
-      note.textContent = "업체 사진 등록 전";
+      note.textContent = "업체 사진 준비 중";
       media.append(note);
     }
     const body = document.createElement("div");
@@ -193,19 +230,15 @@
     const location = document.createElement("p");
     location.className = "directory-card__location";
     location.textContent = normalizedLocation(item);
-    const review = reviewSummary(item);
-    const reviewLine = document.createElement("p");
-    reviewLine.className = "directory-card__reviews";
-    reviewLine.textContent = [review.rating ? `★ ${review.rating.toFixed(1)}` : "", review.count ? `후기 ${review.count.toLocaleString("ko-KR")}개` : ""].filter(Boolean).join(" · ");
     const facts = statusApi.getProviderFacts(item);
     const factList = document.createElement("dl");
     factList.className = "directory-card__facts";
     const cardFacts = [
-      facts.maxGuests ? ["최대 인원", `${facts.maxGuests.toLocaleString("ko-KR")}명`] : null,
-      facts.guarantee ? ["최소 보증 인원", `${facts.guarantee.toLocaleString("ko-KR")}명`] : null,
-      priceValue(item) ? ["식대·시작 가격", `${priceValue(item).toLocaleString("ko-KR")}원부터`] : null,
-      facts.parking ? ["주차", `${facts.parking.toLocaleString("ko-KR")}대`] : (booleanFact(item, "parking") ? ["주차", "가능"] : null)
-    ].filter(Boolean);
+      ["최대 인원", facts.maxGuests ? `${facts.maxGuests.toLocaleString("ko-KR")}명` : "업체 확인 필요"],
+      ["최소 보증 인원", facts.guarantee ? `${facts.guarantee.toLocaleString("ko-KR")}명` : "업체 확인 필요"],
+      ["식대·시작 가격", priceValue(item) ? `${priceValue(item).toLocaleString("ko-KR")}원부터` : "가격 문의 필요"],
+      ["주차", facts.parking ? `${facts.parking.toLocaleString("ko-KR")}대` : (booleanFact(item, "parking") ? "가능" : "업체 확인 필요")]
+    ];
     cardFacts.forEach(([label, value]) => {
       const wrapper = document.createElement("div");
       const dt = document.createElement("dt"), dd = document.createElement("dd");
@@ -213,11 +246,11 @@
     });
     const events = document.createElement("p");
     events.className = "directory-card__events";
-    events.textContent = (item.eventTags || []).map((key) => EVENT_LABELS[key]).filter(Boolean).join(" · ");
+    events.textContent = normalizedEventTags(item).map((key) => EVENT_LABELS[key] || window.SonpumEventTypes?.label?.(key)).filter(Boolean).join(" · ");
     const freshness = document.createElement("small");
     freshness.className = "directory-card__freshness";
     const freshnessState = statusApi.getProviderFreshness(item);
-    freshness.textContent = freshnessState.state === "unknown" ? "" : freshnessState.label;
+    freshness.textContent = freshnessState.date ? `정보 확인 ${freshnessState.date}` : "";
     const actions = document.createElement("div");
     actions.className = "directory-card__actions";
     const saved = JSON.parse(window.TaranStorage?.get("saved-providers", "[]") || "[]");
@@ -239,7 +272,6 @@
     compareButton.setAttribute("aria-pressed", String(compareStore.has(item.id)));
     actions.append(saveButton, compareButton);
     body.append(head, titleLink, location);
-    if (reviewLine.textContent) body.append(reviewLine);
     if (events.textContent) body.append(events);
     if (factList.children.length) body.append(factList);
     if (freshness.textContent) body.append(freshness);
@@ -249,7 +281,7 @@
   }
 
   const filterDefinitions = [
-    ["event", controls.event, "행사"], ["province", controls.province, "지역"], ["district", controls.district, "지역"], ["guests", controls.guests, "인원"],
+    ["event", controls.event, "행사"], ["province", controls.province, "지역"], ["district", controls.district, "지역"], ["guests", controls.guests, "인원"], ["date", controls.date, "날짜"],
     ["budget", controls.budget, "예산"], ["category", controls.category, "유형"], ["guarantee", controls.guarantee, "보증 인원"],
     ["parking", controls.parking, "주차"], ["private", controls.private, "단독 공간"], ["wheelchair", controls.wheelchair, "휠체어"],
     ["outsideFood", controls.outsideFood, "외부 음식"], ["outsideVendor", controls.outsideVendor, "외부 업체"], ["status", controls.status, "상태"]
@@ -275,7 +307,7 @@
     const params = new URLSearchParams();
     if (controls.query.value.trim()) params.set("query", controls.query.value.trim());
     activeFilters().forEach(([key, control]) => params.set(key, control.value));
-    if (controls.sort.value !== "region") params.set("sort", controls.sort.value);
+    if (controls.sort.value !== "recommended") params.set("sort", controls.sort.value);
     history.replaceState(null, "", `${location.pathname}${params.size ? `?${params}` : ""}`);
     window.TaranSearchContext?.save(window.TaranSearchContext.fromParams(params));
   }
@@ -296,8 +328,9 @@
 
   function applyFilters(updateHistory = true) {
     const query = controls.query.value.trim().toLowerCase();
-    state.filtered = sortItems(state.items.filter((item) => (!query || searchText(item).includes(query)) &&
-      (controls.event.value === "all" || (item.eventTags || []).includes(controls.event.value)) &&
+    state.filtered = sortItems(state.items.filter((item) => hasPublishedReviewOrRating(item) &&
+      (!query || searchText(item).includes(query)) &&
+      eventMatches(item) &&
       (controls.category.value === "all" || serviceGroup(item) === controls.category.value) &&
       regionMatches(item) && guestsMatch(item) && budgetMatches(item) && detailMatches(item)));
     render(updateHistory);
@@ -307,7 +340,8 @@
     controls.form.reset();
     controls.event.value = controls.province.value = controls.district.value = controls.category.value = controls.parking.value = controls.private.value = controls.wheelchair.value = controls.outsideFood.value = controls.outsideVendor.value = controls.status.value = "all";
     controls.guests.value = controls.budget.value = controls.guarantee.value = "0";
-    controls.sort.value = "region";
+    controls.date.value = "";
+    controls.sort.value = "recommended";
     controls.province.dispatchEvent(new Event("change"));
     state.page = 1; applyFilters(updateHistory);
   }
@@ -321,9 +355,10 @@
 
   function readUrl() {
     const params = new URLSearchParams(location.search);
-    selectUrl(controls.event, params.get("event")); selectUrl(controls.province, params.get("province"));
-    if (params.get("province")) controls.province.dispatchEvent(new Event("change"));
-    selectUrl(controls.district, params.get("district")); selectUrl(controls.guests, params.get("guests"));
+    const resolved = window.TaranSearchContext?.resolve?.(params) || {};
+    selectUrl(controls.event, resolved.event); selectUrl(controls.province, resolved.province);
+    if (resolved.province) controls.province.dispatchEvent(new Event("change"));
+    selectUrl(controls.district, params.get("district")); selectUrl(controls.guests, params.get("guests")); selectUrl(controls.date, params.get("date"));
     const budget = number(params.get("budget"));
     if (budget) {
       const options = [...controls.budget.options].map((option) => number(option.value)).filter(Boolean).sort((a, b) => a - b);
@@ -332,7 +367,8 @@
     selectUrl(controls.category, params.get("category")); selectUrl(controls.guarantee, params.get("guarantee"));
     selectUrl(controls.parking, params.get("parking")); selectUrl(controls.private, params.get("private")); selectUrl(controls.wheelchair, params.get("wheelchair"));
     selectUrl(controls.outsideFood, params.get("outsideFood")); selectUrl(controls.outsideVendor, params.get("outsideVendor")); selectUrl(controls.status, params.get("status"));
-    selectUrl(controls.sort, params.get("sort"));
+    const legacySort = { region: "recommended", updated: "recent", "price-low": "price", "review-count": "recommended", "rating-high": "recommended", "rating-low": "recommended" };
+    selectUrl(controls.sort, legacySort[params.get("sort")] || params.get("sort") || resolved.sort || "recommended");
     if (params.get("query")) controls.query.value = params.get("query");
   }
 

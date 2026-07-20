@@ -11,6 +11,16 @@
    비교함, 통합 견적 문의, 업체 등록, 체크리스트 저장과 전환 통계 구조를 추가합니다.
 4. `004_provider_automation.sql`
    업체 정보 완성도, 24시간 문의 만료, 12시간 리마인드 예약, 응답률, 정보 갱신과 관리자 예외 구조를 추가합니다.
+5. `005_sonpum_brand_and_event_types.sql`
+   공개 브랜드 전환에 맞춰 8개 가족행사 분류와 행사별 조건 저장 구조를 추가합니다. 기존 `wedding` 값은 근거가 분명할 때만 상견례 또는 스몰웨딩으로 나누고, 애매한 업체는 검수 대기 목록에 남깁니다.
+
+## 005 적용 후 확인할 항목
+
+- SQL Editor 결과가 오류 없이 `Success`로 끝나는지
+- `taran_providers`에 `event_profiles`, `event_taxonomy_status` 열이 생겼는지
+- `taran_event_taxonomy_reviews` 표가 생성됐는지
+- 기존 상견례·스몰웨딩 업체가 자동 분류되고, 애매한 `wedding` 업체는 `review_required`로 남는지
+- 기존 업체·후기·견적 데이터의 건수가 줄지 않았는지
 
 ## 004 적용 후 확인할 항목
 

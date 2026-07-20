@@ -75,4 +75,4 @@ for (const entry of await readdir(projectRoot, { withFileTypes: true })) {
 process.env.TARAN_CONFIG_OUTPUT = "dist/content-config.js";
 await import("./write-config.mjs");
 
-console.log("T'ARAN Netlify deployment bundle created in dist/.");
+console.log("SONPUM HAEBANG Netlify deployment bundle created in dist/.");

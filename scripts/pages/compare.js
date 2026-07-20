@@ -3,6 +3,7 @@
 
   const store = window.TaranCompareStore;
   const statusApi = window.TaranProviderStatus;
+  const placeholderApi = window.SonpumProviderPlaceholder;
   const body = document.getElementById("compare-table-body");
   const empty = document.getElementById("compare-empty");
   const wrap = document.getElementById("compare-table-wrap");
@@ -45,9 +46,8 @@
     const box = document.createElement("div");
     box.className = "compare-provider-head";
     const image = document.createElement("img");
-    image.src = text(provider.image) || "assets/images/venue-partyroom.webp";
-    image.alt = provider.imageVerified ? `${provider.name} 대표 이미지` : "업체 유형 참고 이미지";
-    image.addEventListener("error", () => { image.src = "assets/images/venue-partyroom.webp"; }, { once: true });
+    const requestedImage = provider.imageVerified ? text(provider.image) : "";
+    placeholderApi.apply(image, provider, requestedImage);
     const status = document.createElement("span");
     status.className = `badge badge--${statusApi.getProviderStatus(provider).key}`;
     status.textContent = statusApi.getProviderStatusLabel(provider);
@@ -95,7 +95,7 @@
 
     row("업체 유형", items.map((item) => statusApi.getProviderIndustry(item)));
     row("지역", items.map((item) => [item.region, item.area].filter(Boolean).join(" ")));
-    row("행사 가능 유형", items.map((item) => (item.eventTags || []).map((tag) => ({ kids: "돌잔치·백일", parents: "환갑·칠순", wedding: "상견례·결혼식", home: "가족모임" })[tag] || tag).join(", ")));
+    row("행사 가능 유형", items.map((item) => (item.eventTags || []).map((tag) => window.SonpumEventTypes?.label?.(tag) || tag).join(", ")));
     row("최소 수용 인원", items.map((item) => statusApi.getProviderFacts(item).minGuests ? `${statusApi.getProviderFacts(item).minGuests}명` : ""));
     row("최대 수용 인원", items.map((item) => statusApi.getProviderFacts(item).maxGuests ? `${statusApi.getProviderFacts(item).maxGuests}명` : ""));
     row("최소 보증 인원", items.map((item) => statusApi.getProviderFacts(item).guarantee ? `${statusApi.getProviderFacts(item).guarantee}명` : ""));

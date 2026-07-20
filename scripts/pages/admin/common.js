@@ -49,16 +49,31 @@
           node.value = option.value;
           input.append(node);
         });
+      } else if (field.type === "checkbox-group") {
+        input = element("fieldset", undefined, "admin-editor-checks");
+        const selected = new Set(Array.isArray(initial[field.name]) ? initial[field.name] : []);
+        (field.options || []).forEach(option => {
+          const choice = element("label");
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.name = field.name;
+          checkbox.value = option.value;
+          checkbox.checked = selected.has(option.value);
+          choice.append(checkbox, document.createTextNode(option.label));
+          input.append(choice);
+        });
       } else {
         input = document.createElement("input");
         input.type = field.type || "text";
       }
-      input.name = field.name;
-      input.value = text(initial[field.name]);
-      if (field.placeholder) input.placeholder = field.placeholder;
-      if (field.required) input.required = true;
-      if (field.readOnly) input.readOnly = true;
-      if (field.help) input.setAttribute("aria-describedby", `help-${field.name}`);
+      if (field.type !== "checkbox-group") {
+        input.name = field.name;
+        input.value = text(initial[field.name]);
+        if (field.placeholder) input.placeholder = field.placeholder;
+        if (field.required) input.required = true;
+        if (field.readOnly) input.readOnly = true;
+        if (field.help) input.setAttribute("aria-describedby", `help-${field.name}`);
+      }
       label.append(caption, input);
       if (field.help) {
         const help = element("small", field.help);
@@ -89,7 +104,11 @@
       save.disabled = true;
       save.setAttribute("aria-busy", "true");
       try {
-        const values = Object.fromEntries(new FormData(form).entries());
+        const formData = new FormData(form);
+        const values = Object.fromEntries(formData.entries());
+        fields.filter(field => field.type === "checkbox-group").forEach(field => {
+          values[field.name] = formData.getAll(field.name);
+        });
         await onSubmit(values);
         dialog.close();
       } catch (caught) {

@@ -41,5 +41,5 @@ await writeFile(
   "utf8"
 );
 console.log(publicConfig.supabaseUrl && publicConfig.supabaseAnonKey
-  ? "T'ARAN public Supabase configuration created."
-  : "T'ARAN built without Supabase configuration; online-only features stay hidden.");
+  ? "SONPUM HAEBANG public Supabase configuration created."
+  : "SONPUM HAEBANG built without Supabase configuration; online-only features stay hidden.");

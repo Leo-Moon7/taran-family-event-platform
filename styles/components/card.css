@@ -11,8 +11,8 @@
 .card--interactive:hover { border-color: var(--color-border-strong); box-shadow: var(--shadow-md); transform: translateY(-2px); }
 .card--interactive:focus-visible { outline-offset: 4px; }
 .skeleton { position: relative; overflow: hidden; border-radius: var(--radius-sm); background: #eee9e4; }
-.skeleton::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgb(255 255 255 / 70%), transparent); animation: taran-shimmer 1.4s infinite; }
-@keyframes taran-shimmer { to { transform: translateX(100%); } }
+.skeleton::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgb(255 255 255 / 70%), transparent); animation: sonpum-haebang-shimmer 1.4s infinite; }
+@keyframes sonpum-haebang-shimmer { to { transform: translateX(100%); } }
 @media (prefers-reduced-motion: reduce) { .skeleton::after { animation: none; } }
 .result-state { display: grid; min-height: 15rem; place-items: center; align-content: center; gap: var(--space-3); padding: var(--space-8); border: 1px dashed var(--color-border-strong); border-radius: var(--radius-lg); text-align: center; }
 .result-state strong { font-size: var(--font-size-20); }

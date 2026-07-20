@@ -30,9 +30,9 @@ function upgradeLegacyHeader(header) {
   const inner = createElement("div", "site-header__inner");
   const brand = createElement("a", "brand");
   brand.href = "index.html";
-  brand.setAttribute("aria-label", "따란 홈");
+  brand.setAttribute("aria-label", "손품해방 홈");
   const brandName = createElement("span", "brand__name");
-  brandName.append(createElement("span", "", "따란"), createElement("small", "", "T'ARAN"));
+  brandName.append(createElement("span", "", "손품해방"), createElement("small", "", "SONPUM HAEBANG"));
   brand.append(brandName);
   const toggle = createElement("button", "site-header__toggle", "☰");
   toggle.type = "button";
@@ -74,9 +74,9 @@ upgradeLegacyHeader(publicHeader);
 if (publicHeader) {
   const brand = publicHeader.querySelector(".brand");
   if (brand) {
-    brand.setAttribute("aria-label", "따란 홈");
+    brand.setAttribute("aria-label", "손품해방 홈");
     const englishName = brand.querySelector("small");
-    if (englishName) englishName.textContent = "T'ARAN";
+    if (englishName) englishName.textContent = "SONPUM HAEBANG";
   }
 
   const nav = publicHeader.querySelector("nav");

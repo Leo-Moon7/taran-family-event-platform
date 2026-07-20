@@ -197,7 +197,20 @@
           contentSlotId: row.content_slot_id || row.id,
           text: row.text_value || ""
         })).filter(item => CONTENT_SLOTS[item.contentSlotId]),
-        providers: (providerRows || []).map(row => ({ ...(row.data || {}), id: row.id })),
+        providers: (providerRows || []).map(row => ({
+          ...(row.data || {}),
+          id: row.id,
+          eventTypes: Array.isArray(row.event_types) && row.event_types.length
+            ? row.event_types
+            : (row.data || {}).eventTypes,
+          eventTags: Array.isArray(row.event_types) && row.event_types.length
+            ? row.event_types
+            : (row.data || {}).eventTags,
+          eventProfiles: row.event_profiles && typeof row.event_profiles === "object"
+            ? row.event_profiles
+            : (row.data || {}).eventProfiles,
+          eventTaxonomyStatus: row.event_taxonomy_status || "classified"
+        })),
         articles: (articleRows || []).map(row => ({ ...(row.data || {}), slug: row.slug })),
         banners: (bannerRows || []).map(row => ({
           ...(row.data || {}),

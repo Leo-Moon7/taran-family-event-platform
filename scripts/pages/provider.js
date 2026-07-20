@@ -20,7 +20,8 @@
     return "";
   };
   const won = (value) => Number(value) > 0 ? `${Number(value).toLocaleString("ko-KR")}원` : "";
-  const eventLabels = { kids: "돌잔치·백일", parents: "환갑·칠순", wedding: "상견례·소규모 결혼식", home: "가족모임" };
+  const eventLabels = window.SonpumEventTypes?.labels || { kids: "아이 행사", parents: "부모님 행사", meeting: "상견례", smallWedding: "소규모 결혼식", familyGathering: "가족 모임" };
+  const placeholderApi = window.SonpumProviderPlaceholder;
   let publishedInternalReviews = [];
 
   function safeUrl(value) {
@@ -60,11 +61,11 @@
       });
       publishedInternalReviews = publishedInternalReviews.map((review) => ({
         ...review,
-        name: review.author_name || "따란 회원",
+        name: review.author_name || "손품해방 회원",
         date: String(review.created_at || "").slice(0, 10)
       }));
     } catch (error) {
-      console.warn("따란 후기를 불러오지 못했습니다.", error);
+      console.warn("손품해방 후기를 불러오지 못했습니다.", error);
     }
   }
 
@@ -108,7 +109,7 @@
     if (!internal.length) {
       const empty = document.createElement("p");
       empty.className = "review-empty";
-      empty.textContent = "아직 등록된 따란 후기가 없습니다. 첫 이용 후기를 남겨주세요.";
+      empty.textContent = "아직 등록된 손품해방 후기가 없습니다. 첫 이용 후기를 남겨주세요.";
       internalBox.append(empty);
     }
     if (!external.length) {
@@ -120,7 +121,7 @@
     const rating = internal.length ? internal.reduce((sum, item) => sum + Number(item.rating || 0), 0) / internal.length : 0;
     if (rating) {
       $("#provider-rating").hidden = false;
-      $("#provider-rating").textContent = `★ ${rating.toFixed(1)} · 따란 후기 ${internal.length}개`;
+      $("#provider-rating").textContent = `★ ${rating.toFixed(1)} · 손품해방 후기 ${internal.length}개`;
     } else {
       $("#provider-rating").hidden = true;
     }
@@ -132,7 +133,7 @@
       $("#provider-not-found").hidden = false;
       return;
     }
-    document.title = `${provider.name} | 따란`;
+    document.title = `${provider.name} | 손품해방`;
     $("#provider-name").textContent = provider.name;
     $("#provider-category").textContent = provider.category || statusApi.getProviderIndustry(provider);
     const address = statusApi.getProviderAddress(provider) || [provider.region, provider.area].filter(Boolean).join(" ");
@@ -142,14 +143,14 @@
     $("#provider-status").className = `badge badge--${status.key}`;
     $("#provider-date").textContent = statusApi.getProviderFreshness(provider).label;
     const image = $("#provider-image");
-    image.src = safe(provider.image) || "assets/images/venue-partyroom.webp";
-    image.alt = provider.imageVerified ? `${provider.name} 대표 이미지` : "업체 유형 참고 이미지";
-    $("#provider-image-note").hidden = Boolean(provider.imageVerified);
-    image.addEventListener("error", () => { image.src = "assets/images/venue-partyroom.webp"; }, { once: true });
+    const requestedImage = provider.imageVerified ? safe(provider.image) : "";
+    placeholderApi.apply(image, provider, requestedImage);
+    $("#provider-image-note").hidden = Boolean(requestedImage);
+    $("#provider-image-note").textContent = "업체 사진 준비 중";
     (provider.eventTags || []).forEach((tag) => {
       const chip = document.createElement("span");
       chip.className = "badge";
-      chip.textContent = eventLabels[tag] || tag;
+      chip.textContent = eventLabels[tag] || window.SonpumEventTypes?.label?.(tag) || tag;
       $("#provider-tags").append(chip);
     });
 
@@ -223,7 +224,7 @@
       loginNote.hidden = false;
       const link = document.createElement("a");
       link.href = window.TaranAuth.loginUrl(`provider.html?id=${encodeURIComponent(id)}#reviews`);
-      link.textContent = "로그인하고 따란 후기 작성하기";
+      link.textContent = "로그인하고 손품해방 후기 작성하기";
       loginNote.replaceChildren(link);
     } else {
       formWrap.hidden = false;

@@ -1,21 +1,31 @@
 (function () {
   "use strict";
 
-  const BRAND = window.PlatformBrand || { storagePrefix: "taran-" };
+  const BRAND = window.PlatformBrand || { storagePrefix: "sonpum-haebang-" };
   const PREFIX = BRAND.storagePrefix;
-  const MIGRATION_MARKER = `${PREFIX}storage-migration-v1`;
+  const MIGRATION_MARKER = "sonpum-haebang-storage-migration-v1";
   const LEGACY_KEYS = {
-    "memoa-admin-overrides-preview": "taran-admin-overrides-preview",
-    "memoa-admin-studio": "taran-admin-studio",
-    "nopoom-user": "taran-user",
-    "nopoom-saved-venues": "taran-saved-venues",
-    "nopoom-calculator": "taran-calculator",
-    "nopoom-checklist": "taran-checklist",
-    "compare-providers": "taran-compare-providers",
-    "saved-providers": "taran-saved-providers",
-    "sonpum-haebang-crawl-review": "taran-crawl-review",
-    "sonpum-haebang-claims": "taran-provider-claims",
-    "sonpum-haebang-vendor-edits": "taran-provider-edits"
+    "taran-compare-providers": "sonpum-haebang-compare-providers",
+    "taran-checklist": "sonpum-haebang-checklist",
+    "taran-calculator": "sonpum-haebang-calculator",
+    "taran-favorites": "sonpum-haebang-favorites",
+    "taran-search-context": "sonpum-haebang-search-context",
+    "taran-user": "sonpum-haebang-user",
+    "taran-saved-venues": "sonpum-haebang-saved-venues",
+    "taran-saved-providers": "sonpum-haebang-saved-providers",
+    "taran-admin-overrides-preview": "sonpum-haebang-admin-overrides-preview",
+    "taran-admin-studio": "sonpum-haebang-admin-studio",
+    "taran-crawl-review": "sonpum-haebang-crawl-review",
+    "taran-provider-claims": "sonpum-haebang-provider-claims",
+    "taran-provider-edits": "sonpum-haebang-provider-edits",
+    "memoa-admin-overrides-preview": "sonpum-haebang-admin-overrides-preview",
+    "memoa-admin-studio": "sonpum-haebang-admin-studio",
+    "nopoom-user": "sonpum-haebang-user",
+    "nopoom-saved-venues": "sonpum-haebang-saved-venues",
+    "nopoom-calculator": "sonpum-haebang-calculator",
+    "nopoom-checklist": "sonpum-haebang-checklist",
+    "compare-providers": "sonpum-haebang-compare-providers",
+    "saved-providers": "sonpum-haebang-saved-providers"
   };
 
   function migrateStorage(storage) {
@@ -28,7 +38,6 @@
       if (legacyValue !== null && nextValue === null) {
         storage.setItem(nextKey, legacyValue);
       }
-      if (legacyValue !== null) storage.removeItem(legacyKey);
     });
 
     storage.setItem(MIGRATION_MARKER, "done");
@@ -44,7 +53,7 @@
   window.TaranStorage = Object.freeze({
     prefix: PREFIX,
     key(name) {
-      return `${PREFIX}${String(name || "").replace(/^taran-/, "")}`;
+      return `${PREFIX}${String(name || "").replace(/^(?:sonpum-haebang-|taran-)/, "")}`;
     },
     get(name, fallback = null, storage = window.localStorage) {
       try {

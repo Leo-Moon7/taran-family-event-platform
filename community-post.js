@@ -35,7 +35,7 @@
     const avatar = node("div", initials(comment.author_name || comment.author), "comment-avatar");
     avatar.setAttribute("aria-hidden", "true");
     const main = node("div", null, "comment-main");
-    const name = node("strong", comment.author_name || comment.author || "따란 회원");
+    const name = node("strong", comment.author_name || comment.author || "손품해방 회원");
     name.append(node("span", ` ${formatDate(comment.created_at)}`));
     main.append(name, node("p", comment.content || comment.text || ""));
     article.append(avatar, main);
@@ -51,7 +51,7 @@
       link.href = `community-post.html?id=${encodeURIComponent(item.id)}`;
       link.append(node("b", `[${item.category || "이야기"}] `), document.createTextNode(item.title || "제목 없음"));
       const meta = node("p");
-      meta.append(node("span", item.author_name || item.author || "따란 회원"), node("span", formatDate(item.created_at) || item.time || ""));
+      meta.append(node("span", item.author_name || item.author || "손품해방 회원"), node("span", formatDate(item.created_at) || item.time || ""));
       article.append(link, meta);
       relatedRoot.append(article);
     });
@@ -84,7 +84,7 @@
       await window.TaranApi.upsert(window.TaranConfig.tables.communityComments, {
         post_id: post.id,
         user_id: account.id,
-        author_name: account.display_name || "따란 회원",
+        author_name: account.display_name || "손품해방 회원",
         content,
         status: "pending"
       });
@@ -101,7 +101,7 @@
   function render() {
     if (!root || !post) return;
     root.replaceChildren();
-    document.title = `${post.title} | 따란 커뮤니티`;
+    document.title = `${post.title} | 손품해방 커뮤니티`;
 
     const card = node("article", null, "community-reader-card");
     const header = node("header", null, "reader-title-area");
@@ -113,7 +113,7 @@
     const avatar = node("div", initials(post.author_name || post.author), "reader-avatar");
     avatar.setAttribute("aria-hidden", "true");
     const authorInfo = node("div", null, "reader-author-info");
-    authorInfo.append(node("strong", post.author_name || post.author || "따란 회원"), node("p", `댓글 ${comments.length}`));
+    authorInfo.append(node("strong", post.author_name || post.author || "손품해방 회원"), node("p", `댓글 ${comments.length}`));
     authorRow.append(avatar, authorInfo);
 
     const body = node("section", null, "reader-body");

@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="승인된 따란 파트너가 업체 정보를 직접 관리하는 화면입니다.">
+  <meta name="description" content="승인된 손품해방 파트너가 업체 정보를 직접 관리하는 화면입니다.">
   <meta name="robots" content="noindex,nofollow">
-  <title>내 업체 관리 | 따란 T'ARAN</title>
+  <title>내 업체 관리 | 손품해방 SONPUM HAEBANG</title>
   <link rel="stylesheet" href="styles/tokens.css">
   <link rel="stylesheet" href="styles/reset.css">
   <link rel="stylesheet" href="styles/base.css">
@@ -22,7 +22,7 @@
 <body>
   <header class="site-header" data-site-header>
     <div class="site-header__inner">
-      <a class="brand" href="index.html" aria-label="따란 홈"><span class="brand__mark" aria-hidden="true">T</span><span class="brand__name"><span>따란</span><small>T'ARAN</small></span></a>
+      <a class="brand" href="index.html" aria-label="손품해방 홈"><span class="brand__mark" aria-hidden="true">손</span><span class="brand__name"><span>손품해방</span><small>SONPUM HAEBANG</small></span></a>
       <button class="site-header__toggle" type="button" aria-controls="site-navigation" aria-expanded="false" data-menu-toggle><span class="visually-hidden">메뉴 열기</span>☰</button>
       <nav class="site-nav" id="site-navigation" aria-label="주요 메뉴"><a href="venues.html">업체·장소</a><a href="account.html">내 계정</a><a class="site-nav__auth" href="account.html" data-auth-link>로그인</a></nav>
     </div>
@@ -69,10 +69,14 @@
         <fieldset class="partner-manage__section">
           <legend>진행 가능한 행사</legend>
           <div class="partner-manage__checks">
-            <label><input type="checkbox" name="event" value="wedding"> 결혼 준비</label>
-            <label><input type="checkbox" name="event" value="kids"> 아이 행사</label>
-            <label><input type="checkbox" name="event" value="parents"> 부모님 행사</label>
-            <label><input type="checkbox" name="event" value="home"> 가족 모임</label>
+            <label><input type="checkbox" name="event" value="kids"> 돌잔치·백일</label>
+            <label><input type="checkbox" name="event" value="parents"> 환갑·칠순·팔순</label>
+            <label><input type="checkbox" name="event" value="meeting"> 상견례</label>
+            <label><input type="checkbox" name="event" value="smallWedding"> 스몰웨딩</label>
+            <label><input type="checkbox" name="event" value="familyGathering"> 가족모임</label>
+            <label><input type="checkbox" name="event" value="anniversary"> 기념일·생신</label>
+            <label><input type="checkbox" name="event" value="memorial"> 추모 가족행사</label>
+            <label><input type="checkbox" name="event" value="other"> 기타 가족행사</label>
           </div>
         </fieldset>
 
@@ -106,7 +110,7 @@
     </div>
   </main>
 
-  <footer class="site-footer"><div class="container site-footer__inner"><div><strong>따란 T'ARAN</strong><p>가족행사 장소와 업체를 조건별로 비교합니다.</p></div><nav aria-label="정책 메뉴"><a href="privacy.html">개인정보처리방침</a><a href="terms.html">이용약관</a></nav></div></footer>
+  <footer class="site-footer"><div class="container site-footer__inner"><div><strong>손품해방 SONPUM HAEBANG</strong><p>가족행사 장소와 업체를 조건별로 비교합니다.</p></div><nav aria-label="정책 메뉴"><a href="privacy.html">개인정보처리방침</a><a href="terms.html">이용약관</a></nav></div></footer>
   <script src="content-config.js"></script><script src="scripts/core/config.js"></script><script src="scripts/core/api.js"></script><script src="scripts/core/auth.js"></script><script src="scripts/core/provider-profile.js"></script><script src="scripts/components/header.js"></script><script src="scripts/pages/partner.js"></script>
 </body>
 </html>

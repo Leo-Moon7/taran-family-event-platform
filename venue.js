@@ -140,18 +140,18 @@ function renderReviewPanels(item, showExternalFirst = false) {
   const internalPanel = document.querySelector("#internal-review-panel");
   internalPanel.innerHTML = internalReviews.length
     ? `<div class="internal-review-list">${internalReviews.map(review => `<article>
-        <div><strong>${escapeHtml(review.author || "따란 고객")}</strong><span>${escapeHtml([internalReviewRatingText(review), displayDate(review.createdAt)].filter(Boolean).join(" · "))}</span></div>
+        <div><strong>${escapeHtml(review.author || "손품해방 고객")}</strong><span>${escapeHtml([internalReviewRatingText(review), displayDate(review.createdAt)].filter(Boolean).join(" · "))}</span></div>
         <p>${escapeHtml(review.body)}</p>
       </article>`).join("")}</div>`
     : `<div class="review-empty-state">
-        <strong>아직 따란 고객 리뷰가 없습니다.</strong>
-        <p>따란에서 실제 이용 여부가 확인된 고객의 리뷰만 이곳에 표시할 예정입니다.</p>
+        <strong>아직 손품해방 고객 리뷰가 없습니다.</strong>
+        <p>손품해방에서 실제 이용 여부가 확인된 고객의 리뷰만 이곳에 표시할 예정입니다.</p>
         <button type="button" disabled>실제 이용 확인 후 작성 가능</button>
       </div>`;
 
   const externalPanel = document.querySelector("#external-review-panel");
   externalPanel.innerHTML = externalReviews.length
-    ? `<div class="external-review-notice"><strong>외부 후기 참고 안내</strong><p>외부 블로그 후기는 따란 고객 리뷰와 구분해 표시합니다. 가격과 운영 조건은 실제 상담 시 업체에서 최종 안내합니다.</p></div>
+    ? `<div class="external-review-notice"><strong>외부 후기 참고 안내</strong><p>외부 블로그 후기는 손품해방 고객 리뷰와 구분해 표시합니다. 가격과 운영 조건은 실제 상담 시 업체에서 최종 안내합니다.</p></div>
       <div class="external-review-list">${externalReviews.map(review => `<article>
         <div><span>네이버 블로그</span><time>${escapeHtml(displayDate(review.publishedDate))}</time></div>
         <h3>${escapeHtml(review.title)}</h3>
@@ -180,7 +180,7 @@ function renderCandidate(candidate) {
   const spec = candidateSpecProfile(candidate);
   document.body.classList.add("review-candidate-detail");
   document.querySelectorAll(".verified-only").forEach(element => { element.hidden = true; });
-  document.title = `${candidate.name} 업체 정보 | 따란`;
+  document.title = `${candidate.name} 업체 정보 | 손품해방`;
   setText("#breadcrumb-name", candidate.name);
   setText("#detail-location", `${regionLabel} · ${candidate.category}`);
   setText("#detail-name", candidate.name);
@@ -227,7 +227,7 @@ function renderCandidate(candidate) {
 
   document.querySelector("#caution-list").innerHTML = [
     "가격, 상세 주소, 예약 가능 날짜는 업체 상담 시 최종 안내됩니다.",
-    "따란 고객 리뷰와 외부 블로그 후기는 별도로 구분해 보여드립니다.",
+    "손품해방 고객 리뷰와 외부 블로그 후기는 별도로 구분해 보여드립니다.",
     "업체와 연결되면 연락처와 패키지 가격을 순차적으로 보강합니다."
   ].map(item => `<li>${escapeHtml(item)}</li>`).join("");
 
@@ -281,7 +281,7 @@ function renderCandidate(candidate) {
 function renderPublishedVenue(item) {
   const isSample = String(item.sourceStatus).includes("검수 준비") || String(item.sourceStatus).includes("확인 예정");
   const verificationLabel = isSample ? "정보 확인 예정" : "관리자 검수 완료";
-  document.title = `${item.name} | 따란`;
+  document.title = `${item.name} | 손품해방`;
   setText("#breadcrumb-name", item.name);
   setText("#detail-location", `${venueLocationText(item)} · ${item.type}`);
   setText("#detail-name", item.name);

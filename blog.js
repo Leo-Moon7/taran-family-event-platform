@@ -168,7 +168,7 @@
       return { href: "venues.html", eyebrow: "업체 비교", title: "읽은 기준으로 실제 업체 조건을 비교해보세요.", label: "업체 찾아보기" };
     })();
 
-    document.title = `${post.title} | 따란`;
+    document.title = `${post.title} | 손품해방`;
     const description = document.querySelector("meta[name='description']");
     if (description) description.setAttribute("content", post.excerpt);
 

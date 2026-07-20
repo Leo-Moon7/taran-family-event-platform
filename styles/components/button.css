@@ -21,5 +21,5 @@
 .button--text { min-height: 44px; padding-inline: var(--space-2); color: var(--color-brand-800); background: transparent; }
 .button--text:hover { color: var(--color-accent-700); }
 .button.is-loading { color: transparent; position: relative; pointer-events: none; }
-.button.is-loading::after { content: ""; position: absolute; width: 1rem; height: 1rem; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: taran-spin 0.7s linear infinite; }
-@keyframes taran-spin { to { transform: rotate(360deg); } }
+.button.is-loading::after { content: ""; position: absolute; width: 1rem; height: 1rem; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: sonpum-haebang-spin 0.7s linear infinite; }
+@keyframes sonpum-haebang-spin { to { transform: rotate(360deg); } }

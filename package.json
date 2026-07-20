@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/build/prepare-dist.mjs",
-    "test": "node scripts/tests/validate.mjs && node scripts/tests/marketplace-flow.mjs",
+    "test": "node scripts/tests/validate.mjs && node scripts/tests/marketplace-flow.mjs && node scripts/tests/sonpum-redesign.mjs",
     "test:marketplace": "node scripts/tests/marketplace-flow.mjs",
+    "test:redesign": "node scripts/tests/sonpum-redesign.mjs",
     "test:dist": "node scripts/tests/validate-dist.mjs"
   }
 }

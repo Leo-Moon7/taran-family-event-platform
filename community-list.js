@@ -27,7 +27,7 @@
     const category = text("b", `[${post.category || "이야기"}] `);
     link.append(category, document.createTextNode(post.title || "제목 없음"));
     const meta = document.createElement("p");
-    [post.author_name || post.author || "따란 회원", formatDate(post.created_at) || post.time || "", `댓글 ${post.comment_count || 0}`]
+    [post.author_name || post.author || "손품해방 회원", formatDate(post.created_at) || post.time || "", `댓글 ${post.comment_count || 0}`]
       .filter(Boolean).forEach(value => meta.append(text("span", value)));
     article.append(link, meta);
     return article;
@@ -90,7 +90,7 @@
         category: String(values.get("category") || "준비 질문"),
         title,
         content,
-        author_name: account.display_name || "따란 회원",
+        author_name: account.display_name || "손품해방 회원",
         status: "pending"
       });
       form.reset();

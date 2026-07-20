@@ -1,4 +1,4 @@
-# 따란 온라인 저장 연결 가이드
+# 손품해방 온라인 저장 연결 가이드
 
 개발 지식이 없어도 아래 순서대로 한 번만 설정하면 됩니다. `service_role` 키는 어떤 경우에도 사이트 파일·GitHub·채팅에 넣지 않습니다.
 
@@ -14,8 +14,11 @@
 1. `migrations/002_security_hardening.sql`
 2. `migrations/003_marketplace_comparison_flow.sql`
 3. `migrations/004_provider_automation.sql`
+4. `migrations/005_sonpum_brand_and_event_types.sql`
 
 `004_provider_automation.sql`은 업체 정보 완성도, 문의 즉시 웹 알림, 12시간 리마인드, 24시간 만료, 응답률·평균 응답 시간, 오래된 정보의 문의 수신 제한을 추가합니다. 실행 후 `migrations/README.md`의 확인 항목을 순서대로 점검합니다.
+
+`005_sonpum_brand_and_event_types.sql`은 돌잔치·백일, 환갑·칠순·팔순, 상견례, 스몰웨딩, 가족모임, 기념일·생신, 추모 가족행사, 기타 가족행사로 분류를 확장합니다. 기존 `wedding` 데이터는 이름과 설명에 근거가 분명할 때만 자동 분류하며, 애매한 자료는 삭제하지 않고 관리자 검토 대상으로 남깁니다.
 
 ## 2. 로그인 주소 설정
 

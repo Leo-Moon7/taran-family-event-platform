@@ -1,51 +1,94 @@
 (function () {
   "use strict";
 
-  const common = [
-    { id: "date", days: 120, title: "행사 날짜 확정하기", action: "calendar" },
-    { id: "guests", days: 110, title: "예상 인원 정리하기", action: "calculator" },
-    { id: "budget", days: 100, title: "예산 범위 정하기", action: "calculator" },
-    { id: "venues", days: 90, title: "장소 후보 찾기", action: "venues" },
-    { id: "compare", days: 75, title: "장소 조건 비교하기", action: "compare" },
-    { id: "inquiry", days: 65, title: "후보 업체에 견적 문의하기", action: "inquiry" },
-    { id: "contract", days: 50, title: "계약·취소 조건 확인하기", action: "guide" },
-    { id: "final-guests", days: 14, title: "최종 인원 전달하기", action: "venues" },
-    { id: "reconfirm", days: 3, title: "예약 내용 재확인하기", action: "none" }
-  ];
-
-  const specific = {
-    kids: [
-      { id: "table", days: 60, title: "돌상·포토존 구성 정하기", action: "venues" },
-      { id: "snap", days: 55, title: "스냅·영상 예약하기", action: "venues" },
-      { id: "outfit", days: 40, title: "아기와 가족 의상 준비하기", action: "guide" },
-      { id: "baby-bag", days: 2, title: "아기 간식·여벌옷 챙기기", action: "none" }
-    ],
-    parents: [
-      { id: "ceremony", days: 60, title: "행사 순서와 감사 인사 정하기", action: "guide" },
-      { id: "snap", days: 45, title: "가족사진·영상 예약하기", action: "venues" },
-      { id: "mobility", days: 20, title: "어르신 이동 동선 확인하기", action: "guide" }
-    ],
-    wedding: [
-      { id: "families", days: 60, title: "양가 참석 인원 확정하기", action: "none" },
-      { id: "menu", days: 45, title: "식사 메뉴와 좌석 확인하기", action: "venues" },
-      { id: "gift", days: 20, title: "선물·예단 전달 방식 정하기", action: "guide" }
-    ],
-    home: [
-      { id: "catering", days: 30, title: "식사·케이터링 구성 정하기", action: "venues" },
-      { id: "seats", days: 14, title: "좌석과 이동 공간 정리하기", action: "guide" },
-      { id: "supplies", days: 3, title: "당일 식기·소모품 확인하기", action: "none" }
-    ]
+  const templates = {
+    kids: {
+      label: "돌잔치·백일",
+      tasks: [
+        { id: "venue-budget", days: 120, title: "장소 후보와 전체 예산 정하기", action: "venues" },
+        { id: "photo-table", days: 90, title: "촬영과 돌상 구성 비교하기", action: "compare" },
+        { id: "outfits", days: 60, title: "아기와 가족 의상 준비하기", action: "guide" },
+        { id: "invitation-gift", days: 30, title: "초대장과 답례품 확정하기", action: "guide" },
+        { id: "final-kids", days: 7, title: "최종 인원과 아기 준비물 확인하기", action: "none" }
+      ]
+    },
+    parents: {
+      label: "환갑·칠순·팔순",
+      tasks: [
+        { id: "date-venue", days: 90, title: "날짜와 장소 후보 정하기", action: "venues" },
+        { id: "guests-table", days: 60, title: "참석 인원과 상차림 정하기", action: "calculator" },
+        { id: "photo-gift", days: 30, title: "사진 촬영과 답례품 준비하기", action: "guide" },
+        { id: "seats", days: 14, title: "좌석과 어르신 이동 동선 확인하기", action: "guide" },
+        { id: "final-parents", days: 3, title: "최종 인원과 진행 순서 확인하기", action: "none" }
+      ]
+    },
+    meeting: {
+      label: "상견례",
+      tasks: [
+        { id: "meeting-date", days: 30, title: "양가 일정과 지역 정하기", action: "none" },
+        { id: "meeting-venue", days: 21, title: "프라이빗 룸과 코스 비교하기", action: "venues" },
+        { id: "meeting-menu", days: 14, title: "메뉴와 좌석 배치 확정하기", action: "compare" },
+        { id: "meeting-gift", days: 7, title: "선물과 복장 준비하기", action: "guide" },
+        { id: "meeting-final", days: 1, title: "예약 시간과 주차 안내 확인하기", action: "none" }
+      ]
+    },
+    smallWedding: {
+      label: "스몰웨딩",
+      tasks: [
+        { id: "wedding-budget", days: 240, title: "예산과 예상 하객 정하기", action: "calculator" },
+        { id: "wedding-venue", days: 180, title: "예식 장소 계약하기", action: "venues" },
+        { id: "wedding-photo-outfit", days: 120, title: "촬영과 의상 업체 정하기", action: "compare" },
+        { id: "wedding-invite-food", days: 60, title: "초대장과 식사 구성 확정하기", action: "guide" },
+        { id: "wedding-direction", days: 30, title: "진행 순서와 공간 연출 정하기", action: "guide" },
+        { id: "wedding-final", days: 7, title: "인원과 우천 대안 최종 확인하기", action: "none" }
+      ]
+    },
+    familyGathering: {
+      label: "가족모임",
+      tasks: [
+        { id: "gathering-purpose", days: 45, title: "모임 목적과 참석 범위 정하기", action: "none" },
+        { id: "gathering-venue", days: 30, title: "장소와 식사 구성 정하기", action: "venues" },
+        { id: "gathering-transport", days: 14, title: "좌석과 이동 동선 안내하기", action: "guide" },
+        { id: "gathering-supplies", days: 3, title: "케이크와 당일 준비물 확인하기", action: "none" }
+      ]
+    },
+    anniversary: {
+      label: "기념일",
+      tasks: [
+        { id: "anniversary-plan", days: 60, title: "기념 방식과 예산 정하기", action: "calculator" },
+        { id: "anniversary-venue", days: 45, title: "장소와 촬영 방식 정하기", action: "venues" },
+        { id: "anniversary-flower", days: 30, title: "꽃과 공간 연출 준비하기", action: "compare" },
+        { id: "anniversary-letter", days: 10, title: "편지와 선물 준비하기", action: "guide" },
+        { id: "anniversary-final", days: 2, title: "예약과 전달 순서 확인하기", action: "none" }
+      ]
+    },
+    memorial: {
+      label: "추모 가족행사",
+      tasks: [
+        { id: "memorial-family", days: 30, title: "가족 일정과 진행 방식 정하기", action: "none" },
+        { id: "memorial-meal", days: 20, title: "장소와 식사 구성 확인하기", action: "venues" },
+        { id: "memorial-notice", days: 7, title: "참석 가족에게 일정 안내하기", action: "none" },
+        { id: "memorial-final", days: 2, title: "준비물과 이동 동선 확인하기", action: "guide" }
+      ]
+    },
+    other: {
+      label: "기타 가족행사",
+      tasks: [
+        { id: "other-purpose", days: 60, title: "행사 목적과 예상 인원 정하기", action: "none" },
+        { id: "other-budget", days: 45, title: "예산과 필요한 서비스 정하기", action: "calculator" },
+        { id: "other-venue", days: 30, title: "장소와 업체 비교하기", action: "compare" },
+        { id: "other-run-sheet", days: 7, title: "당일 진행 순서 정리하기", action: "guide" },
+        { id: "other-final", days: 2, title: "예약 조건 최종 확인하기", action: "none" }
+      ]
+    }
   };
 
-  const labels = { kids: "돌잔치·백일", parents: "환갑·칠순", wedding: "상견례·소규모 결혼식", home: "가족모임" };
-
   function getTemplate(type = "kids") {
-    return {
-      type,
-      label: labels[type] || labels.kids,
-      tasks: [...common, ...(specific[type] || specific.kids)].sort((a, b) => b.days - a.days)
-    };
+    const normalized = window.SonpumEventTypes?.normalize?.(type) || type;
+    const source = templates[normalized] || templates.other;
+    return { type: normalized, label: source.label, tasks: source.tasks.map((task) => ({ ...task })) };
   }
 
+  const labels = Object.fromEntries(Object.entries(templates).map(([key, value]) => [key, value.label]));
   window.TaranChecklistTemplates = Object.freeze({ getTemplate, labels });
 })();
