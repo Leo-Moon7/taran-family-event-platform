@@ -142,7 +142,7 @@ alter table public.taran_user_checklists enable row level security;
 drop policy if exists "users manage own inquiry groups" on public.taran_inquiry_groups;
 create policy "users manage own inquiry groups"
 on public.taran_inquiry_groups for select
-using (auth.uid() = user_id);
+using (auth.uid() = taran_inquiry_groups.user_id);
 
 drop policy if exists "providers read assigned inquiry groups" on public.taran_inquiry_groups;
 create policy "providers read assigned inquiry groups"
@@ -152,7 +152,8 @@ using (
     select 1
     from public.taran_inquiry_recipients recipient
     join public.taran_providers provider on provider.id = recipient.provider_id
-    where recipient.inquiry_group_id = id and provider.owner_user_id = auth.uid()
+    where recipient.inquiry_group_id = taran_inquiry_groups.id
+      and provider.owner_user_id = auth.uid()
   )
 );
 
@@ -168,7 +169,8 @@ on public.taran_inquiry_recipients for select
 using (
   exists (
     select 1 from public.taran_inquiry_groups inquiry_group
-    where inquiry_group.id = inquiry_group_id and inquiry_group.user_id = auth.uid()
+    where inquiry_group.id = taran_inquiry_recipients.inquiry_group_id
+      and inquiry_group.user_id = auth.uid()
   )
 );
 
@@ -178,7 +180,8 @@ on public.taran_inquiry_recipients for select
 using (
   exists (
     select 1 from public.taran_providers provider
-    where provider.id = provider_id and provider.owner_user_id = auth.uid()
+    where provider.id = taran_inquiry_recipients.provider_id
+      and provider.owner_user_id = auth.uid()
   )
 );
 
@@ -188,13 +191,15 @@ on public.taran_inquiry_recipients for update
 using (
   exists (
     select 1 from public.taran_providers provider
-    where provider.id = provider_id and provider.owner_user_id = auth.uid()
+    where provider.id = taran_inquiry_recipients.provider_id
+      and provider.owner_user_id = auth.uid()
   )
 )
 with check (
   exists (
     select 1 from public.taran_providers provider
-    where provider.id = provider_id and provider.owner_user_id = auth.uid()
+    where provider.id = taran_inquiry_recipients.provider_id
+      and provider.owner_user_id = auth.uid()
   )
 );
 
@@ -212,21 +217,23 @@ using (
     select 1
     from public.taran_inquiry_recipients recipient
     join public.taran_inquiry_groups inquiry_group on inquiry_group.id = recipient.inquiry_group_id
-    where recipient.id = inquiry_recipient_id and inquiry_group.user_id = auth.uid()
+    where recipient.id = taran_inquiry_responses.inquiry_recipient_id
+      and inquiry_group.user_id = auth.uid()
   )
 );
 
 drop policy if exists "providers manage own inquiry responses" on public.taran_inquiry_responses;
 create policy "providers manage own inquiry responses"
 on public.taran_inquiry_responses for all
-using (provider_user_id = auth.uid())
+using (taran_inquiry_responses.provider_user_id = auth.uid())
 with check (
-  provider_user_id = auth.uid()
+  taran_inquiry_responses.provider_user_id = auth.uid()
   and exists (
     select 1
     from public.taran_inquiry_recipients recipient
     join public.taran_providers provider on provider.id = recipient.provider_id
-    where recipient.id = inquiry_recipient_id and provider.owner_user_id = auth.uid()
+    where recipient.id = taran_inquiry_responses.inquiry_recipient_id
+      and provider.owner_user_id = auth.uid()
   )
 );
 
@@ -239,7 +246,7 @@ with check (public.taran_has_role(array['owner','admin','operations']));
 drop policy if exists "users manage own provider registrations" on public.taran_provider_registrations;
 create policy "users manage own provider registrations"
 on public.taran_provider_registrations for select
-using (user_id = auth.uid());
+using (taran_provider_registrations.user_id = auth.uid());
 
 drop policy if exists "admins manage provider registrations" on public.taran_provider_registrations;
 create policy "admins manage provider registrations"
@@ -250,14 +257,14 @@ with check (public.taran_has_role(array['owner','admin','operations']));
 drop policy if exists "users manage own comparisons" on public.taran_user_comparisons;
 create policy "users manage own comparisons"
 on public.taran_user_comparisons for all
-using (user_id = auth.uid())
-with check (user_id = auth.uid());
+using (taran_user_comparisons.user_id = auth.uid())
+with check (taran_user_comparisons.user_id = auth.uid());
 
 drop policy if exists "users manage own checklists" on public.taran_user_checklists;
 create policy "users manage own checklists"
 on public.taran_user_checklists for all
-using (user_id = auth.uid())
-with check (user_id = auth.uid());
+using (taran_user_checklists.user_id = auth.uid())
+with check (taran_user_checklists.user_id = auth.uid());
 
 create or replace function public.taran_create_inquiry_group(
   p_provider_ids text[],
