@@ -94,18 +94,23 @@
     body.append(head);
 
     row("업체 유형", items.map((item) => statusApi.getProviderIndustry(item)));
+    row("지역", items.map((item) => [item.region, item.area].filter(Boolean).join(" ")));
     row("행사 가능 유형", items.map((item) => (item.eventTags || []).map((tag) => ({ kids: "돌잔치·백일", parents: "환갑·칠순", wedding: "상견례·결혼식", home: "가족모임" })[tag] || tag).join(", ")));
     row("최소 수용 인원", items.map((item) => statusApi.getProviderFacts(item).minGuests ? `${statusApi.getProviderFacts(item).minGuests}명` : ""));
     row("최대 수용 인원", items.map((item) => statusApi.getProviderFacts(item).maxGuests ? `${statusApi.getProviderFacts(item).maxGuests}명` : ""));
     row("최소 보증 인원", items.map((item) => statusApi.getProviderFacts(item).guarantee ? `${statusApi.getProviderFacts(item).guarantee}명` : ""));
-    row("성인 식대", items.map((item) => formatWon(statusApi.getProviderFacts(item).adultMealMin)));
-    row("기본 대관료", items.map((item) => formatWon(statusApi.getProviderFacts(item).rentalFee || item.price)));
+    row("성인 식대", items.map((item) => statusApi.shouldShowVolatileFacts(item) ? formatWon(statusApi.getProviderFacts(item).adultMealMin) : "최근 조건 확인 필요"));
+    row("어린이 식대", items.map((item) => statusApi.shouldShowVolatileFacts(item) ? first(item, ["어린이 식대", "소인 식대"]) : "최근 조건 확인 필요"));
+    row("기본 대관료", items.map((item) => statusApi.shouldShowVolatileFacts(item) ? formatWon(statusApi.getProviderFacts(item).rentalFee || item.price) : "최근 조건 확인 필요"));
     row("주차", items.map((item) => first(item, ["주차", "주차 정보", "parking"]) || (statusApi.getProviderFacts(item).parking ? `${statusApi.getProviderFacts(item).parking}대` : "")));
     row("단독 공간", items.map((item) => label(first(item, ["단독 공간", "privateSpace"]))));
     row("외부 음식", items.map((item) => label(first(item, ["외부 음식", "외부 음식 허용 여부", "outsideFood"]))));
     row("외부 업체", items.map((item) => label(first(item, ["외부 업체", "외부 업체 이용 가능 여부", "outsideVendor"]))));
+    row("외부 촬영", items.map((item) => label(first(item, ["외부 촬영", "촬영 업체 반입", "outsidePhotography"]))));
+    row("휠체어 접근", items.map((item) => label(first(item, ["휠체어 접근", "접근 편의", "wheelchairAccess"]))));
     row("취소·환불", items.map((item) => first(item, ["취소·환불", "취소 환불", "cancellationPolicy"])));
     row("정보 상태", items.map((item) => statusApi.getProviderFreshness(item).label));
+    row("정보 확인일", items.map((item) => statusApi.getProviderFreshness(item).date || "미등록"));
   }
 
   render();

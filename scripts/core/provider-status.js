@@ -45,15 +45,27 @@
     return getProviderStatus(provider).label;
   }
 
+  function getProviderAgeDays(provider) {
+    const value = getProviderStatus(provider).date;
+    if (!value) return null;
+    const date = new Date(value.replaceAll(".", "-"));
+    if (Number.isNaN(date.getTime())) return null;
+    return Math.max(0, Math.floor((Date.now() - date.getTime()) / 86400000));
+  }
+
   function getProviderFreshness(provider) {
     const status = getProviderStatus(provider);
-    if (!status.date) return { state: "unknown", label: "확인일 미등록", date: "" };
-    const date = new Date(status.date.replaceAll(".", "-"));
-    if (Number.isNaN(date.getTime())) return { state: "unknown", label: status.date, date: status.date };
-    const days = Math.floor((Date.now() - date.getTime()) / 86400000);
-    if (days <= 90) return { state: "fresh", label: `정보 확인 ${status.date}`, date: status.date };
-    if (days <= 120) return { state: "review", label: "가격 확인 필요", date: status.date };
-    return { state: "stale", label: "업체 정보 업데이트 필요", date: status.date };
+    const ageDays = getProviderAgeDays(provider);
+    if (ageDays === null) return { state: "unknown", label: "확인일 미등록", date: status.date || "", ageDays: null };
+    if (ageDays <= 90) return { state: "fresh", label: `정보 확인 ${status.date}`, date: status.date, ageDays };
+    if (ageDays <= 120) return { state: "review", label: "최근 조건을 다시 확인해 주세요", date: status.date, ageDays };
+    if (ageDays < 180) return { state: "stale", label: "업체 정보 업데이트 필요", date: status.date, ageDays };
+    return { state: "expired", label: "프로필 업데이트 필요", date: status.date, ageDays };
+  }
+
+  function shouldShowVolatileFacts(provider) {
+    const ageDays = getProviderAgeDays(provider);
+    return ageDays === null || ageDays <= 120;
   }
 
   function isProviderPublic(provider) {
@@ -84,7 +96,9 @@
   window.TaranProviderStatus = Object.freeze({
     getProviderStatus,
     getProviderStatusLabel,
+    getProviderAgeDays,
     getProviderFreshness,
+    shouldShowVolatileFacts,
     getProviderAddress,
     getProviderIndustry,
     getProviderFacts,

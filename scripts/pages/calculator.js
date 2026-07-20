@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const state = { step: 1, event: "", guests: 0, space: "", services: [] };
+  const state = { step: 1, event: "", region: "", date: "", guests: 0, space: "", services: [] };
   const ranges = {
     kids: { meal: [55000, 90000], space: { restaurant: [0, 500000], hotel: [500000, 1500000], partyroom: [300000, 900000], home: [0, 300000] } },
     parents: { meal: [50000, 110000], space: { restaurant: [0, 600000], hotel: [700000, 1800000], partyroom: [300000, 900000], home: [0, 300000] } },
@@ -34,8 +34,8 @@
         state.services = [...selected];
         button.classList.toggle("is-selected", selected.has(item.value));
       } else {
-        const key = state.step === 1 ? "event" : state.step === 2 ? "guests" : "space";
-        state[key] = state.step === 2 ? Number(item.value) : item.value;
+        const key = state.step === 1 ? "event" : state.step === 3 ? "guests" : "space";
+        state[key] = state.step === 3 ? Number(item.value) : item.value;
         button.parentElement.querySelectorAll("button").forEach((candidate) => candidate.classList.toggle("is-selected", candidate === button));
       }
       next.disabled = false;
@@ -54,11 +54,11 @@
 
   function showStep() {
     steps.forEach((section) => { section.hidden = Number(section.dataset.step) !== state.step; });
-    document.getElementById("calculator-step-label").textContent = `${state.step} / 4`;
-    document.getElementById("calculator-progress-bar").style.width = `${state.step * 25}%`;
+    document.getElementById("calculator-step-label").textContent = `${state.step} / 5`;
+    document.getElementById("calculator-progress-bar").style.width = `${state.step * 20}%`;
     prev.hidden = state.step === 1;
-    next.textContent = state.step === 4 ? "계산 완료" : "다음";
-    next.disabled = state.step === 1 ? !state.event : state.step === 2 ? !state.guests : state.step === 3 ? !state.space : false;
+    next.textContent = state.step === 5 ? "계산 완료" : "다음";
+    next.disabled = state.step === 1 ? !state.event : state.step === 2 ? !state.region : state.step === 3 ? !state.guests : state.step === 4 ? !state.space : false;
   }
 
   function calculate() {
@@ -78,7 +78,7 @@
     });
     const format = (value) => `${Math.round(value / 10000).toLocaleString("ko-KR")}만 원`;
     document.getElementById("calculator-total").textContent = `${format(min)} ~ ${format(max)}`;
-    document.getElementById("calculator-result-note").textContent = `${guests}명 기준으로 선택한 항목을 합산한 참고 범위입니다.`;
+    document.getElementById("calculator-result-note").textContent = `${state.region ? `${state.region} · ` : ""}${guests}명 기준으로 선택한 항목을 합산한 참고 범위입니다.`;
     const box = document.getElementById("calculator-breakdown");
     box.replaceChildren(...items.map(([name, low, high]) => {
       const row = document.createElement("div");
@@ -86,9 +86,12 @@
       const value = document.createElement("strong"); value.textContent = `${format(low)}~${format(high)}`;
       row.append(label, value); return row;
     }));
-    document.getElementById("calculator-venues-link").href = `venues.html?event=${encodeURIComponent(state.event)}&guests=${guests}&budget=${max}`;
-    document.getElementById("calculator-checklist-link").href = `checklist.html?event=${encodeURIComponent(state.event)}`;
+    const context = { event: state.event, province: state.region, guests, budget: max, date: state.date };
+    const query = new URLSearchParams(Object.entries(context).filter(([, value]) => value).map(([key, value]) => [key, String(value)]));
+    document.getElementById("calculator-venues-link").href = `venues.html?${query}`;
+    document.getElementById("calculator-checklist-link").href = `checklist.html?${query}`;
     window.TaranStorage.set("calculator-state", JSON.stringify({ ...state, min, max }));
+    window.TaranSearchContext?.save?.(context);
   }
 
   document.querySelectorAll('[data-step="1"] [data-single-options] button').forEach((button) => button.addEventListener("click", () => {
@@ -99,11 +102,40 @@
     calculate();
   }));
   next.addEventListener("click", () => {
-    if (state.step < 4) { state.step += 1; showStep(); return; }
+    if (state.step < 5) { state.step += 1; showStep(); return; }
     calculate();
     window.TaranAnalytics?.track("calculator_completed", "calculator.html", { eventType: state.event, guests: state.guests, services: state.services }).catch(() => {});
     document.getElementById("calculator-total").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
   });
   prev.addEventListener("click", () => { state.step = Math.max(1, state.step - 1); showStep(); });
+  document.getElementById("calculator-region").addEventListener("change", (event) => {
+    state.region = event.target.value;
+    next.disabled = !state.region;
+    calculate();
+  });
+  document.getElementById("calculator-date").addEventListener("change", (event) => {
+    state.date = event.target.value;
+    calculate();
+  });
+  document.getElementById("calculator-save").addEventListener("click", () => {
+    calculate();
+    window.TaranToast?.show?.("계산 결과를 이 브라우저에 저장했습니다.");
+    window.TaranAnalytics?.track("calculator_saved", "calculator.html", { eventType: state.event }).catch(() => {});
+  });
+  document.getElementById("calculator-share").addEventListener("click", async () => {
+    calculate();
+    const total = document.getElementById("calculator-total").textContent;
+    const shareData = { title: "따란 가족행사 예상 비용", text: `${state.region || "지역 미정"} · ${state.guests || 20}명 · ${total}`, url: location.href };
+    try {
+      if (navigator.share) await navigator.share(shareData);
+      else {
+        await navigator.clipboard.writeText(`${shareData.text}\n${shareData.url}`);
+        window.TaranToast?.show?.("계산 결과 링크를 복사했습니다.");
+      }
+      window.TaranAnalytics?.track("calculator_shared", "calculator.html", { eventType: state.event }).catch(() => {});
+    } catch (error) {
+      if (error?.name !== "AbortError") window.TaranToast?.show?.("공유하지 못했습니다. 잠시 후 다시 시도해 주세요.");
+    }
+  });
   showStep();
 })();

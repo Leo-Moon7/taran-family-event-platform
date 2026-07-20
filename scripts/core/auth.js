@@ -156,7 +156,7 @@
   }
 
   function safeReturnPath(path) {
-    const allowed = /^(?:(?:index|venues|provider|venue|account|partner|calculator|checklist|guides|partners|claim|community|community-post|contribute)\.html|admin\/(?:index|inquiries|providers|content|banners|members|analytics|settings)\.html)(?:[?#].*)?$/;
+    const allowed = /^(?:(?:index|venues|provider|venue|compare|inquiry|account|partner|provider-register|calculator|checklist|guides|articles|article|partners|claim|community|community-post|contribute)\.html|admin\/(?:index|inquiries|providers|venues|content|banners|members|analytics|settings)\.html)(?:[?#].*)?$/;
     return allowed.test(path || "") ? path : "account.html";
   }
 

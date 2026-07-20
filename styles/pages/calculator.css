@@ -8,6 +8,7 @@
 .calculator-progress i { display: block; width: 25%; height: 100%; background: var(--color-brand-800); transition: width var(--transition-fast); }
 .calculator-step h2 { margin-bottom: var(--space-2); font-size: clamp(1.5rem, 3vw, 2rem); }
 .calculator-step > p { margin-bottom: var(--space-5); color: var(--color-text-muted); }
+.calculator-context-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
 .option-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); }
 .option-grid button { min-height: 5.5rem; padding: var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-md); text-align: left; background: var(--color-surface); }
 .option-grid button:hover, .option-grid button.is-selected { border-color: var(--color-brand-800); background: var(--color-accent-100); }
@@ -24,5 +25,8 @@
 .calculator-result .button { width: 100%; margin-top: var(--space-2); }
 .calculator-result .button--primary { color: var(--color-brand-900); background: #fff; }
 .calculator-result .button--secondary { color: #fff; border-color: rgb(255 255 255 / 48%); background: transparent; }
+.calculator-disclaimer { margin-top: var(--space-4); padding-top: var(--space-4); border-top: 1px solid rgb(255 255 255 / 24%); font-size: var(--font-size-14); }
+.calculator-result-actions { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
+.calculator-result-actions .button--text { min-height: 44px; color: #fff; text-decoration: underline; text-underline-offset: .2em; }
 @media (max-width: 64rem) { .calculator-layout { grid-template-columns: 1fr; } .calculator-result { position: static; } }
-@media (max-width: 40rem) { .calculator-hero { padding-block: var(--space-8); } .calculator-flow { padding: var(--space-4); } .option-grid { grid-template-columns: 1fr; } .option-grid button { min-height: 4.75rem; } }
+@media (max-width: 40rem) { .calculator-hero { padding-block: var(--space-8); } .calculator-flow { padding: var(--space-4); } .calculator-context-grid, .option-grid { grid-template-columns: 1fr; } .option-grid button { min-height: 4.75rem; } }

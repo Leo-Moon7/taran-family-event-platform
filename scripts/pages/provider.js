@@ -163,10 +163,12 @@
     addFact(summary, "문의 가능 시간", first(["문의 가능 시간", "영업시간"]));
 
     const pricing = $("#provider-pricing");
-    addFact(pricing, "기본 대관료", won(facts.rentalFee || provider.price));
-    addFact(pricing, "성인 식대", facts.adultMealMin ? (facts.adultMealMax ? `${won(facts.adultMealMin)}~${won(facts.adultMealMax)}` : won(facts.adultMealMin)) : first(["성인 식대", "성인 1인 식대"]));
-    addFact(pricing, "어린이 식대", first(["어린이 식대", "소인 식대"]));
-    addFact(pricing, "패키지", first(["패키지 가격", "상품 구성", "포함 항목"]));
+    if (statusApi.shouldShowVolatileFacts(provider)) {
+      addFact(pricing, "기본 대관료", won(facts.rentalFee || provider.price));
+      addFact(pricing, "성인 식대", facts.adultMealMin ? (facts.adultMealMax ? `${won(facts.adultMealMin)}~${won(facts.adultMealMax)}` : won(facts.adultMealMin)) : first(["성인 식대", "성인 1인 식대"]));
+      addFact(pricing, "어린이 식대", first(["어린이 식대", "소인 식대"]));
+      addFact(pricing, "패키지", first(["패키지 가격", "상품 구성", "포함 항목"]));
+    }
     $("#pricing").hidden = !pricing.children.length;
 
     const facilities = $("#provider-facilities");

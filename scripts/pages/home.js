@@ -55,7 +55,7 @@
     const facts = document.createElement("div");
     facts.className = "partner-facts";
     const normalized = statusApi.getProviderFacts(item);
-    [text(item.subcategory), normalized.maxGuests ? `최대 ${normalized.maxGuests}명` : "", normalized.adultMealMin ? `식대 ${normalized.adultMealMin.toLocaleString("ko-KR")}원부터` : ""].filter(Boolean).forEach((value) => {
+    [text(item.subcategory), normalized.maxGuests ? `최대 ${normalized.maxGuests}명` : "", statusApi.shouldShowVolatileFacts(item) && normalized.adultMealMin ? `식대 ${normalized.adultMealMin.toLocaleString("ko-KR")}원부터` : ""].filter(Boolean).forEach((value) => {
       const span = document.createElement("span");
       span.textContent = value;
       facts.append(span);

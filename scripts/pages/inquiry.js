@@ -7,6 +7,7 @@
   const ids = window.TaranInquiryFlow.providerIds();
   const providers = ids.map((id) => (window.publicDirectoryData || []).find((item) => String(item.id) === id)).filter(Boolean);
   const params = new URLSearchParams(location.search);
+  let account = null;
 
   function prefill() {
     const fields = {
@@ -46,6 +47,11 @@
     event.preventDefault();
     status.textContent = "";
     const button = form.querySelector('[type="submit"]');
+    if (window.TaranConfig?.isSupabaseConfigured && !account) {
+      status.textContent = "로그인 후 문의를 보낼 수 있습니다.";
+      document.getElementById("inquiry-auth-note").scrollIntoView({ block: "center" });
+      return;
+    }
     const payload = window.TaranInquiryFlow.normalize(new FormData(form), providers.map((item) => String(item.id)));
     if (payload.budgetMin && payload.budgetMax && payload.budgetMin > payload.budgetMax) {
       status.textContent = "최대 예산은 최소 예산보다 커야 합니다.";
@@ -72,6 +78,22 @@
     }
   });
 
-  prefill();
-  renderProviders();
+  async function init() {
+    prefill();
+    renderProviders();
+    account = await Promise.resolve(window.TaranAuth?.ready).catch(() => null);
+    if (account) {
+      if (!form.elements.contactName.value) form.elements.contactName.value = account.display_name || "";
+      if (!form.elements.contactEmail.value) form.elements.contactEmail.value = account.email || "";
+      if (!form.elements.contactPhone.value) form.elements.contactPhone.value = account.phone || "";
+      return;
+    }
+    if (!window.TaranConfig?.isSupabaseConfigured) return;
+    const note = document.getElementById("inquiry-auth-note");
+    note.hidden = false;
+    document.getElementById("inquiry-login-link").href = window.TaranAuth.loginUrl(`${location.pathname.split("/").pop()}${location.search}`);
+    form.querySelector('[type="submit"]').disabled = true;
+  }
+
+  init();
 })();

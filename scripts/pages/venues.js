@@ -69,6 +69,7 @@
   }
 
   function priceValue(item) {
+    if (!statusApi.shouldShowVolatileFacts(item)) return 0;
     const facts = statusApi.getProviderFacts(item);
     return facts.adultMealMin || facts.rentalFee || number(item.price || item.startingPrice || item.basePrice);
   }

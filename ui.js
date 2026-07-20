@@ -1,5 +1,76 @@
 const publicHeader = document.querySelector("header.site-header:not(.admin-header)");
 
+function createElement(tag, className, text) {
+  const element = document.createElement(tag);
+  if (className) element.className = className;
+  if (text) element.textContent = text;
+  return element;
+}
+
+function loadScriptOnce(src, callback) {
+  const existing = [...document.scripts].find(script => script.src.endsWith(src));
+  if (existing) {
+    if (callback) callback();
+    return;
+  }
+  const script = document.createElement("script");
+  script.src = src;
+  script.addEventListener("load", () => callback?.(), { once: true });
+  document.body.append(script);
+}
+
+function upgradeLegacyHeader(header) {
+  if (!header || header.hasAttribute("data-site-header")) return;
+  if (!document.querySelector('link[href="styles/components/header.css"]')) {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "styles/components/header.css";
+    document.head.append(link);
+  }
+  const inner = createElement("div", "site-header__inner");
+  const brand = createElement("a", "brand");
+  brand.href = "index.html";
+  brand.setAttribute("aria-label", "따란 홈");
+  const brandName = createElement("span", "brand__name");
+  brandName.append(createElement("span", "", "따란"), createElement("small", "", "T'ARAN"));
+  brand.append(brandName);
+  const toggle = createElement("button", "site-header__toggle", "☰");
+  toggle.type = "button";
+  toggle.dataset.menuToggle = "";
+  toggle.setAttribute("aria-controls", "site-navigation");
+  toggle.setAttribute("aria-expanded", "false");
+  const nav = createElement("nav", "site-nav");
+  nav.id = "site-navigation";
+  nav.setAttribute("aria-label", "주요 메뉴");
+  [
+    ["venues.html", "업체 찾기"],
+    ["compare.html", "비교함"],
+    ["calculator.html", "비용 계산기"],
+    ["checklist.html", "준비 체크리스트"],
+    ["articles.html", "준비 가이드"]
+  ].forEach(([href, label]) => {
+    const link = createElement("a", "", label);
+    link.href = href;
+    if (href === "compare.html") {
+      const count = createElement("span", "nav-count");
+      count.dataset.compareCount = "";
+      count.hidden = true;
+      link.append(" ", count);
+    }
+    nav.append(link);
+  });
+  const authLink = createElement("a", "site-nav__auth", "로그인");
+  authLink.href = "login.html";
+  authLink.dataset.authLink = "";
+  nav.append(authLink);
+  inner.append(brand, toggle, nav);
+  header.replaceChildren(inner);
+  header.dataset.siteHeader = "";
+  loadScriptOnce("scripts/core/compare-store.js", () => loadScriptOnce("scripts/components/header.js"));
+}
+
+upgradeLegacyHeader(publicHeader);
+
 if (publicHeader) {
   const brand = publicHeader.querySelector(".brand");
   if (brand) {
