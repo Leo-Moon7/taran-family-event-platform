@@ -12,11 +12,27 @@
     }
   }
 
-  function authHeaders(extra) {
+  function tokenExpiry(accessToken) {
+    try {
+      const payload = JSON.parse(atob(String(accessToken || "").split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
+      return Number(payload?.exp || 0);
+    } catch (_error) {
+      return 0;
+    }
+  }
+
+  function sessionExpired(session, skewSeconds = 30) {
+    if (!session?.access_token) return true;
+    const expiresAt = Number(session.expires_at || tokenExpiry(session.access_token) || 0);
+    return expiresAt > 0 && expiresAt <= Math.floor(Date.now() / 1000) + skewSeconds;
+  }
+
+  function authHeaders(extra, useAnon = false) {
     const session = readSession();
+    const accessToken = !useAnon && !sessionExpired(session) ? session?.access_token : "";
     return {
       apikey: config.supabaseAnonKey || "",
-      Authorization: `Bearer ${session?.access_token || config.supabaseAnonKey || ""}`,
+      Authorization: `Bearer ${accessToken || config.supabaseAnonKey || ""}`,
       "Content-Type": "application/json",
       ...(extra || {})
     };
@@ -28,7 +44,8 @@
       error.code = "NOT_CONFIGURED";
       throw error;
     }
-    const response = await fetch(url, { ...options, headers: authHeaders(options.headers) });
+    const { useAnon = false, ...fetchOptions } = options;
+    const response = await fetch(url, { ...fetchOptions, headers: authHeaders(options.headers, useAnon) });
     const text = await response.text();
     let payload = null;
     if (text) {
@@ -77,7 +94,19 @@
   }
 
   async function auth(path, options = {}) {
-    return request(`${config.supabaseUrl}/auth/v1/${path.replace(/^\//, "")}`, options);
+    const cleanPath = path.replace(/^\//, "");
+    const useAnon = options.useAnon ?? /^(?:token\?|signup)/.test(cleanPath);
+    return request(`${config.supabaseUrl}/auth/v1/${cleanPath}`, { ...options, useAnon });
+  }
+
+  async function refreshSession() {
+    const session = readSession();
+    if (!session?.refresh_token) return null;
+    return auth("token?grant_type=refresh_token", {
+      method: "POST",
+      useAnon: true,
+      body: JSON.stringify({ refresh_token: session.refresh_token })
+    });
   }
 
   async function rpc(functionName, body = {}) {
@@ -121,5 +150,5 @@
     return signed.startsWith("http") ? signed : `${config.supabaseUrl}/storage/v1${signed}`;
   }
 
-  window.TaranApi = Object.freeze({ request, select, upsert, update, remove, auth, rpc, uploadPrivate, createPrivateSignedUrl, readSession });
+  window.TaranApi = Object.freeze({ request, select, upsert, update, remove, auth, rpc, uploadPrivate, createPrivateSignedUrl, readSession, refreshSession, sessionExpired });
 })();

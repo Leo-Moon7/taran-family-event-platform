@@ -40,7 +40,22 @@
   }
 
   async function loadAccount() {
-    const session = window.TaranApi?.readSession();
+    let session = window.TaranApi?.readSession();
+    if (session?.access_token && window.TaranApi?.sessionExpired(session) && window.TaranConfig?.isSupabaseConfigured) {
+      try {
+        const refreshed = await window.TaranApi.refreshSession();
+        if (refreshed?.access_token) {
+          saveSession(refreshed);
+          session = refreshed;
+        } else {
+          saveSession(null);
+          session = null;
+        }
+      } catch (_error) {
+        saveSession(null);
+        session = null;
+      }
+    }
     account = sessionAccount(session);
     if (session?.access_token && window.TaranConfig?.isSupabaseConfigured) {
       try {
