@@ -67,14 +67,14 @@
         </div>
 
         <fieldset class="claim-plan-section claim-rights-section">
-          <legend><span>04</span> 권한 및 광고 안내</legend>
+          <legend><span>04</span> 권한 안내</legend>
           <article class="claim-free-rights">
             <span>수정 권한</span>
-            <b>Basic · 무료</b>
-            <small>업체 연락처·가격·사진·운영 조건을 직접 수정할 수 있습니다.</small>
+            <b>무료 수정 권한</b>
+            <small>업체 기본 정보·가격·이용 조건을 직접 수정할 수 있습니다.</small>
           </article>
-          <label class="plan-card premium"><input id="claim-ad-interest" type="checkbox"><span><b>Premium 광고 안내받기 · 선택</b><small>월 39,000원 예정 · 검색 상단 노출·광고 제거·상담 버튼</small><em>지금 결제되지 않으며 권한 승인 여부에 영향을 주지 않습니다.</em></span></label>
-          <p class="claim-plan-note">광고 상품은 담당자 승인 후 별도로 신청할 수 있습니다.</p>
+          <input id="claim-ad-interest" type="checkbox" hidden aria-hidden="true" tabindex="-1">
+          <p class="claim-plan-note">이 화면은 업체 정보 수정 권한 검수 요청만 접수합니다.</p>
         </fieldset>
 
         <label class="claim-consent"><input id="claim-consent" type="checkbox" required><span>담당자 확인을 위해 입력한 정보를 검수하는 것에 동의합니다.</span></label>
@@ -84,13 +84,13 @@
 
       <aside class="claim-side">
         <span class="mini-label">승인 후 가능한 일</span>
-        <ul><li>메뉴 가격과 보증 인원 수정</li><li>최신 사진과 영업 정보 관리</li><li>주차·반입·예약 마감 조건 갱신</li><li>수정자와 최종 갱신일 표시</li></ul>
+        <ul><li>메뉴 가격과 보증 인원 수정</li><li>업체명·지역·주소 등 기본 정보 관리</li><li>문의 가능 시간과 이용 조건 갱신</li><li>수정자와 최종 갱신일 표시</li></ul>
         <div class="claim-security"><strong>권한 원칙</strong><p>한 계정은 승인받은 업체만 수정할 수 있으며, 관리자 승인 전에는 편집 화면에 접근할 수 없습니다.</p></div>
       </aside>
     </section>
 
     <section class="claim-result" id="claim-result" hidden>
-      <span>✓</span><h2>검수 요청이 접수되었습니다.</h2><p>담당자 확인 후 승인되면 내 계정에 ‘내 업체 관리’ 메뉴가 표시됩니다. 광고 안내 신청 여부는 승인에 영향을 주지 않습니다.</p>
+      <span>✓</span><h2>검수 요청이 접수되었습니다.</h2><p>담당자 확인 후 승인되면 내 계정에 ‘내 업체 관리’ 메뉴가 표시됩니다. 이 요청은 업체 정보 수정 권한 검수를 위한 절차입니다.</p>
       <div><a class="button button-primary" href="account.html">내 계정으로</a><a class="button button-quiet" href="venues.html">업체 목록으로</a></div>
     </section>
   </main>

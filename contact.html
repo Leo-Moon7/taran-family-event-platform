@@ -66,6 +66,56 @@
         <li>업체 입점·광고 문의</li>
       </ul>
     </section>
+
+    <section class="policy-article" aria-labelledby="contact-form-title">
+      <h2 id="contact-form-title">문의 남기기</h2>
+      <p>접수와 회신에 필요한 최소한의 정보만 입력해 주세요. 비밀번호·주민등록번호·결제정보 등 민감정보는 보내지 마세요.</p>
+      <form class="real-auth-form" name="contact" method="POST" action="/contact-success.html" data-netlify="true" netlify-honeypot="bot-field">
+        <input type="hidden" name="form-name" value="contact">
+        <p hidden>
+          <label>작성하지 마세요 <input name="bot-field"></label>
+        </p>
+
+        <div class="field">
+          <label class="field__label" for="contact-type">문의 유형</label>
+          <select class="select" id="contact-type" name="inquiryType" required>
+            <option value="">선택해 주세요</option>
+            <option value="general">일반 문의</option>
+            <option value="information-error">정보 오류</option>
+            <option value="provider-onboarding">업체 입점</option>
+            <option value="privacy-rights">개인정보 권리 요청</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="contact-name">이름 또는 담당자명</label>
+          <input class="input" id="contact-name" name="contactName" type="text" autocomplete="name" maxlength="50" required>
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="contact-email">회신 이메일</label>
+          <input class="input" id="contact-email" name="replyEmail" type="email" autocomplete="email" maxlength="254" required>
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="contact-page-url">관련 페이지 URL <span class="field__help">(선택)</span></label>
+          <input class="input" id="contact-page-url" name="relatedPageUrl" type="url" inputmode="url" maxlength="500" placeholder="https://">
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="contact-message">문의 내용</label>
+          <textarea class="textarea" id="contact-message" name="message" rows="8" maxlength="3000" required></textarea>
+          <p class="field__help">오류 제보라면 잘못된 항목과 확인 가능한 공개 출처를 적어 주세요. 파일은 첨부할 수 없습니다.</p>
+        </div>
+
+        <label class="checkbox" for="contact-consent">
+          <input id="contact-consent" name="privacyConsent" type="checkbox" value="agreed" required>
+          <span>문의 접수와 회신을 위해 입력한 이름·이메일·문의 내용을 처리하는 데 동의합니다. <a href="privacy.html">개인정보처리방침</a></span>
+        </label>
+
+        <button class="button button-primary" type="submit">문의 접수하기</button>
+      </form>
+    </section>
   </main>
 
   <footer>
