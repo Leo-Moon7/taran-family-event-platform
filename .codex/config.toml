@@ -1,0 +1,9 @@
+[features]
+multi_agent = true
+
+[agents]
+# 루트 PM 1개와 병렬 전문 작업 최대 3개를 합친 상한이다.
+max_threads = 4
+# 전문 에이전트가 다시 하위 에이전트를 늘리지 못하게 한다.
+max_depth = 1
+interrupt_message = true
