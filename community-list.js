@@ -21,13 +21,16 @@
 
   function createRow(post, index) {
     const article = document.createElement("article");
-    article.className = `thread-row${index === 0 ? " hot" : ""}`;
+    article.className = `thread-row${index === 0 && !post.is_starter ? " hot" : ""}`;
     const link = document.createElement("a");
     link.href = `community-post.html?id=${encodeURIComponent(post.id)}`;
     const category = text("b", `[${post.category || "이야기"}] `);
     link.append(category, document.createTextNode(post.title || "제목 없음"));
     const meta = document.createElement("p");
-    [post.author_name || post.author || "손품해방 회원", formatDate(post.created_at) || post.time || "", `댓글 ${post.comment_count || 0}`]
+    const values = post.is_starter
+      ? ["손품해방 운영팀", "시작 질문"]
+      : [post.author_name || "손품해방 회원", formatDate(post.created_at), `댓글 ${post.comment_count || 0}`];
+    values
       .filter(Boolean).forEach(value => meta.append(text("span", value)));
     article.append(link, meta);
     return article;
@@ -46,7 +49,16 @@
 
   async function loadOnline() {
     const postRows = await window.TaranApi.select(window.TaranConfig.tables.communityPosts, { status: "eq.published", order: "created_at.desc", limit: 100 });
-    const commentRows = await window.TaranApi.select(window.TaranConfig.tables.communityComments, { status: "eq.published", select: "post_id", limit: 1000 });
+    if (!postRows.length) {
+      loadStarterQuestions();
+      return;
+    }
+    let commentRows = [];
+    try {
+      commentRows = await window.TaranApi.select(window.TaranConfig.tables.communityComments, { status: "eq.published", select: "post_id", limit: 1000 });
+    } catch (error) {
+      console.warn("커뮤니티 댓글 수를 불러오지 못했습니다.", error);
+    }
     const counts = commentRows.reduce((result, row) => {
       result[row.post_id] = (result[row.post_id] || 0) + 1;
       return result;
@@ -54,12 +66,10 @@
     posts = postRows.map(row => ({ ...row, comment_count: counts[row.id] || 0 }));
   }
 
-  function loadPreview() {
-    posts = (window.taran_COMMUNITY_POSTS || []).map(post => ({
-      ...post,
-      author_name: post.author,
-      comment_count: Array.isArray(post.comments) ? post.comments.length : 0
-    }));
+  function loadStarterQuestions() {
+    posts = (window.taran_COMMUNITY_POSTS || [])
+      .filter(post => post.is_starter)
+      .map(post => ({ ...post, author_name: "손품해방 운영팀", comment_count: 0 }));
   }
 
   async function submit(event) {
@@ -104,15 +114,23 @@
   }
 
   async function init() {
-    if (window.TaranConfig?.isSupabaseConfigured) await loadOnline();
-    else loadPreview();
+    if (window.TaranConfig?.isSupabaseConfigured) {
+      try {
+        await loadOnline();
+      } catch (error) {
+        console.warn("커뮤니티 온라인 글을 불러오지 못해 시작 질문을 표시합니다.", error);
+        loadStarterQuestions();
+      }
+    } else {
+      loadStarterQuestions();
+    }
     render();
     form?.addEventListener("submit", submit);
   }
 
   init().catch(error => {
     console.error("커뮤니티 목록을 불러오지 못했습니다.", error);
-    posts = [];
+    loadStarterQuestions();
     render();
   });
 })();

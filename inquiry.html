@@ -6,7 +6,7 @@
   <title>통합 견적 문의 | 손품해방</title>
   <link rel="stylesheet" href="styles/tokens.css"><link rel="stylesheet" href="styles/reset.css"><link rel="stylesheet" href="styles/base.css"><link rel="stylesheet" href="styles/layout.css">
   <link rel="stylesheet" href="styles/components/header.css"><link rel="stylesheet" href="styles/components/button.css"><link rel="stylesheet" href="styles/components/form.css"><link rel="stylesheet" href="styles/components/card.css"><link rel="stylesheet" href="styles/pages/inquiry.css">
-  <script src="scripts/core/brand.js"></script><script src="scripts/core/storage.js"></script>
+  <script src="scripts/core/brand.js"></script><script src="scripts/core/storage.js"></script><script src="scripts/core/event-types.js"></script>
 </head>
 <body>
   <header class="site-header" data-site-header>
@@ -24,7 +24,7 @@
           <div class="inquiry-auth-note" id="inquiry-auth-note" hidden><strong>로그인 후 문의를 보낼 수 있습니다.</strong><p>로그인하면 업체 답변과 문의 진행 상태를 한곳에서 확인할 수 있습니다.</p><a class="button button--primary" id="inquiry-login-link" href="login.html">로그인하고 계속하기</a></div>
           <section class="form-section"><div class="form-section__head"><b>1</b><div><h2>행사 정보</h2><p>업체가 예약 가능 여부를 확인하는 데 필요한 내용입니다.</p></div></div>
             <div class="form-grid">
-              <div class="field"><label class="field__label" for="inquiry-event-type">행사 종류</label><select class="select" id="inquiry-event-type" name="eventType" required><option value="">선택해 주세요</option><option value="kids">돌잔치·백일</option><option value="parents">환갑·칠순·팔순</option><option value="meeting">상견례</option><option value="smallWedding">스몰웨딩</option><option value="familyGathering">가족모임</option><option value="anniversary">기념일·생신</option><option value="memorial">추모 가족행사</option><option value="other">기타 가족행사</option></select></div>
+              <div class="field"><label class="field__label" for="inquiry-event-type">행사 종류</label><select class="select" id="inquiry-event-type" name="eventType" required><option value="">선택해 주세요</option><option value="kids">돌잔치·백일</option><option value="parents">환갑·칠순·팔순</option><option value="meeting">결혼 준비</option><option value="anniversary">기념일·생신</option><option value="other">기타 가족행사</option></select></div>
               <div class="field"><label class="field__label" for="inquiry-event-detail">세부 행사</label><input class="input" id="inquiry-event-detail" name="eventDetail" placeholder="예: 첫돌, 칠순"></div>
               <div class="field"><label class="field__label" for="inquiry-date">행사 날짜</label><input class="input" id="inquiry-date" name="eventDate" type="date"></div>
               <label class="check-field"><input type="checkbox" name="dateFlexible"> 날짜 조정 가능</label>
@@ -50,8 +50,8 @@
     </section>
   </main>
   <footer class="site-footer"><div class="container site-footer__inner"><div><strong>손품해방</strong><small>SONPUM HAEBANG · 가족행사 장소 비교와 견적 문의</small></div><nav aria-label="정책 메뉴"><a href="privacy.html">개인정보처리방침</a><a href="terms.html">이용약관</a><a href="contact.html">문의</a></nav></div></footer>
-  <script src="review-provider-candidates.js?v=1"></script><script src="review-lifecycle-candidates.js?v=1"></script><script src="review-lifecycle-verified.js?v=6"></script><script src="review-local-api-partners.js?v=3"></script><script src="data.js?v=19"></script>
+  <script src="data.js?v=19"></script>
   <script src="content-config.js"></script><script src="scripts/core/config.js"></script><script src="scripts/core/api.js"></script><script src="scripts/core/auth.js"></script><script src="scripts/core/analytics.js"></script><script src="scripts/core/inquiry-flow.js"></script>
-  <script src="scripts/core/compare-store.js"></script><script src="scripts/components/header.js"></script><script src="scripts/pages/inquiry.js"></script>
+  <script src="scripts/core/compare-store.js"></script><script src="scripts/core/search-context.js"></script><script src="scripts/components/header.js"></script><script src="scripts/pages/inquiry.js"></script>
 </body>
 </html>

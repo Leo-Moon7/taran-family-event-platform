@@ -1,6 +1,7 @@
 (function () {
   function bootBlog() {
-  const posts = window.taran_BLOG_POSTS || [];
+  const allPosts = window.taran_BLOG_POSTS || [];
+  const posts = allPosts.filter((post) => post.status === "published");
   const localBlogImages = [
     "assets/images/venue-hotel.webp",
     "assets/images/venue-hanjeongsik.webp",
@@ -10,14 +11,14 @@
     "assets/images/editorial-parking.webp"
   ];
 
-  posts.forEach((post, index) => {
+  allPosts.forEach((post, index) => {
     if (!post.image || /^https?:\/\//.test(post.image)) {
       post.image = localBlogImages[index % localBlogImages.length];
       post.alt = post.alt || "돌잔치 준비 참고 이미지";
     }
   });
 
-  const bySlug = new Map(posts.map((post) => [post.slug, post]));
+  const bySlug = new Map(allPosts.map((post) => [post.slug, post]));
 
   function escapeHtml(value) {
     return String(value || "")
@@ -94,6 +95,25 @@
     `;
   }
 
+  function renderSources(post) {
+    const sources = (post.sources || []).filter((source) => source && source.name && source.url);
+    if (!sources.length) return "";
+    return `
+      <aside class="article-guide-box article-sources" aria-label="이 글의 참고 자료">
+        <strong>참고 자료와 검토 범위</strong>
+        ${post.reviewedAt ? `<p>검토일 ${escapeHtml(post.reviewedAt)} · ${escapeHtml(post.reviewScope || "")}</p>` : ""}
+        <ul>
+          ${sources.map((source) => `
+            <li>
+              <a href="${escapeHtml(source.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(source.name)}</a>
+              ${source.note ? `<small>${escapeHtml(source.note)}</small>` : ""}
+            </li>
+          `).join("")}
+        </ul>
+      </aside>
+    `;
+  }
+
   function renderBlogHome() {
     const featuredRoot = document.querySelector("[data-featured-post]");
     const listRoot = document.querySelector("[data-blog-list]");
@@ -158,9 +178,25 @@
     if (!articleRoot) return;
 
     const params = new URLSearchParams(window.location.search);
-    const slug = params.get("slug") || "contract-questions";
-    const post = bySlug.get(slug) || posts[0];
-    if (!post) return;
+    const slug = params.get("slug");
+    const post = slug ? bySlug.get(slug) : null;
+    if (!post || post.status !== "published") {
+      document.title = "준비 중인 글 | 손품해방";
+      const description = document.querySelector("meta[name='description']");
+      if (description) description.setAttribute("content", "요청한 준비백과 글은 현재 공개 준비 중이거나 존재하지 않습니다.");
+      articleRoot.innerHTML = `
+        <a class="text-link" href="articles.html">← 준비백과 목록</a>
+        <section class="blog-article-header" aria-live="polite">
+          <p class="eyebrow">준비백과 안내</p>
+          <h1>이 글은 아직 공개되지 않았습니다.</h1>
+          <p>내용과 근거 검토를 마친 글만 공개하고 있습니다. 준비백과 목록에서 현재 읽을 수 있는 글을 확인해 주세요.</p>
+          <a class="button button--primary" href="articles.html">공개된 글 보기</a>
+        </section>
+      `;
+      const relatedRoot = document.querySelector("[data-related-posts]");
+      if (relatedRoot) relatedRoot.innerHTML = "";
+      return;
+    }
     const topicCta = (() => {
       const source = `${post.category} ${post.title} ${(post.tags || []).join(" ")}`;
       if (/예산|비용|견적/.test(source)) return { href: "calculator.html", eyebrow: "예상 비용 확인", title: "내 행사 조건으로 예상 비용을 계산해보세요.", label: "비용 계산기 열기" };
@@ -178,7 +214,7 @@
         <p class="eyebrow">${escapeHtml(post.category)} · taran 준비백과</p>
         <h1>${escapeHtml(post.title)}</h1>
         <p>${escapeHtml(post.excerpt)}</p>
-        <div class="blog-card-meta"><span>작성일 ${escapeHtml(post.date)}</span><span>읽는 시간 ${escapeHtml(post.readTime)}</span><span>${escapeHtml(post.category)}</span></div>
+        <div class="blog-card-meta"><span>게시일 ${escapeHtml(post.date)}</span><span>검토일 ${escapeHtml(post.reviewedAt)}</span><span>읽는 시간 ${escapeHtml(post.readTime)}</span></div>
       </header>
       <figure class="article-hero-photo">
         <img src="${escapeHtml(post.image)}" alt="${escapeHtml(post.alt)}">
@@ -208,6 +244,7 @@
           </ul>
         </div>
         ${renderArticleListBox("읽고 바로 이어서 할 일", post.nextActions, "is-actions")}
+        ${renderSources(post)}
         <div class="blog-tag-row">${renderTags(post.tags)}</div>
         <aside class="article-conversion">
           <span>${escapeHtml(topicCta.eyebrow)}</span>

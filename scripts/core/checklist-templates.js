@@ -1,84 +1,235 @@
 (function () {
   "use strict";
 
+  const task = (id, days, title, description, check, action = "none", optional = "") => ({
+    id, days, title, description, check, action, optional
+  });
+
   const templates = {
     kids: {
       label: "돌잔치·백일",
-      tasks: [
-        { id: "venue-budget", days: 120, title: "장소 후보와 전체 예산 정하기", action: "venues" },
-        { id: "photo-table", days: 90, title: "촬영과 돌상 구성 비교하기", action: "compare" },
-        { id: "outfits", days: 60, title: "아기와 가족 의상 준비하기", action: "guide" },
-        { id: "invitation-gift", days: 30, title: "초대장과 답례품 확정하기", action: "guide" },
-        { id: "final-kids", days: 7, title: "최종 인원과 아기 준비물 확인하기", action: "none" }
+      stages: [
+        {
+          id: "direction",
+          label: "행사 방향 정하기",
+          description: "가족이 원하는 방식과 예산 한도를 먼저 맞춥니다.",
+          tasks: [
+            task("venue-budget", 120, "행사 방식과 전체 예산 정하기", "장소·식사·촬영·의상에 쓸 총액을 먼저 정하면 선택 범위를 줄일 수 있어요.", "필수 항목, 생략 가능한 항목, 예비비를 나눠 적기", "calculator"),
+            task("kids-family-owner", 120, "가족별 담당 역할 정하기", "한 사람이 모든 연락을 맡지 않도록 예약·초대·아기 준비 담당을 나눕니다.", "업체 연락 담당자와 최종 결정권자 정하기"),
+            task("kids-date-guests", 110, "후보 날짜와 초대 범위 정하기", "아기 생활 리듬과 핵심 가족 일정을 함께 보면 날짜 변경을 줄일 수 있어요.", "후보 날짜 2개와 꼭 참석할 가족 명단 적기")
+          ]
+        },
+        {
+          id: "venue",
+          label: "장소와 핵심 업체",
+          description: "인원·동선·포함 항목을 같은 기준으로 확인합니다.",
+          tasks: [
+            task("kids-venue-search", 100, "장소 후보 3곳 찾기", "인원과 지역 조건을 맞춘 후보를 모아야 식사·대관 조건을 비교하기 쉬워요.", "최소 보증 인원, 독립 공간, 주차 가능 대수 확인", "venues"),
+            task("photo-table", 90, "촬영과 돌상 구성 비교하기", "사진·돌상은 장소 패키지 포함 여부에 따라 중복 비용이 생길 수 있어요.", "원본 제공, 촬영 시간, 설치·철수, 추가금 확인", "compare"),
+            task("kids-contract", 80, "계약서의 포함·취소 조건 확인하기", "구두 안내와 계약서가 다르면 변경·취소 때 분쟁이 생길 수 있어요.", "총액, 계약금, 환불 기준, 인원 변경 마감일 표시하기", "guide")
+          ]
+        },
+        {
+          id: "details",
+          label: "초대와 준비물",
+          description: "아기 컨디션을 중심으로 의상·초대·답례를 준비합니다.",
+          tasks: [
+            task("outfits", 60, "아기와 가족 의상 준비하기", "행사 당일 장시간 입어도 불편하지 않은지 미리 확인해야 해요.", "사이즈, 갈아입는 순서, 여벌 옷과 세탁 방법 확인", "guide"),
+            task("invitation-gift", 30, "초대장과 답례품 확정하기", "제작·배송 기간을 고려해 수량과 전달 방식을 일찍 확정합니다.", "주소·시간 교정, 여분 수량, 알레르기 표기 확인", "guide"),
+            task("kids-routine", 21, "아기 낮잠·식사 시간 반영하기", "익숙한 생활 리듬을 지키면 행사 중 피로와 보챔을 줄일 수 있어요.", "낮잠 공간, 이유식 보관, 수유·기저귀 교환 장소 확인")
+          ]
+        },
+        {
+          id: "final",
+          label: "당일 운영과 마무리",
+          description: "최종 인원과 준비물을 한 번 더 점검합니다.",
+          tasks: [
+            task("kids-run-sheet", 14, "당일 진행 순서 공유하기", "가족과 업체가 같은 순서를 알아야 촬영과 식사가 겹치지 않아요.", "도착·촬영·식사·돌잡이·인사 시간을 한 장에 정리하기"),
+            task("final-kids", 7, "최종 인원과 아기 준비물 확인하기", "마감 이후 인원 변경과 빠진 준비물을 줄이는 마지막 확인입니다.", "기저귀, 물티슈, 간식, 약, 여벌 옷, 애착 물건 챙기기"),
+            task("kids-payment", 1, "잔금·반납·사진 수령 일정 적기", "행사 후 남은 업무를 기록해 결제나 대여품 반납을 놓치지 않아요.", "잔금 영수증, 대여품 수량, 사진 납기일 확인")
+          ]
+        }
       ]
     },
     parents: {
       label: "환갑·칠순·팔순",
-      tasks: [
-        { id: "date-venue", days: 90, title: "날짜와 장소 후보 정하기", action: "venues" },
-        { id: "guests-table", days: 60, title: "참석 인원과 상차림 정하기", action: "calculator" },
-        { id: "photo-gift", days: 30, title: "사진 촬영과 답례품 준비하기", action: "guide" },
-        { id: "seats", days: 14, title: "좌석과 어르신 이동 동선 확인하기", action: "guide" },
-        { id: "final-parents", days: 3, title: "최종 인원과 진행 순서 확인하기", action: "none" }
+      stages: [
+        {
+          id: "direction",
+          label: "주인공과 가족 의견 맞추기",
+          description: "부모님의 선호와 가족이 맡을 역할을 먼저 확인합니다.",
+          tasks: [
+            task("date-venue", 90, "날짜와 장소 범위 정하기", "주인공과 핵심 가족이 가능한 날짜를 먼저 맞추면 재예약을 줄일 수 있어요.", "후보 날짜 2개, 희망 지역, 이동 가능 거리 적기", "venues"),
+            task("parents-wishes", 90, "부모님이 원하는 행사 방식 듣기", "가족이 준비한 형식보다 부모님의 부담과 선호가 더 중요해요.", "행사 규모, 식사 중심 여부, 축하 순서, 원치 않는 연출 확인"),
+            task("parents-family-owner", 75, "가족별 담당 역할 나누기", "초대·영상·선물·당일 안내를 나누면 누락과 중복 연락을 줄일 수 있어요.", "담당자 이름과 완료 확인 날짜 적기")
+          ]
+        },
+        {
+          id: "venue",
+          label: "장소와 식사",
+          description: "어르신 동선과 식사 조건을 우선해 후보를 비교합니다.",
+          tasks: [
+            task("guests-table", 60, "참석 인원과 상차림 범위 정하기", "인원과 상차림 범위가 장소·예산에 가장 큰 영향을 줍니다.", "성인·어린이 인원, 상차림 포함 여부, 예비 좌석 확인", "calculator"),
+            task("parents-compare-route", 55, "장소 후보의 이동 조건 비교하기", "계단·주차·화장실 거리는 어르신의 실제 이용 편의와 연결돼요.", "엘리베이터, 휠체어, 주차장에서 룸까지 거리 확인", "compare"),
+            task("parents-contract", 45, "메뉴와 계약 조건 확정하기", "식사 변경과 인원 마감 조건을 계약 전에 분명히 해야 해요.", "메뉴 교체, 알레르기, 최소 보증 인원, 취소·환불 확인", "guide")
+          ]
+        },
+        {
+          id: "details",
+          label: "초대와 기념 준비",
+          description: "사진·선물·축하 순서를 가족과 함께 준비합니다.",
+          tasks: [
+            task("photo-gift", 30, "사진 촬영과 답례품 준비하기", "원하는 가족사진과 전달 대상을 정해야 수량과 촬영 시간을 맞출 수 있어요.", "필수 촬영 조합, 답례 대상, 여분 수량 확인", "guide"),
+            task("parents-ceremony", 28, "축하 영상과 진행 순서 만들기", "길지 않은 순서를 미리 공유하면 주인공의 피로를 줄일 수 있어요.", "인사말, 케이크, 영상, 가족사진 순서와 담당자 적기"),
+            task("parents-message", 21, "초대 안내와 가족 요청사항 보내기", "복장·주차·도착 시간을 함께 알리면 당일 문의가 줄어요.", "주소, 룸명, 주차 등록, 도착 권장 시간 포함하기")
+          ]
+        },
+        {
+          id: "final",
+          label: "좌석과 당일 확인",
+          description: "주인공이 편안하게 이동하고 식사하도록 최종 점검합니다.",
+          tasks: [
+            task("seats", 14, "좌석과 어르신 이동 동선 확인하기", "가까운 가족과 도움이 필요한 분의 좌석을 미리 배치합니다.", "출입구·화장실 가까운 좌석과 유아 의자 수 확인"),
+            task("final-parents", 3, "최종 인원과 진행 순서 확인하기", "업체 마감 인원과 가족이 가진 명단을 일치시켜야 해요.", "최종 인원, 메뉴 수량, 진행자 연락처, 시작 시간 재확인"),
+            task("parents-payment", 1, "잔금과 대여품 반납 확인하기", "행사 후 남은 결제·반납 업무를 가족에게 공유합니다.", "잔금 영수증, 대여 의상·장식 반납일, 사진 납기일 적기")
+          ]
+        }
       ]
     },
     meeting: {
-      label: "상견례",
-      tasks: [
-        { id: "meeting-date", days: 30, title: "양가 일정과 지역 정하기", action: "none" },
-        { id: "meeting-venue", days: 21, title: "프라이빗 룸과 코스 비교하기", action: "venues" },
-        { id: "meeting-menu", days: 14, title: "메뉴와 좌석 배치 확정하기", action: "compare" },
-        { id: "meeting-gift", days: 7, title: "선물과 복장 준비하기", action: "guide" },
-        { id: "meeting-final", days: 1, title: "예약 시간과 주차 안내 확인하기", action: "none" }
-      ]
-    },
-    smallWedding: {
-      label: "스몰웨딩",
-      tasks: [
-        { id: "wedding-budget", days: 240, title: "예산과 예상 하객 정하기", action: "calculator" },
-        { id: "wedding-venue", days: 180, title: "예식 장소 계약하기", action: "venues" },
-        { id: "wedding-photo-outfit", days: 120, title: "촬영과 의상 업체 정하기", action: "compare" },
-        { id: "wedding-invite-food", days: 60, title: "초대장과 식사 구성 확정하기", action: "guide" },
-        { id: "wedding-direction", days: 30, title: "진행 순서와 공간 연출 정하기", action: "guide" },
-        { id: "wedding-final", days: 7, title: "인원과 우천 대안 최종 확인하기", action: "none" }
-      ]
-    },
-    familyGathering: {
-      label: "가족모임",
-      tasks: [
-        { id: "gathering-purpose", days: 45, title: "모임 목적과 참석 범위 정하기", action: "none" },
-        { id: "gathering-venue", days: 30, title: "장소와 식사 구성 정하기", action: "venues" },
-        { id: "gathering-transport", days: 14, title: "좌석과 이동 동선 안내하기", action: "guide" },
-        { id: "gathering-supplies", days: 3, title: "케이크와 당일 준비물 확인하기", action: "none" }
+      label: "결혼 준비",
+      stages: [
+        {
+          id: "direction",
+          label: "두 가족의 기준 맞추기",
+          description: "상견례와 소규모 예식 중 필요한 항목만 선택해 준비합니다.",
+          tasks: [
+            task("meeting-date", 180, "양가 일정과 희망 지역 정하기", "양가 핵심 참석자의 일정을 먼저 맞추면 이후 예약을 안정적으로 진행할 수 있어요.", "후보 날짜 2개, 중간 지역, 참석 가능 인원 적기"),
+            task("wedding-budget", 180, "전체 예산과 예상 하객 정하기", "상견례·예식·촬영에 쓸 범위를 한 번에 보면 중복 지출을 줄일 수 있어요.", "항목별 상한, 양가 분담, 예비비를 구분해 적기", "calculator"),
+            task("marriage-priorities", 150, "꼭 지킬 기준 세 가지 정하기", "두 사람이 중요하게 생각하는 기준을 먼저 합의하면 비교가 쉬워요.", "지역, 식사, 사진, 예식 방식 중 우선순위 적기")
+          ]
+        },
+        {
+          id: "venue",
+          label: "장소와 계약",
+          description: "행사 방식에 맞는 공간과 계약 조건을 확인합니다.",
+          tasks: [
+            task("meeting-venue", 60, "프라이빗 룸과 코스 비교하기", "대화하기 좋은 독립 공간과 양가가 편한 메뉴를 확인합니다.", "룸 차지, 최소 주문, 좌석 간격, 주차 지원 확인", "venues", "상견례"),
+            task("wedding-venue", 150, "소규모 예식 장소 비교·계약하기", "하객 수와 원하는 진행 방식에 맞는 장소인지 계약 전에 확인해야 해요.", "대관 시간, 식사, 우천 대안, 외부 업체 허용 확인", "venues", "소규모 예식"),
+            task("meeting-menu", 30, "메뉴와 좌석 배치 확정하기", "식사 취향과 양가 좌석을 미리 확인하면 당일 어색함을 줄일 수 있어요.", "알레르기, 코스 시간, 양가 좌석, 결제 담당 확인", "compare", "상견례")
+          ]
+        },
+        {
+          id: "details",
+          label: "촬영과 초대 준비",
+          description: "선택한 행사 방식에 필요한 세부 항목을 확정합니다.",
+          tasks: [
+            task("wedding-photo-outfit", 120, "촬영과 의상 업체 정하기", "준비 일정이 긴 촬영·의상을 먼저 확정하면 재촬영과 급행비를 줄일 수 있어요.", "촬영 원본, 수정본 수, 피팅·반납, 추가금 확인", "compare", "소규모 예식"),
+            task("meeting-gift", 14, "선물과 복장 준비하기", "양가가 부담스럽지 않은 범위와 복장 수준을 미리 맞춥니다.", "선물 전달 여부, 포장, 가족별 복장 안내 확인", "guide", "상견례"),
+            task("wedding-invite-food", 60, "초대장과 식사 구성 확정하기", "하객 회신과 식사 수량은 계약 마감 전에 정리해야 해요.", "초대 문구, 회신 마감일, 어린이·알레르기 식사 확인", "guide", "소규모 예식")
+          ]
+        },
+        {
+          id: "final",
+          label: "진행과 최종 확인",
+          description: "가족·업체와 같은 일정표를 공유합니다.",
+          tasks: [
+            task("wedding-direction", 30, "진행 순서와 공간 연출 정하기", "짧은 예식도 입장·인사·촬영 순서를 정해야 대관 시간을 지킬 수 있어요.", "사회자, 음향, 꽃, 촬영 위치와 담당자 확인", "guide", "소규모 예식"),
+            task("meeting-final", 1, "예약 시간과 주차 안내 확인하기", "양가에 정확한 룸명과 도착 방법을 보내 마지막 혼선을 줄입니다.", "예약자명, 룸, 주차 등록, 늦을 때 연락처 확인", "none", "상견례"),
+            task("wedding-final", 7, "인원과 우천 대안 최종 확인하기", "최종 인원과 날씨 대응을 업체와 같은 내용으로 맞춥니다.", "좌석·식사 수량, 우천 전환 시점, 잔금, 반납 일정 확인", "none", "소규모 예식")
+          ]
+        }
       ]
     },
     anniversary: {
-      label: "기념일",
-      tasks: [
-        { id: "anniversary-plan", days: 60, title: "기념 방식과 예산 정하기", action: "calculator" },
-        { id: "anniversary-venue", days: 45, title: "장소와 촬영 방식 정하기", action: "venues" },
-        { id: "anniversary-flower", days: 30, title: "꽃과 공간 연출 준비하기", action: "compare" },
-        { id: "anniversary-letter", days: 10, title: "편지와 선물 준비하기", action: "guide" },
-        { id: "anniversary-final", days: 2, title: "예약과 전달 순서 확인하기", action: "none" }
-      ]
-    },
-    memorial: {
-      label: "추모 가족행사",
-      tasks: [
-        { id: "memorial-family", days: 30, title: "가족 일정과 진행 방식 정하기", action: "none" },
-        { id: "memorial-meal", days: 20, title: "장소와 식사 구성 확인하기", action: "venues" },
-        { id: "memorial-notice", days: 7, title: "참석 가족에게 일정 안내하기", action: "none" },
-        { id: "memorial-final", days: 2, title: "준비물과 이동 동선 확인하기", action: "guide" }
+      label: "기념일·생신",
+      stages: [
+        {
+          id: "direction",
+          label: "기념 방식 정하기",
+          description: "주인공의 취향과 함께할 사람을 기준으로 계획합니다.",
+          tasks: [
+            task("anniversary-plan", 60, "기념 방식과 예산 정하기", "식사·여행·공간 대여 중 우선순위를 정하면 준비 범위가 선명해져요.", "총예산, 꼭 할 일, 생략 가능한 일을 구분하기", "calculator"),
+            task("anniversary-wishes", 55, "주인공의 취향과 부담 확인하기", "깜짝 행사가 부담이 될 수 있어 원하는 분위기와 공개 범위를 확인합니다.", "음식, 장소, 사진 공개, 깜짝 연출 선호 적기"),
+            task("anniversary-guests", 50, "초대 범위와 날짜 후보 정하기", "핵심 참석자의 가능 시간을 먼저 확인하면 예약 변경을 줄일 수 있어요.", "후보 날짜 2개, 필수 참석자, 회신 마감일 정하기")
+          ]
+        },
+        {
+          id: "venue",
+          label: "장소와 주요 예약",
+          description: "식사·촬영·장식 조건을 같은 기준으로 비교합니다.",
+          tasks: [
+            task("anniversary-venue", 45, "장소와 촬영 방식 정하기", "사진을 남길지에 따라 공간 크기와 조명 조건이 달라져요.", "독립 공간, 이용 시간, 촬영 허용, 주차 확인", "venues"),
+            task("anniversary-compare", 40, "후보 장소의 포함 항목 비교하기", "케이크·꽃·음향이 포함되는지 확인하면 중복 예약을 막을 수 있어요.", "대관료, 식사, 장식, 반입비, 취소 규정 비교", "compare"),
+            task("anniversary-contract", 35, "예약과 변경 마감일 기록하기", "인원과 메뉴를 바꿀 수 있는 마지막 날을 놓치지 않도록 적어둡니다.", "계약금, 환불 기준, 인원·메뉴 변경 마감일 확인")
+          ]
+        },
+        {
+          id: "details",
+          label: "선물과 연출",
+          description: "주인공에게 의미 있는 메시지와 준비물을 정합니다.",
+          tasks: [
+            task("anniversary-flower", 30, "꽃과 공간 연출 준비하기", "장소 반입 규정과 설치 시간을 알아야 추가 비용을 피할 수 있어요.", "꽃 알레르기, 설치·철수, 반입비, 보관 방법 확인", "compare"),
+            task("anniversary-letter", 10, "편지와 선물 준비하기", "가족의 메시지를 미리 모으면 당일 빠지는 사람이 없어요.", "메시지 수합 마감, 포장, 전달 순서, 영수증 보관", "guide"),
+            task("anniversary-photo", 14, "사진·영상 목록 정하기", "꼭 남길 장면을 미리 정하면 제한된 시간 안에 촬영할 수 있어요.", "필수 가족 조합, 영상 길이, 파일 전달 방식 확인")
+          ]
+        },
+        {
+          id: "final",
+          label: "당일과 이후",
+          description: "예약·전달 순서와 행사 후 할 일을 확인합니다.",
+          tasks: [
+            task("anniversary-run-sheet", 7, "당일 진행 순서 공유하기", "도착·식사·선물·촬영 순서를 공유하면 깜짝 준비가 겹치지 않아요.", "담당자와 예상 시간을 한 장에 정리하기"),
+            task("anniversary-final", 2, "예약과 전달 순서 확인하기", "업체와 가족의 최종 시간을 일치시키는 마지막 점검입니다.", "예약자명, 최종 인원, 케이크·꽃 도착, 잔금 확인"),
+            task("anniversary-after", 1, "사진 공유와 감사 인사 준비하기", "행사 후 기록과 감사 인사를 정리해 마무리합니다.", "공유 범위, 사진 링크, 대여품 반납, 감사 연락 대상 적기")
+          ]
+        }
       ]
     },
     other: {
       label: "기타 가족행사",
-      tasks: [
-        { id: "other-purpose", days: 60, title: "행사 목적과 예상 인원 정하기", action: "none" },
-        { id: "other-budget", days: 45, title: "예산과 필요한 서비스 정하기", action: "calculator" },
-        { id: "other-venue", days: 30, title: "장소와 업체 비교하기", action: "compare" },
-        { id: "other-run-sheet", days: 7, title: "당일 진행 순서 정리하기", action: "guide" },
-        { id: "other-final", days: 2, title: "예약 조건 최종 확인하기", action: "none" }
+      stages: [
+        {
+          id: "direction",
+          label: "목적과 가족 기준 정하기",
+          description: "가족모임·추모 등 행사 목적에 맞는 항목만 선택합니다.",
+          tasks: [
+            task("other-purpose", 60, "행사 목적과 예상 인원 정하기", "목적과 꼭 함께할 사람을 정해야 적절한 장소와 진행 방식을 찾을 수 있어요.", "행사 목적 한 문장, 필수 참석자, 예상 인원 적기"),
+            task("gathering-purpose", 45, "모임 주제와 참석 범위 정하기", "명절·집들이·친지 모임의 성격에 맞춰 초대 범위를 정합니다.", "가족별 참석 여부, 어린이·어르신 인원 확인", "none", "가족모임"),
+            task("memorial-family", 30, "가족 일정과 추모 방식 정하기", "가족의 종교·문화적 방식을 존중해 진행 범위를 합의합니다.", "참석 범위, 장소, 의식 여부, 사진 공개 범위 확인", "none", "추모")
+          ]
+        },
+        {
+          id: "venue",
+          label: "예산과 장소",
+          description: "인원·식사·이동 조건을 기준으로 후보를 정합니다.",
+          tasks: [
+            task("other-budget", 45, "예산과 필요한 서비스 정하기", "공간·식사·이동 등 필요한 항목을 나누면 과도한 준비를 막을 수 있어요.", "항목별 상한, 공동 부담 방식, 예비비 적기", "calculator"),
+            task("gathering-venue", 30, "장소와 식사 구성 정하기", "함께 대화할 수 있는 좌석과 가족별 식사 조건을 확인합니다.", "독립 공간, 어린이 의자, 알레르기, 주차 확인", "venues", "가족모임"),
+            task("memorial-meal", 20, "장소와 식사 구성 확인하기", "조용한 진행과 가족이 머물 시간을 고려해 장소를 선택합니다.", "독립 공간, 이용 시간, 음식 반입, 이동 동선 확인", "venues", "추모"),
+            task("other-venue", 30, "장소와 업체 조건 비교하기", "행사 목적에 필요한 조건만 같은 표로 비교하면 결정이 쉬워요.", "총액, 포함 항목, 취소 규정, 문의 수신 상태 확인", "compare")
+          ]
+        },
+        {
+          id: "details",
+          label: "안내와 준비물",
+          description: "참석 가족에게 필요한 내용을 미리 공유합니다.",
+          tasks: [
+            task("gathering-transport", 14, "좌석과 이동 동선 안내하기", "어린이·어르신이 있는 모임은 이동과 좌석 안내가 특히 중요해요.", "주차, 대중교통, 계단, 좌석 요청사항 전달", "guide", "가족모임"),
+            task("memorial-notice", 7, "참석 가족에게 일정 안내하기", "장소·시간·준비 방식을 차분하고 분명하게 전달합니다.", "주소, 시작·종료 시간, 복장, 준비물 안내", "none", "추모"),
+            task("other-run-sheet", 7, "당일 진행 순서 정리하기", "담당자와 순서를 공유하면 식사·인사·정리가 겹치지 않아요.", "도착, 식사, 주요 순서, 정리 담당과 시간 적기", "guide")
+          ]
+        },
+        {
+          id: "final",
+          label: "최종 확인과 마무리",
+          description: "준비물·예약·행사 후 정리를 확인합니다.",
+          tasks: [
+            task("gathering-supplies", 3, "케이크와 당일 준비물 확인하기", "가족이 나눠 가져오는 물품이 빠지거나 겹치지 않도록 확인합니다.", "음식, 케이크, 식기, 약, 어린이 준비물 담당 적기", "none", "가족모임"),
+            task("memorial-final", 2, "준비물과 이동 동선 확인하기", "가족이 편안하고 존중받는 방식으로 참여하도록 마지막 점검을 합니다.", "꽃·사진·준비물, 좌석, 이동 도움 담당 확인", "guide", "추모"),
+            task("other-final", 2, "예약 조건과 최종 인원 확인하기", "업체 마감 인원과 가족 명단을 일치시키고 추가금을 확인합니다.", "최종 인원, 시작 시간, 잔금, 취소·변경 조건 재확인")
+          ]
+        }
       ]
     }
   };
@@ -86,9 +237,18 @@
   function getTemplate(type = "kids") {
     const normalized = window.SonpumEventTypes?.normalize?.(type) || type;
     const source = templates[normalized] || templates.other;
-    return { type: normalized, label: source.label, tasks: source.tasks.map((task) => ({ ...task })) };
+    const stages = source.stages.map((stage) => ({
+      ...stage,
+      tasks: stage.tasks.map((item) => ({ ...item, stage: stage.id, stageLabel: stage.label }))
+    }));
+    return {
+      type: normalized,
+      label: source.label,
+      stages,
+      tasks: stages.flatMap((stage) => stage.tasks)
+    };
   }
 
-  const labels = Object.fromEntries(Object.entries(templates).map(([key, value]) => [key, value.label]));
+  const labels = Object.freeze(Object.fromEntries(Object.entries(templates).map(([key, value]) => [key, value.label])));
   window.TaranChecklistTemplates = Object.freeze({ getTemplate, labels });
 })();

@@ -3,14 +3,11 @@
 
   const state = { step: 1, event: "", region: "", district: "", date: "", guests: 0, space: "", services: [] };
   const profiles = {
-    kids: { meal: [55000, 90000], guide: "돌잔치는 10~50명 구간에서 장소 선택 폭이 넓습니다.", spaces: ["restaurant", "hotel", "partyroom", "home"], services: ["dolTable", "photo", "childOutfit", "parentOutfit", "gift", "growthVideo", "host"] },
+    kids: { meal: [55000, 90000], guide: "초대할 가족 범위를 기준으로 참석 인원을 정해보세요.", spaces: ["restaurant", "hotel", "partyroom", "home"], services: ["dolTable", "photo", "childOutfit", "parentOutfit", "gift", "growthVideo", "host"] },
     parents: { meal: [50000, 110000], guide: "어르신 이동 동선과 주차를 고려해 참석 범위를 정해보세요.", spaces: ["restaurant", "hotel", "partyroom", "home"], services: ["ceremonyTable", "banner", "photoVideo", "cake", "gift", "transport", "performance"] },
-    meeting: { meal: [60000, 140000], guide: "상견례는 6~12명 규모의 독립된 룸을 많이 찾습니다.", spaces: ["restaurant", "hotel"], services: ["privateRoom", "gift", "flower", "clothing", "transport"] },
-    smallWedding: { meal: [70000, 160000], guide: "스몰웨딩은 30~80명 구간을 많이 비교합니다.", spaces: ["hotel", "garden", "partyroom", "restaurant"], services: ["flower", "photoVideo", "dress", "beauty", "audioHost", "gift"] },
-    familyGathering: { meal: [35000, 85000], guide: "가족모임은 좌석과 식사 준비가 편한 인원으로 잡아보세요.", spaces: ["restaurant", "partyroom", "home", "garden"], services: ["cake", "photo", "styling", "gift", "transport"] },
+    meeting: { meal: [60000, 160000], guide: "상견례나 소규모 예식에 함께할 양가 가족과 하객 범위를 정해보세요.", spaces: ["restaurant", "hotel", "garden", "partyroom"], services: ["privateRoom", "flower", "photoVideo", "dress", "beauty", "audioHost", "gift", "transport"] },
     anniversary: { meal: [50000, 120000], guide: "기념일은 식사와 사진을 함께 남길 인원을 기준으로 선택하세요.", spaces: ["restaurant", "hotel", "partyroom", "garden"], services: ["photoVideo", "flower", "cake", "beauty", "gift"] },
-    memorial: { meal: [35000, 80000], guide: "추모모임은 참석 인원과 조용한 독립 공간을 먼저 고려하세요.", spaces: ["restaurant", "hotel", "home"], services: ["flower", "transport", "gift"] },
-    other: { meal: [40000, 100000], guide: "초대하려는 가족과 지인 범위를 기준으로 선택하세요.", spaces: ["restaurant", "hotel", "partyroom", "home", "garden"], services: ["photoVideo", "beauty", "styling", "gift", "transport"] }
+    other: { meal: [35000, 100000], guide: "가족모임·추모 등 행사 목적과 참석할 가족 범위를 기준으로 선택하세요.", spaces: ["restaurant", "hotel", "partyroom", "home", "garden"], services: ["flower", "photoVideo", "cake", "styling", "gift", "transport"] }
   };
   const spaceRanges = {
     restaurant: [0, 800000], hotel: [700000, 2800000], partyroom: [250000, 1200000],
@@ -36,6 +33,29 @@
   const steps = [...document.querySelectorAll(".calculator-step")];
   const next = document.getElementById("calculator-next");
   const prev = document.getElementById("calculator-prev");
+  const resultLinks = document.getElementById("calculator-result-links");
+
+  function guestFilterValue(guests) {
+    const value = Number(guests) || 0;
+    if (value <= 10) return 10;
+    if (value <= 30) return 30;
+    if (value <= 50) return 50;
+    if (value <= 100) return 100;
+    return 101;
+  }
+
+  function guestFilterLabel(value) {
+    return value === 101 ? "100명 초과" : `${value}명 이하`;
+  }
+
+  function budgetFilterValue(amount) {
+    const filters = [1000000, 2000000, 3000000, 5000000];
+    return filters.find((value) => amount <= value) || 5000001;
+  }
+
+  function budgetFilterLabel(value) {
+    return value === 5000001 ? "500만 원 초과" : `${Math.round(value / 10000).toLocaleString("ko-KR")}만 원 이하`;
+  }
 
   function optionButton(item, multi) {
     const button = document.createElement("button");
@@ -74,8 +94,8 @@
     document.getElementById("calculator-space-options").replaceChildren(...profile.spaces.map((key) => optionButton(spaceOptions[key], false)));
     document.getElementById("calculator-service-options").replaceChildren(...profile.services.map((key) => optionButton(serviceOptions[key], true)));
     document.getElementById("calculator-guests-guide").textContent = profile.guide;
-    document.getElementById("calculator-space-guide").textContent = state.event === "smallWedding"
-      ? "야외 진행은 우천 대안과 식사 동선을 함께 확인하세요."
+    document.getElementById("calculator-space-guide").textContent = state.event === "meeting"
+      ? "상견례의 독립 공간과 소규모 예식의 우천 대안·식사 동선을 필요한 만큼 확인하세요."
       : state.event === "parents" ? "어르신 동선, 주차, 독립 공간을 함께 확인하세요." : "행사 방식에 가장 가까운 공간을 선택하세요.";
   }
 
@@ -90,10 +110,25 @@
 
   function format(value) { return `${Math.round(value / 10000).toLocaleString("ko-KR")}만 원`; }
 
+  function clearResult() {
+    document.getElementById("calculator-min").textContent = "선택 전";
+    document.getElementById("calculator-typical").textContent = "선택 전";
+    document.getElementById("calculator-high").textContent = "선택 전";
+    document.getElementById("calculator-total").textContent = "조건 선택 전";
+    document.getElementById("calculator-result-note").textContent = "행사와 인원을 선택하면 참고 범위를 표시합니다.";
+    document.getElementById("calculator-data-basis").textContent = "손품해방의 준비 계획용 가정이며, 확인된 시세·전국 표본·실제 견적이 아닙니다.";
+    document.getElementById("calculator-breakdown").replaceChildren();
+    document.getElementById("calculator-filter-note").textContent = "";
+    resultLinks.hidden = true;
+  }
+
   function calculate() {
-    if (!state.event) return null;
+    if (!state.event || !state.guests) {
+      clearResult();
+      return null;
+    }
     const profile = profiles[state.event] || profiles.other;
-    const guests = state.guests || 20;
+    const guests = state.guests;
     let min = profile.meal[0] * guests;
     let high = profile.meal[1] * guests;
     const items = [["식사", profile.meal[0] * guests, profile.meal[1] * guests]];
@@ -109,22 +144,37 @@
     document.getElementById("calculator-min").textContent = format(min);
     document.getElementById("calculator-typical").textContent = format(typical);
     document.getElementById("calculator-high").textContent = format(high);
-    document.getElementById("calculator-total").textContent = `${format(min)} ~ ${format(high)}`;
-    document.getElementById("calculator-result-note").textContent = `${state.region ? `${state.region} · ` : ""}${guests}명 기준으로 선택한 항목을 합산했습니다.`;
-    const basisMonth = new Intl.DateTimeFormat("ko-KR", { year: "numeric", month: "2-digit" }).format(new Date());
-    document.getElementById("calculator-data-basis").textContent = `${basisMonth} 기준 · 선택 지역의 확정 표본이 부족한 항목은 전국 참고 범위를 사용했습니다.`;
+    document.getElementById("calculator-total").textContent = `약 ${format(min)}~${format(high)}`;
+    document.getElementById("calculator-result-note").textContent = `${state.region ? `${state.region} · ` : ""}입력 ${guests}명 기준으로 선택한 항목을 합산했습니다.`;
+    document.getElementById("calculator-data-basis").textContent = "손품해방의 준비 계획용 가정이며, 산정 기준과 검토일이 확정된 시세·전국 표본·실제 견적이 아닙니다.";
     document.getElementById("calculator-breakdown").replaceChildren(...items.map(([name, low, upper]) => {
       const row = document.createElement("div");
       const label = document.createElement("span"); label.textContent = name;
       const value = document.createElement("strong"); value.textContent = `${format(low)}~${format(upper)}`;
       row.append(label, value); return row;
     }));
-    const context = { event: state.event, province: state.region, district: state.district, guests, budgetMin: min, budgetMax: high, date: state.date, source: "calculator" };
-    const query = window.TaranSearchContext?.toParams?.(context) || new URLSearchParams(Object.entries(context).filter(([, value]) => value).map(([key, value]) => [key, String(value)]));
-    document.getElementById("calculator-venues-link").href = `venues.html?${query}`;
-    document.getElementById("calculator-checklist-link").href = `checklist.html?${query}`;
-    window.TaranSearchContext?.save?.(context);
-    return { min, typical, high };
+    const guestsFilter = guestFilterValue(guests);
+    const budgetFilter = budgetFilterValue(typical);
+    const searchContext = {
+      event: state.event,
+      province: state.region,
+      district: state.district,
+      guests: guestsFilter,
+      budget: budgetFilter,
+      budgetMin: min,
+      budgetMax: high,
+      date: state.date,
+      source: "calculator"
+    };
+    const checklistContext = { ...searchContext, guests };
+    const searchQuery = window.TaranSearchContext?.toParams?.(searchContext) || new URLSearchParams(Object.entries(searchContext).filter(([, value]) => value).map(([key, value]) => [key, String(value)]));
+    const checklistQuery = window.TaranSearchContext?.toParams?.(checklistContext) || new URLSearchParams(Object.entries(checklistContext).filter(([, value]) => value).map(([key, value]) => [key, String(value)]));
+    document.getElementById("calculator-venues-link").href = `venues.html?${searchQuery}`;
+    document.getElementById("calculator-checklist-link").href = `checklist.html?${checklistQuery}`;
+    document.getElementById("calculator-filter-note").textContent = `업체 검색에는 인원 ‘${guestFilterLabel(guestsFilter)}’, 예산 ‘${budgetFilterLabel(budgetFilter)}’ 필터가 적용됩니다.`;
+    resultLinks.hidden = false;
+    window.TaranSearchContext?.save?.(searchContext);
+    return { min, typical, high, guestsFilter, budgetFilter };
   }
 
   document.querySelectorAll('[data-step="1"] [data-single-options] button').forEach((button) => button.addEventListener("click", () => {
@@ -136,6 +186,16 @@
     });
     next.disabled = false;
     renderDynamicOptions();
+    calculate();
+  }));
+  document.querySelectorAll('[data-step="3"] [data-single-options] button').forEach((button) => button.addEventListener("click", () => {
+    state.guests = Number(button.dataset.value) || 0;
+    button.parentElement.querySelectorAll("button").forEach((candidate) => {
+      const active = candidate === button;
+      candidate.classList.toggle("is-selected", active);
+      candidate.setAttribute("aria-pressed", String(active));
+    });
+    next.disabled = !state.guests;
     calculate();
   }));
   next.addEventListener("click", () => {
@@ -150,22 +210,30 @@
   document.getElementById("calculator-district").addEventListener("change", (event) => { state.district = event.target.value; calculate(); });
   document.getElementById("calculator-date").addEventListener("change", (event) => { state.date = event.target.value; calculate(); });
   document.getElementById("calculator-save").addEventListener("click", async () => {
+    const result = calculate();
+    if (!result) {
+      window.TaranToast?.show?.("행사와 인원을 선택한 뒤 결과를 저장해 주세요.");
+      return;
+    }
+    window.TaranStorage.set("calculator-state", JSON.stringify({ ...state, ...result }));
     await window.TaranAuth?.ready;
     if (!window.TaranAuth?.getAccount?.()) {
       location.href = window.TaranAuth?.loginUrl?.(`calculator.html${location.search}`) || "login.html?return=calculator.html";
       return;
     }
-    const result = calculate();
-    window.TaranStorage.set("calculator-state", JSON.stringify({ ...state, ...result }));
     try { await window.TaranAuth.api("/api/member/state/calculator", { method: "PUT", body: JSON.stringify({ state: { ...state, ...result } }) }); }
     catch (_error) { window.TaranToast?.show?.("브라우저에는 저장했지만 온라인 계정 저장은 잠시 후 다시 시도해 주세요."); return; }
     window.TaranToast?.show?.("계산 결과를 계정에서 이어볼 수 있도록 저장했습니다.");
   });
   document.getElementById("calculator-share").addEventListener("click", async () => {
-    calculate();
-    const text = `${state.region || "지역 미정"} · ${state.guests || 20}명 · ${document.getElementById("calculator-total").textContent}`;
+    const result = calculate();
+    if (!result) {
+      window.TaranToast?.show?.("행사와 인원을 선택한 뒤 결과를 공유해 주세요.");
+      return;
+    }
+    const text = `${state.region || "지역 미정"} · ${state.guests}명 · 준비 계획용 ${document.getElementById("calculator-total").textContent}`;
     try {
-      if (navigator.share) await navigator.share({ title: "손품해방 가족행사 예상 비용", text, url: location.href });
+      if (navigator.share) await navigator.share({ title: "손품해방 가족행사 준비 비용 범위", text, url: location.href });
       else { await navigator.clipboard.writeText(`${text}\n${location.href}`); window.TaranToast?.show?.("계산 결과 링크를 복사했습니다."); }
     } catch (error) { if (error?.name !== "AbortError") window.TaranToast?.show?.("공유하지 못했습니다. 잠시 후 다시 시도해 주세요."); }
   });
@@ -177,8 +245,21 @@
   state.guests = Number(initial.guests) || 0;
   window.SonpumRegions?.setupSelects?.(document.getElementById("calculator-region"), document.getElementById("calculator-district"), { province: state.region, district: state.district });
   document.getElementById("calculator-date").value = state.date;
-  const initialButton = document.querySelector(`[data-step="1"] button[data-value="${state.event}"]`);
-  if (initialButton) { initialButton.classList.add("is-selected"); initialButton.setAttribute("aria-pressed", "true"); }
+  document.querySelectorAll('[data-step="1"] button').forEach((button) => {
+    const active = button.dataset.value === state.event;
+    button.classList.toggle("is-selected", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
+  if (state.guests) {
+    const initialGuestOption = state.guests <= 10 ? 10 : state.guests <= 30 ? 30 : state.guests <= 50 ? 50 : state.guests <= 80 ? 80 : 120;
+    document.querySelectorAll('[data-step="3"] button').forEach((button) => {
+      const active = Number(button.dataset.value) === initialGuestOption;
+      button.classList.toggle("is-selected", active);
+      button.setAttribute("aria-pressed", String(active));
+    });
+  } else {
+    document.querySelectorAll('[data-step="3"] button').forEach((button) => button.setAttribute("aria-pressed", "false"));
+  }
   renderDynamicOptions();
   calculate();
   showStep();

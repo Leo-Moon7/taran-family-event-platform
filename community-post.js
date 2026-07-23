@@ -51,7 +51,11 @@
       link.href = `community-post.html?id=${encodeURIComponent(item.id)}`;
       link.append(node("b", `[${item.category || "이야기"}] `), document.createTextNode(item.title || "제목 없음"));
       const meta = node("p");
-      meta.append(node("span", item.author_name || item.author || "손품해방 회원"), node("span", formatDate(item.created_at) || item.time || ""));
+      if (item.is_starter) {
+        meta.append(node("span", "손품해방 운영팀"), node("span", "시작 질문"));
+      } else {
+        meta.append(node("span", item.author_name || "손품해방 회원"), node("span", formatDate(item.created_at)));
+      }
       article.append(link, meta);
       relatedRoot.append(article);
     });
@@ -81,20 +85,35 @@
     button.disabled = true;
     button.textContent = "접수하는 중…";
     try {
-      await window.TaranApi.upsert(window.TaranConfig.tables.communityComments, {
-        post_id: post.id,
-        user_id: account.id,
-        author_name: account.display_name || "손품해방 회원",
-        content,
-        status: "pending"
-      });
+      if (post.is_starter) {
+        await window.TaranApi.upsert(window.TaranConfig.tables.communityPosts, {
+          user_id: account.id,
+          category: "경험 나눔",
+          title: `${post.title}에 답해요`,
+          content,
+          author_name: account.display_name || "손품해방 회원",
+          status: "pending"
+        });
+      } else {
+        await window.TaranApi.upsert(window.TaranConfig.tables.communityComments, {
+          post_id: post.id,
+          user_id: account.id,
+          author_name: account.display_name || "손품해방 회원",
+          content,
+          status: "pending"
+        });
+      }
       textarea.value = "";
-      if (message) message.textContent = "댓글이 접수되었습니다. 개인정보와 광고성 내용을 확인한 뒤 공개합니다.";
+      if (message) {
+        message.textContent = post.is_starter
+          ? "답변이 경험 나눔 글로 접수되었습니다. 개인정보와 광고성 내용을 확인한 뒤 공개합니다."
+          : "댓글이 접수되었습니다. 개인정보와 광고성 내용을 확인한 뒤 공개합니다.";
+      }
     } catch (error) {
       if (message) message.textContent = error.message || "댓글을 등록하지 못했습니다.";
     } finally {
       button.disabled = false;
-      button.textContent = "댓글 등록";
+      button.textContent = post.is_starter ? "답변 등록" : "댓글 등록";
     }
   }
 
@@ -107,13 +126,20 @@
     const header = node("header", null, "reader-title-area");
     const boardLink = node("a", post.category || "커뮤니티", "reader-board-link");
     boardLink.href = "community.html";
-    header.append(boardLink, node("h1", post.title), node("p", formatDate(post.created_at) || post.time || "", "reader-written-at"));
+    header.append(
+      boardLink,
+      node("h1", post.title),
+      node("p", post.is_starter ? "운영팀 시작 질문" : formatDate(post.created_at), "reader-written-at")
+    );
 
     const authorRow = node("section", null, "reader-author-row");
     const avatar = node("div", initials(post.author_name || post.author), "reader-avatar");
     avatar.setAttribute("aria-hidden", "true");
     const authorInfo = node("div", null, "reader-author-info");
-    authorInfo.append(node("strong", post.author_name || post.author || "손품해방 회원"), node("p", `댓글 ${comments.length}`));
+    authorInfo.append(
+      node("strong", post.is_starter ? "손품해방 운영팀" : post.author_name || "손품해방 회원"),
+      node("p", post.is_starter ? "여러분의 실제 경험과 질문을 기다립니다." : `댓글 ${comments.length}`)
+    );
     authorRow.append(avatar, authorInfo);
 
     const body = node("section", null, "reader-body");
@@ -123,22 +149,26 @@
     const panel = node("section", null, "community-comment-panel board-comment-panel");
     panel.id = "comments";
     const panelHead = node("div", null, "board-comment-head");
-    panelHead.append(node("strong", `댓글 ${comments.length}개`));
+    panelHead.append(node("strong", post.is_starter ? "이 질문에 경험 나누기" : `댓글 ${comments.length}개`));
     const list = node("div", null, "community-comment-list board-comment-list");
     comments.forEach(comment => list.append(commentArticle(comment)));
-    if (!comments.length) list.append(node("p", "첫 댓글을 남겨보세요.", "empty-state"));
+    if (!comments.length) {
+      list.append(node("p", post.is_starter ? "아직 등록된 경험이 없습니다. 알고 있는 내용이나 궁금한 점을 먼저 남겨보세요." : "첫 댓글을 남겨보세요.", "empty-state"));
+    }
 
     const form = node("form", null, "community-mock-form light-form board-reply-form");
-    const label = node("label", "댓글 입력");
+    const label = node("label", post.is_starter ? "경험 또는 질문 입력" : "댓글 입력");
     const textarea = document.createElement("textarea");
     textarea.name = "content";
     textarea.maxLength = 1000;
     textarea.required = true;
-    textarea.placeholder = "개인정보를 제외하고 경험과 의견을 남겨주세요.";
+    textarea.placeholder = post.is_starter
+      ? "개인정보를 제외하고 직접 겪은 내용이나 궁금한 점을 남겨주세요."
+      : "개인정보를 제외하고 경험과 의견을 남겨주세요.";
     label.append(textarea);
     const formMessage = node("p", "", "field-error");
     formMessage.dataset.commentMessage = "";
-    const button = node("button", "댓글 등록", "button button-primary");
+    const button = node("button", post.is_starter ? "답변 등록" : "댓글 등록", "button button-primary");
     button.type = "submit";
     form.append(label, formMessage, button);
     form.addEventListener("submit", submitComment);
@@ -148,24 +178,36 @@
   }
 
   function previewPost() {
-    const posts = window.taran_COMMUNITY_POSTS || [];
-    post = posts.find(item => item.id === id) || posts[0];
+    const posts = (window.taran_COMMUNITY_POSTS || []).filter(item => item.is_starter);
+    post = id ? posts.find(item => item.id === id) : posts[0];
     comments = (post?.comments || []).map(([author, content]) => ({ author_name: author, content, created_at: "" }));
     related = posts.filter(item => item.id !== post?.id).slice(0, 5);
   }
 
   async function onlinePost() {
-    if (!id) return;
+    if (!id) return false;
     const rows = await window.TaranApi.select(window.TaranConfig.tables.communityPosts, { id: `eq.${id}`, status: "eq.published", limit: 1 });
     post = rows[0] || null;
-    if (!post) return;
-    comments = await window.TaranApi.select(window.TaranConfig.tables.communityComments, { post_id: `eq.${post.id}`, status: "eq.published", order: "created_at.asc", limit: 500 });
-    related = await window.TaranApi.select(window.TaranConfig.tables.communityPosts, { status: "eq.published", id: `neq.${post.id}`, order: "created_at.desc", limit: 5 });
+    if (!post) return false;
+    const [commentResult, relatedResult] = await Promise.allSettled([
+      window.TaranApi.select(window.TaranConfig.tables.communityComments, { post_id: `eq.${post.id}`, status: "eq.published", order: "created_at.asc", limit: 500 }),
+      window.TaranApi.select(window.TaranConfig.tables.communityPosts, { status: "eq.published", id: `neq.${post.id}`, order: "created_at.desc", limit: 5 })
+    ]);
+    comments = commentResult.status === "fulfilled" ? commentResult.value : [];
+    related = relatedResult.status === "fulfilled" ? relatedResult.value : [];
+    return true;
   }
 
   async function init() {
-    if (window.TaranConfig?.isSupabaseConfigured) await onlinePost();
-    else previewPost();
+    let loadedOnline = false;
+    if (window.TaranConfig?.isSupabaseConfigured) {
+      try {
+        loadedOnline = await onlinePost();
+      } catch (error) {
+        console.warn("커뮤니티 온라인 글을 불러오지 못해 시작 질문을 확인합니다.", error);
+      }
+    }
+    if (!loadedOnline) previewPost();
     if (!post) {
       root?.replaceChildren(node("div", "게시글을 찾을 수 없습니다.", "empty-state"));
       return;

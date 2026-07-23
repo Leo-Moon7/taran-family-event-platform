@@ -456,20 +456,6 @@ window.publicDirectoryData = [
   }))
 ].filter(item => item.publicationStatus === "published");
 
-// 네이버 블로그 검색 메타데이터에서 반복 확인한 비장소 업체 후보입니다.
-// 블로그 본문·이미지는 복사하지 않고, 원문 링크와 카테고리 공통 확인 항목만 제공합니다.
-window.publicDirectoryData.push(...(window.reviewProviderCandidateData || [])
-  .filter(isConfirmedDirectoryItem)
-  .map(toPublicDirectoryItem));
-
-window.publicDirectoryData.push(...(window.reviewLifecycleVerifiedData || window.reviewLifecycleCandidateData || [])
-  .filter(isConfirmedDirectoryItem)
-  .map(toPublicDirectoryItem));
-
-window.publicDirectoryData.push(...(window.reviewLocalApiPartnerData || [])
-  .filter(isConfirmedDirectoryItem)
-  .map(toPublicDirectoryItem));
-
 window.crawlReviewSchema = {
   commonFields: [
     "업체명",

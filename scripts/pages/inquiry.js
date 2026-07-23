@@ -10,8 +10,9 @@
   let account = null;
 
   function prefill() {
+    const resolved = window.TaranSearchContext?.resolve?.(params) || {};
     const fields = {
-      eventType: params.get("event"),
+      eventType: window.SonpumEventTypes?.normalize?.(resolved.event || params.get("event")) || resolved.event || params.get("event"),
       region: params.get("region"),
       guestCount: params.get("guests"),
       budgetMax: params.get("budget"),

@@ -8,33 +8,35 @@
   <title>업체 비교함 | 손품해방</title>
   <link rel="stylesheet" href="styles/tokens.css"><link rel="stylesheet" href="styles/reset.css"><link rel="stylesheet" href="styles/base.css"><link rel="stylesheet" href="styles/layout.css">
   <link rel="stylesheet" href="styles/components/header.css"><link rel="stylesheet" href="styles/components/button.css"><link rel="stylesheet" href="styles/components/card.css"><link rel="stylesheet" href="styles/components/badge.css"><link rel="stylesheet" href="styles/pages/compare.css">
-  <script src="scripts/core/brand.js"></script><script src="scripts/core/storage.js"></script><script src="scripts/core/event-types.js"></script>
+  <script src="scripts/core/brand.js"></script><script src="scripts/core/storage.js"></script><script src="scripts/core/service-scope.js"></script><script src="scripts/core/display-defaults.js"></script><script src="scripts/core/event-types.js"></script>
 </head>
-<body>
+<body class="compare-page">
   <header class="site-header" data-site-header>
     <div class="site-header__inner">
       <a class="brand" href="index.html" aria-label="손품해방 홈"><span class="brand__name"><span>손품해방</span><small>SONPUM HAEBANG</small></span></a>
       <button class="site-header__toggle" type="button" aria-controls="site-navigation" aria-expanded="false" data-menu-toggle><span class="visually-hidden">메뉴 열기</span>☰</button>
       <nav class="site-nav" id="site-navigation" aria-label="주요 메뉴">
         <a href="venues.html">업체 찾기</a><a aria-current="page" href="compare.html">비교함 <span class="nav-count" data-compare-count hidden></span></a>
-        <div class="nav-menu"><button type="button" aria-haspopup="true" aria-expanded="false" data-nav-menu-button>무료 도구</button><div class="nav-menu__panel"><a href="calculator.html"><strong>비용 계산기</strong><span>예상 비용 범위 확인</span></a><a href="checklist.html"><strong>준비 체크리스트</strong><span>행사일 기준 할 일</span></a></div></div>
-        <a href="articles.html">준비 가이드</a><a href="provider-register.html">업체 등록</a><a class="site-nav__auth" href="login.html" data-auth-link>로그인</a>
+        <div class="nav-menu"><button type="button" aria-haspopup="true" aria-expanded="false" data-nav-menu-button>준비 도구</button><div class="nav-menu__panel"><a href="calculator.html"><strong>비용 계산기</strong><span>준비 계획용 비용 범위</span></a><a href="checklist.html"><strong>준비 체크리스트</strong><span>행사일 기준 일정 관리</span></a></div></div>
+        <a href="articles.html">준비백과</a><a href="provider-register.html">업체 등록</a><a class="site-nav__auth" href="login.html" data-auth-link>로그인</a>
       </nav>
     </div>
   </header>
   <main>
-    <section class="compare-hero"><div class="container"><p class="eyebrow">업체 비교함</p><h1>선택한 업체를<br>같은 기준으로 비교하세요.</h1><p>최대 3곳의 인원, 가격, 주차와 이용 조건을 한 화면에서 확인할 수 있습니다.</p></div></section>
+    <section class="compare-hero"><div class="container compare-hero__grid"><div><p class="eyebrow">업체 비교함</p><h1>선택한 업체를<br>같은 기준으로 비교하세요.</h1><p>최대 3곳의 인원, 가격, 주차와 이용 조건을 나란히 확인합니다. 정보가 없거나 다시 확인해야 하는 값은 추정하지 않습니다.</p></div><div class="compare-limit-card"><span>비교 기준</span><strong>최대 3곳</strong><p>같은 행사 조건을 확인하고, 문의 수신이 확인된 업체에만 견적 문의를 보냅니다.</p></div></div></section>
     <section class="page-section">
       <div class="container">
-        <div class="compare-toolbar"><p id="compare-summary" aria-live="polite">비교할 업체를 불러오는 중입니다.</p><div><a class="button button--secondary" href="venues.html">업체 더 찾기</a><a class="button button--primary" id="compare-inquiry-link" href="inquiry.html" hidden>선택 업체에 한 번에 문의</a></div></div>
-        <div class="compare-table-wrap" id="compare-table-wrap"><table class="compare-table" id="compare-table"><caption class="visually-hidden">선택 업체 조건 비교</caption><tbody id="compare-table-body"></tbody></table></div>
-        <div class="empty-state" id="compare-empty" hidden><h2>비교함이 비어 있습니다.</h2><p>업체 목록에서 비교할 곳을 최대 3곳까지 선택해 주세요.</p><a class="button button--primary" href="venues.html">업체 찾기</a></div>
+        <div class="compare-toolbar"><div><p class="eyebrow">내 비교함</p><p id="compare-summary" aria-live="polite">비교할 업체를 불러오는 중입니다.</p></div><div><button class="button button--text" id="compare-clear" type="button" hidden>비교함 비우기</button><a class="button button--secondary" id="compare-add-link" href="venues.html">업체 더 찾기</a><a class="button button--primary" id="compare-inquiry-link" href="inquiry.html" hidden>같은 조건으로 견적 문의</a></div></div>
+        <p class="compare-action-note" id="compare-action-note" role="status">업체 선택 상태를 확인하고 있습니다.</p>
+        <p class="compare-scroll-guide" id="compare-scroll-guide" hidden><span aria-hidden="true">↔</span> 표를 좌우로 밀어 업체별 조건을 확인하세요.</p>
+        <div class="compare-table-wrap" id="compare-table-wrap" role="region" aria-label="선택 업체 조건 비교표" aria-describedby="compare-scroll-guide" tabindex="0"><table class="compare-table" id="compare-table"><caption class="visually-hidden">선택 업체 조건 비교</caption><tbody id="compare-table-body"></tbody></table></div>
+        <div class="empty-state" id="compare-empty" hidden><span aria-hidden="true">⇄</span><h2 id="compare-empty-title">비교함이 비어 있습니다.</h2><p id="compare-empty-description">업체 목록에서 비교할 곳을 최대 3곳까지 선택해 주세요.</p><a class="button button--primary" id="compare-empty-link" href="venues.html">업체 찾기</a></div>
       </div>
     </section>
   </main>
   <footer class="site-footer"><div class="container site-footer__inner"><div><strong>손품해방</strong><small>SONPUM HAEBANG · 가족행사 장소 비교와 견적 문의</small></div><nav aria-label="정책 메뉴"><a href="about.html">서비스 소개</a><a href="privacy.html">개인정보처리방침</a><a href="terms.html">이용약관</a><a href="contact.html">문의</a></nav></div></footer>
-  <script src="review-provider-candidates.js?v=1"></script><script src="review-lifecycle-candidates.js?v=1"></script><script src="review-lifecycle-verified.js?v=6"></script><script src="review-local-api-partners.js?v=3"></script><script src="data.js?v=19"></script>
+  <script src="data.js?v=19"></script>
   <script src="content-config.js"></script><script src="scripts/core/config.js"></script><script src="scripts/core/api.js"></script><script src="scripts/core/auth.js"></script><script src="scripts/core/analytics.js"></script>
-  <script src="scripts/core/provider-status.js"></script><script src="scripts/core/provider-placeholder.js"></script><script src="scripts/core/compare-store.js"></script><script src="scripts/components/header.js"></script><script src="scripts/components/toast.js"></script><script src="scripts/pages/compare.js"></script>
+  <script src="scripts/core/provider-status.js"></script><script src="scripts/core/provider-placeholder.js"></script><script src="scripts/core/compare-store.js"></script><script src="scripts/core/search-context.js"></script><script src="scripts/components/header.js"></script><script src="scripts/components/toast.js"></script><script src="scripts/pages/compare.js"></script>
 </body>
 </html>

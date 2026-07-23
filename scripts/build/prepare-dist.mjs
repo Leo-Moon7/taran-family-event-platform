@@ -20,7 +20,16 @@ const rootFileExtensions = new Set([
 ]);
 const excludedRootFiles = new Set([
   "content-config.example.js",
-  "_inline_index_check.js"
+  "_inline_index_check.js",
+  "app.js",
+  "venues.js",
+  "review-candidates.js",
+  "review-coverage.js",
+  "review-venue-candidates.js",
+  "review-provider-candidates.js",
+  "review-lifecycle-candidates.js",
+  "review-lifecycle-verified.js",
+  "review-local-api-partners.js"
 ]);
 const publicDirectories = new Set(["admin", "assets", "styles", "scripts"]);
 const excludedScriptDirectories = new Set([
