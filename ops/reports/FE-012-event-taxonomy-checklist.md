@@ -5,7 +5,8 @@
 - 수정 반복: 2회
 - 온라인 draft: `https://6a61a2981e9fc538d795f061--taran-family-event-test.netlify.app/`
 - Netlify deploy ID: `6a61a2981e9fc538d795f061`
-- GitHub main·Netlify production·PR: 변경하지 않음
+- GitHub 분리 브랜치: `agent/approved-marketplace-checklist-update`
+- GitHub main·Netlify production: 변경하지 않음
 
 ## 구현 결과
 

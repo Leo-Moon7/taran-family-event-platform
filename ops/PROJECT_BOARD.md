@@ -6,9 +6,9 @@
 - 운영 시험: QA-005 읽기 전용 오케스트레이션 검증 완료
 - 완료 검수: QA-002, MKT-001, QA-004, MKT-002, OPS-002, QA-005, OPS-005, FE-004, FE-005, OPS-006, QA-007, QA-008, MKT-007, QA-009, MKT-008, FE-007, QA-010, BIZ-002, BE-005, MKT-009, BIZ-003, QA-011, OPS-008, BIZ-004, QA-013, MKT-011, QA-014, OPS-011, QA-015, OPS-009, FE-009, FE-011, FE-012
 - 현재 활성 작업: 없음
-- 다음 순서: FE-012 고유 draft 사용자 확인 → 피드백 반영 카드 또는 최종 배포·GitHub 반영 별도 승인
-- 승인 완료: D-01~D-04, D-09, D-12, D-14~D-15, D-17~D-20, D-22~D-25, D-29, 온라인 미리보기; D-06·D-07 임시 폼 범위 부분 승인
-- 승인 대기: D-13 vendor-dashboard 리디렉션, D-26 업체 외부 연락, D-27 로컬 원본, D-28 지도 링크, D-30 FE-009 최종 배포
+- 다음 순서: GitHub 분리 브랜치 사용자 확인 → 피드백 반영 카드 또는 `main` 병합·production 배포 별도 승인
+- 승인 완료: D-01~D-04, D-09, D-12, D-14~D-15, D-17~D-20, D-22~D-25, D-29, 온라인 미리보기, GitHub 분리 브랜치 반영; D-06·D-07 임시 폼 범위 부분 승인
+- 승인 대기: D-13 vendor-dashboard 리디렉션, D-26 업체 외부 연락, D-27 로컬 원본, D-28 지도 링크, D-30 `main` 병합·production 배포
 - 디자인 승인 완료: D-14 베이지 플랫폼형 C안; D-19·D-20 콘텐츠 방향 승인. 전체 홈 구현은 D-22·BIZ-003·BE-006/FE-008 선행
 - 전체 카드: `ops/TASK_SPECS.md`
 - 이번 통합 검수: `ops/reports/PM-2026-07-22-d24-d26-packet-review.md`, `ops/reports/PM-2026-07-22-qa014-interim-review.md`, `ops/reports/PM-2026-07-22-d23-d25-user-review.md`
@@ -54,7 +54,7 @@
 | FE-008 | 후보·검수 업체 분리와 신뢰·최근성 표시 | 디자인·프런트엔드 | BLOCKED | P0 | D-22·BE-006·CHG-B 선행 |
 | FE-009 | 베이지 C안 홈 안전 축소 구현 | 디자인·프런트엔드 | DONE | P0 | 홈 3개 파일 구현·PM·독립 reviewer PASS, draft 미리보기 생성, 최종 배포 금지 |
 | FE-011 | 승인된 최종 홈·준비 도구·비교 화면 구현 | 디자인·프런트엔드 | DONE | P0 | PM·독립 QA PASS, 고유 draft 생성, 최종 배포·GitHub 반영 금지 |
-| FE-012 | 행사 분류 5종 통합과 실용형 체크리스트 개편 | 디자인·프런트엔드 | DONE | P0 | REVISION 2 후 PM·독립 QA PASS, 고유 draft 생성 |
+| FE-012 | 행사 분류 5종 통합과 실용형 체크리스트 개편 | 디자인·프런트엔드 | DONE | P0 | REVISION 2 후 PM·독립 QA PASS, 고유 draft·GitHub 분리 브랜치 생성 |
 | QA-012 | NAVER 비의존 공개 번들·흐름 회귀 | 품질·보안 | BLOCKED | P0 | OPS-009·FE-008 후 |
 | QA-016 | 승인된 정보 나눔 홈 링크와 테스트 계약 정합화 | 품질·보안 | BLOCKED | P1 | CHG-A 테스트 정본 소유권 확정 후 실행 |
 | FE-010 | 공통 모바일 메뉴 상태명·홈 CTA 정합성 | 디자인·프런트엔드/품질 | BACKLOG | P1 | 공통 header 단일 소유권과 비교함 노출 정책 확인 후 카드화 |

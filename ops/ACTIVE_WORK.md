@@ -2,7 +2,7 @@
 
 ## 현재 상태
 
-QA-015, OPS-009, FE-009, FE-011, FE-012는 총괄 PM·독립 reviewer 검수 `PASS`로 완료됐다. FE-012 온라인 draft는 생성됐지만 GitHub main과 Netlify production에는 반영하지 않았다. 현재 실행 중인 제품 코드 작업은 없다.
+QA-015, OPS-009, FE-009, FE-011, FE-012는 총괄 PM·독립 reviewer 검수 `PASS`로 완료됐다. 검수 완료 변경은 GitHub `agent/approved-marketplace-checklist-update` 분리 브랜치에 반영했지만 GitHub main과 Netlify production에는 반영하지 않았다. 현재 실행 중인 제품 코드 작업은 없다.
 
 QA-010, BIZ-002, BE-005, MKT-009는 전용 보고서만 작성했고 총괄 PM 검수에서 모두 `PASS`를 받아 `DONE` 처리했다. NAVER 비의존 전략은 ADR-016에 기록했으며 4,960건은 `legacy_source_hold` 후보로 재정의했다.
 
