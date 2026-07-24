@@ -7,7 +7,41 @@ Thumbs.db
 !.env.example
 
 # Codex / local verification folders
-backend/
+/backend/
+!/backend/
+/backend/*
+
+!/backend/public_data_seed/
+/backend/public_data_seed/*
+
+!/backend/public_data_seed/README.md
+!/backend/public_data_seed/seed_tool.py
+!/backend/public_data_seed/test_seed_tool.py
+!/backend/public_data_seed/source_registry_gate.py
+!/backend/public_data_seed/source_registry_gate_fixtures.json
+!/backend/public_data_seed/test_source_registry_gate.py
+
+!/backend/public_data_seed/evidence/
+/backend/public_data_seed/evidence/*
+!/backend/public_data_seed/evidence/15154916/
+/backend/public_data_seed/evidence/15154916/*
+!/backend/public_data_seed/evidence/15154916/official-portal-rights-metadata.normalized.json
+!/backend/public_data_seed/evidence/15154916/official-swagger-contract.normalized.json
+!/backend/public_data_seed/evidence/15154916/SHA256SUMS
+
+# Keep local data, secrets, runtime outputs, and caches excluded.
+/backend/data/
+/backend/**/.env
+/backend/**/.env.*
+/backend/public_data_seed/workspaces/
+/backend/public_data_seed/.test-tmp/
+/backend/public_data_seed/**/__pycache__/
+/backend/public_data_seed/**/*.py[cod]
+/backend/public_data_seed/**/*.db
+/backend/public_data_seed/**/*.sqlite
+/backend/public_data_seed/**/*.sqlite3
+/backend/public_data_seed/**/*.duckdb
+/backend/public_data_seed/**/*.jsonl
 _tools/
 _verify/
 design-references/

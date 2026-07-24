@@ -1,0 +1,451 @@
+{
+  "artifactVersion": "BE-013-evidence-v1",
+  "artifactKind": "normalized_official_inline_swagger_contract",
+  "portalDataId": "15154916",
+  "capturedAt": "2026-07-24T20:37:13+09:00",
+  "officialDatasetUrl": "https://www.data.go.kr/data/15154916/openapi.do",
+  "officialDocument": {
+    "title": "행정안전부_식품_일반음식점 조회서비스",
+    "swaggerVersion": "2.0",
+    "apiVersion": "1.0.0",
+    "inlineSwaggerJsonCharacterLength": 18173,
+    "captureMethod": "공식 상세 페이지에 렌더링된 inline Swagger JSON을 읽기 전용으로 정규화",
+    "rawUpstreamArtifactPreserved": false,
+    "rawUpstreamArtifactReason": "공식 페이지가 별도 정적 schema 파일 URL이나 upstream content hash를 제공하지 않고 inline Swagger로 렌더링함",
+    "rawUpstreamSha256Available": false,
+    "deterministicExtractionProcedurePinned": false,
+    "normalizedArtifactSha256Scope": "이 파일의 로컬 파생본 무결성만 증명하며 upstream 공식 문서 bytes 또는 재추출 동일성을 증명하지 않음",
+    "exampleValuesCopied": false
+  },
+  "transport": {
+    "schemesDocumented": [
+      "https",
+      "http"
+    ],
+    "selectedSchemeForAnyFutureAuthorizedUse": "https",
+    "host": "apis.data.go.kr/1741000/general_restaurants",
+    "basePath": "",
+    "documentedEndpoints": [
+      {
+        "method": "GET",
+        "path": "/info",
+        "summary": "식품_일반음식점 데이터 조회",
+        "description": "매일 갱신되며 2일 전 기준으로 현행화된다고 공식 Swagger가 설명함",
+        "calledDuringBE013": false
+      },
+      {
+        "method": "GET",
+        "path": "/history",
+        "summary": "식품_일반음식점 데이터 이력조회",
+        "description": "입력한 데이터기준일자를 기준으로 과거 시점 데이터를 조회하며, 공식 Swagger는 데이터기준일자를 2026-01-01부터 조회일 전일까지 입력할 수 있다고 설명함",
+        "calledDuringBE013": false
+      }
+    ]
+  },
+  "requestContracts": {
+    "/info": [
+      {
+        "name": "serviceKey",
+        "in": "query",
+        "type": "string",
+        "required": true,
+        "description": "공공데이터포털에서 받은 인증키"
+      },
+      {
+        "name": "pageNo",
+        "in": "query",
+        "type": "string",
+        "required": true,
+        "description": "페이지번호"
+      },
+      {
+        "name": "numOfRows",
+        "in": "query",
+        "type": "string",
+        "required": true,
+        "description": "한 페이지 결과 수(max: 100)"
+      },
+      {
+        "name": "returnType",
+        "in": "query",
+        "type": "string",
+        "required": false,
+        "description": "응답의 데이터 타입"
+      },
+      {
+        "name": "cond[LCPMT_YMD::GTE]",
+        "in": "query",
+        "type": "string",
+        "required": false,
+        "description": "인허가일자 이상의 값(YYYYMMDD)"
+      },
+      {
+        "name": "cond[LCPMT_YMD::LT]",
+        "in": "query",
+        "type": "string",
+        "required": false,
+        "description": "인허가일자 미만의 값(YYYYMMDD)"
+      },
+      {
+        "name": "cond[SALS_STTS_CD::EQ]",
+        "in": "query",
+        "type": "string",
+        "required": false,
+        "description": "영업상태코드와 일치하는 값"
+      },
+      {
+        "name": "cond[BPLC_NM::LIKE]",
+        "in": "query",
+        "type": "string",
+        "required": false,
+        "description": "사업장명을 포함하는 값"
+      },
+      {
+        "name": "cond[ROAD_NM_ADDR::LIKE]",
+        "in": "query",
+        "type": "string",
+        "required": false,
+        "description": "도로명주소를 포함하는 값"
+      },
+      {
+        "name": "cond[DAT_UPDT_PNT::GTE]",
+        "in": "query",
+        "type": "string",
+        "required": false,
+        "description": "데이터갱신시점 이상의 값(YYYYMMDDHHMMSS)"
+      },
+      {
+        "name": "cond[DAT_UPDT_PNT::LT]",
+        "in": "query",
+        "type": "string",
+        "required": false,
+        "description": "데이터갱신시점 미만의 값(YYYYMMDDHHMMSS)"
+      },
+      {
+        "name": "cond[OPN_ATMY_GRP_CD::EQ]",
+        "in": "query",
+        "type": "string",
+        "required": false,
+        "description": "개방자치단체코드"
+      }
+    ],
+    "/history": [
+      {
+        "name": "serviceKey",
+        "in": "query",
+        "type": "string",
+        "required": true,
+        "description": "공공데이터포털에서 받은 인증키"
+      },
+      {
+        "name": "pageNo",
+        "in": "query",
+        "type": "string",
+        "required": true,
+        "description": "페이지번호"
+      },
+      {
+        "name": "numOfRows",
+        "in": "query",
+        "type": "string",
+        "required": true,
+        "description": "한 페이지 결과 수(max: 100)"
+      },
+      {
+        "name": "returnType",
+        "in": "query",
+        "type": "string",
+        "required": false,
+        "description": "응답의 데이터 타입"
+      },
+      {
+        "name": "cond[BASE_DATE::EQ]",
+        "in": "query",
+        "type": "string",
+        "required": true,
+        "description": "데이터기준일자(YYYYMMDD) 미만의 값(해당 일자 기준의 상태값)"
+      },
+      {
+        "name": "cond[LCPMT_YMD::GTE]",
+        "in": "query",
+        "type": "string",
+        "required": false,
+        "description": "인허가일자 이상의 값(YYYYMMDD)"
+      },
+      {
+        "name": "cond[LCPMT_YMD::LT]",
+        "in": "query",
+        "type": "string",
+        "required": false,
+        "description": "인허가일자 미만의 값(YYYYMMDD)"
+      },
+      {
+        "name": "cond[SALS_STTS_CD::EQ]",
+        "in": "query",
+        "type": "string",
+        "required": false,
+        "description": "영업상태코드와 일치하는 값"
+      },
+      {
+        "name": "cond[DAT_UPDT_PNT::GTE]",
+        "in": "query",
+        "type": "string",
+        "required": false,
+        "description": "데이터갱신시점 이상의 값(YYYYMMDDHHMMSS)"
+      },
+      {
+        "name": "cond[DAT_UPDT_PNT::LT]",
+        "in": "query",
+        "type": "string",
+        "required": false,
+        "description": "데이터갱신시점 미만의 값(YYYYMMDDHHMMSS)"
+      },
+      {
+        "name": "cond[OPN_ATMY_GRP_CD::EQ]",
+        "in": "query",
+        "type": "string",
+        "required": true,
+        "description": "개방자치단체코드"
+      },
+      {
+        "name": "cond[BPLC_NM::LIKE]",
+        "in": "query",
+        "type": "string",
+        "required": false,
+        "description": "사업장명을 포함하는 값"
+      }
+    ]
+  },
+  "responseContract": {
+    "formatsClaimedByDatasetPage": [
+      "JSON",
+      "XML"
+    ],
+    "jsonRecordPath": "response.body.items.item",
+    "xmlNamespaceAndRecordPathStatus": "not_separately_documented",
+    "paginationResponseFields": {
+      "pageNumber": "response.body.pageNo",
+      "pageSize": "response.body.numOfRows",
+      "reportedTotal": "response.body.totalCount"
+    },
+    "physicalFieldCount": 39,
+    "physicalFields": [
+      {"name": "OPN_ATMY_GRP_CD", "type": "string", "description": "개방자치단체코드"},
+      {"name": "MNG_NO", "type": "string", "description": "관리번호"},
+      {"name": "BLDG_PSN_SE_NM", "type": "string", "description": "건물소유구분명"},
+      {"name": "FCTRY_OFJB_EMP_CNT", "type": "string", "description": "공장사무직직원수"},
+      {"name": "FCTRY_PRODWK_EMP_CNT", "type": "string", "description": "공장생산직직원수"},
+      {"name": "FCTRY_SLSPOS_EMP_CNT", "type": "string", "description": "공장판매직직원수"},
+      {"name": "WTRSPPL_FCLT_SE_NM", "type": "string", "description": "급수시설구분명"},
+      {"name": "ML_PRCTR_CNT", "type": "string", "description": "남성종사자수"},
+      {"name": "MLT_UTZTN_BSNSSP_YN", "type": "string", "description": "다중이용업소여부"},
+      {"name": "DAT_UPDT_SE", "type": "string", "description": "데이터갱신구분"},
+      {"name": "DAT_UPDT_PNT", "type": "string", "description": "데이터갱신시점(YYYYMMDDHHMMSS)"},
+      {"name": "ROAD_NM_ZIP", "type": "string", "description": "도로명우편번호"},
+      {"name": "ROAD_NM_ADDR", "type": "string", "description": "도로명주소"},
+      {"name": "GRD_SE_NM", "type": "string", "description": "등급구분명"},
+      {"name": "GRNAMT", "type": "string", "description": "보증액"},
+      {"name": "HDOFC_EMP_CNT", "type": "string", "description": "본사직원수"},
+      {"name": "BPLC_NM", "type": "string", "description": "사업장명"},
+      {"name": "DTL_SALS_STTS_NM", "type": "string", "description": "상세영업상태명"},
+      {"name": "DTL_SALS_STTS_CD", "type": "string", "description": "상세영업상태코드"},
+      {"name": "LCTN_AREA", "type": "string", "description": "소재지면적"},
+      {"name": "FCLT_TOTAL_SCL", "type": "string", "description": "시설총규모"},
+      {"name": "BZSTAT_SE_NM", "type": "string", "description": "업태구분명"},
+      {"name": "FML_PRCTR_CNT", "type": "string", "description": "여성종사자수"},
+      {"name": "SALS_STTS_NM", "type": "string", "description": "영업상태명"},
+      {"name": "SALS_STTS_CD", "type": "string", "description": "영업상태코드"},
+      {"name": "BIZPLC_SURRND_SE_NM", "type": "string", "description": "영업장주변구분명"},
+      {"name": "MRNT_AMOUNT", "type": "string", "description": "월세액"},
+      {"name": "SNTTN_BZSTAT_NM", "type": "string", "description": "위생업태명"},
+      {"name": "LCPMT_YMD", "type": "string", "description": "인허가일자(YYYYMMDD)"},
+      {"name": "TRDTN_BSNSSP_PRINC_FD", "type": "string", "description": "전통업소주된음식"},
+      {"name": "TRDTN_BSNSSP_DSGN_NO", "type": "string", "description": "전통업소지정번호"},
+      {"name": "TELNO", "type": "string", "description": "전화번호"},
+      {"name": "CRD_INFO_X", "type": "string", "description": "좌표정보(X)"},
+      {"name": "CRD_INFO_Y", "type": "string", "description": "좌표정보(Y)"},
+      {"name": "LOTNO_ADDR", "type": "string", "description": "지번주소"},
+      {"name": "CLSBIZ_YMD", "type": "string", "description": "폐업일자(YYYYMMDD)"},
+      {"name": "HPG", "type": "string", "description": "홈페이지"},
+      {"name": "LCTN_ZIP", "type": "string", "description": "소재지우편번호"},
+      {"name": "LAST_MDFCN_PNT", "type": "string", "description": "최종수정시점(YYYYMMDDHHMMSS)"}
+    ]
+  },
+  "be009Qa023FieldPolicy": {
+    "allowedPhysicalFieldsForPrivateObservationOnly": [
+      "OPN_ATMY_GRP_CD",
+      "MNG_NO",
+      "DAT_UPDT_SE",
+      "DAT_UPDT_PNT",
+      "ROAD_NM_ZIP",
+      "ROAD_NM_ADDR",
+      "BPLC_NM",
+      "DTL_SALS_STTS_NM",
+      "DTL_SALS_STTS_CD",
+      "BZSTAT_SE_NM",
+      "SALS_STTS_NM",
+      "SALS_STTS_CD",
+      "SNTTN_BZSTAT_NM",
+      "LCPMT_YMD",
+      "LOTNO_ADDR",
+      "CLSBIZ_YMD",
+      "LCTN_ZIP",
+      "LAST_MDFCN_PNT"
+    ],
+    "forbiddenOrOutOfScopePhysicalFields": [
+      "BLDG_PSN_SE_NM",
+      "FCTRY_OFJB_EMP_CNT",
+      "FCTRY_PRODWK_EMP_CNT",
+      "FCTRY_SLSPOS_EMP_CNT",
+      "WTRSPPL_FCLT_SE_NM",
+      "ML_PRCTR_CNT",
+      "MLT_UTZTN_BSNSSP_YN",
+      "GRD_SE_NM",
+      "GRNAMT",
+      "HDOFC_EMP_CNT",
+      "LCTN_AREA",
+      "FCLT_TOTAL_SCL",
+      "FML_PRCTR_CNT",
+      "BIZPLC_SURRND_SE_NM",
+      "MRNT_AMOUNT",
+      "TRDTN_BSNSSP_PRINC_FD",
+      "TRDTN_BSNSSP_DSGN_NO",
+      "TELNO",
+      "CRD_INFO_X",
+      "CRD_INFO_Y",
+      "HPG"
+    ],
+    "unknownPhysicalFields": [],
+    "sourceKeyCandidate": {
+      "physicalFields": [
+        "MNG_NO"
+      ],
+      "status": "candidate_only",
+      "officialDescription": "관리번호",
+      "blocker": "공식 문서에 유일성·불변성·null·재사용·충돌 정책이 없음"
+    },
+    "automaticPublicProjectionAllowed": false,
+    "eventFitInferenceAllowed": false
+  },
+  "paginationAssessment": {
+    "mode": "page_number",
+    "requestPageField": "pageNo",
+    "requestPageSizeField": "numOfRows",
+    "documentedMaximumPageSize": 100,
+    "reportedTotalPath": "response.body.totalCount",
+    "terminationRuleOfficiallyDocumented": false,
+    "stableSortFieldsOfficiallyDocumented": false,
+    "overlapPolicyOfficiallyDocumented": false,
+    "completenessPolicyOfficiallyDocumented": false
+  },
+  "blockerAssessment": {
+    "assessmentVersion": "BE-013-review-2",
+    "assessmentMethod": "수동 fail-closed 판정. 기존 QA-023 fixture runner는 BE-013 evidence 전용 판정기가 아님",
+    "registryState": "BLOCKED_REGISTRY",
+    "be006ProjectionStatus": "blocked",
+    "datasetExecutionApproved": false,
+    "allRequiredBlockersRemain": true,
+    "blockers": {
+      "T": {
+        "status": "partial_evidence_blocked",
+        "evidence": "포털 license label과 일반 이용정책 정규화",
+        "missing": [
+          "dataset별 상업·변형 결정",
+          "dataset별 제3자 권리 결정",
+          "승인 validity와 reviewer"
+        ]
+      },
+      "S": {
+        "status": "partial_evidence_blocked",
+        "evidence": "렌더링된 Swagger 2.0 / API version 1.0.0의 정규화 field·path snapshot",
+        "missing": [
+          "raw upstream artifact",
+          "raw upstream SHA-256",
+          "결정론적 추출 절차와 재추출 동일성 증거"
+        ]
+      },
+      "F": {
+        "status": "partial_evidence_blocked",
+        "evidence": "physical field 39개를 allow 18개와 forbidden/out-of-scope 21개로 완전 분류",
+        "missing": [
+          "physical-to-logical fieldMap[]",
+          "logical type·required·null 변환 계약"
+        ]
+      },
+      "K": {
+        "status": "partial_evidence_blocked",
+        "evidence": "MNG_NO의 공식 설명이 관리번호임을 확인",
+        "missing": [
+          "유일성",
+          "불변성",
+          "null·재사용·충돌 정책"
+        ]
+      },
+      "P": {
+        "status": "partial_evidence_blocked",
+        "evidence": "pageNo·numOfRows·max 100·totalCount·JSON record path 확인",
+        "missing": [
+          "termination rule",
+          "stable sort",
+          "overlap·completeness policy",
+          "XML namespace와 record path"
+        ]
+      },
+      "Q": {
+        "status": "partial_evidence_blocked",
+        "evidence": "포털 개발계정 10,000 metadata claim",
+        "missing": [
+          "실제 승인 limit와 window",
+          "requests per second",
+          "burst",
+          "max concurrent"
+        ]
+      },
+      "G": {
+        "status": "partial_evidence_blocked",
+        "evidence": "Swagger query parameter에서 지역·상태·일자·명칭·주소 filter 후보 확인",
+        "missing": [
+          "supportedRegionFilters[] registry 값",
+          "supportedCategoryFilters[] registry 값",
+          "unsupportedFilterPolicy pin"
+        ]
+      },
+      "A": {
+        "status": "blocked",
+        "evidence": "dataset별 attribution 문구 없음",
+        "missing": [
+          "required 여부",
+          "official label과 link",
+          "source-as-of·observed-at 표시 규칙"
+        ]
+      },
+      "R": {
+        "status": "blocked",
+        "evidence": "dataset별 retention 문구 없음",
+        "missing": [
+          "raw storage mode",
+          "raw·observation retention policy",
+          "deletion proof"
+        ]
+      }
+    },
+    "registryFilterPin": {
+      "supportedRegionFilters": null,
+      "supportedCategoryFilters": null,
+      "unsupportedFilterPolicy": null
+    },
+    "physicalToLogicalFieldMap": null,
+    "qa023Regression": {
+      "fixtureCount": 31,
+      "scope": "기존 합성 fixture 회귀",
+      "be013EvidenceDecisionTest": false
+    }
+  },
+  "execution": {
+    "apiEndpointCalled": false,
+    "serviceKeyReadOrUsed": false,
+    "providerRecordDownloadedOrStored": false,
+    "candidateCount": 0,
+    "publicProjectionCount": 0
+  }
+}
