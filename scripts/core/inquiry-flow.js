@@ -26,6 +26,9 @@
         phone: String(formData.get("contactPhone") || "").trim(),
         email: String(formData.get("contactEmail") || "").trim()
       },
+      consent_version: document.querySelector(".consent-field input[type='checkbox']")?.checked
+        ? "inquiry-contact-v1"
+        : "",
       status: "submitted",
       created_at: new Date().toISOString()
     };

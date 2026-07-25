@@ -210,49 +210,11 @@
   async function moderateRegistration(item, status, button) {
     button.disabled = true;
     try {
-      const access = await window.TaranAdminData.context();
-      if (status === "approved") {
-        const data = item.data || {};
-        const id = safeId(data.id || data.name || data.provider_name || `provider-${item.id}`);
-        const providerData = {
-          name: data.name || data.provider_name,
-          category: data.industry || "업체",
-          address: data.address || data.region || "",
-          eventTypes: data.event_tags || [],
-          minGuests: data.minimum_guests || null,
-          maxGuests: data.maximum_guests || null,
-          minimumGuarantee: data.minimum_guarantee || null,
-          rentalFee: data.rental_fee || null,
-          adultMealPriceMin: data.adult_meal_price_min || null,
-          parkingCount: data.parking_count || null,
-          phone: data.phone || "",
-          website: data.official_link || "",
-          ownerRegistered: true,
-          informationCheckedAt: new Date().toISOString().slice(0, 10)
-        };
-        await window.TaranAdminData.upsert("providers", {
-          id,
-          data: providerData,
-          status: "published",
-          owner_user_id: item.user_id,
-          profile_status: "claimed",
-          event_types: providerData.eventTypes,
-          minimum_guests: providerData.minGuests,
-          maximum_guests: providerData.maxGuests,
-          minimum_guarantee: providerData.minimumGuarantee,
-          adult_meal_price_min: providerData.adultMealPriceMin,
-          rental_fee: providerData.rentalFee,
-          parking_count: providerData.parkingCount,
-          inquiry_enabled: true,
-          updated_at: new Date().toISOString()
-        }, "id");
-      }
-      await window.TaranAdminData.update("providerRegistrations", {
-        status,
-        reviewed_by: access.account.id,
-        reviewed_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      }, { id: `eq.${item.id}` });
+      await window.TaranApi.rpc("taran_review_provider_registration", {
+        p_registration_id: item.id,
+        p_approve: status === "approved",
+        p_review_note: null
+      });
       await loadRegistrations();
       await load();
     } catch (error) {
