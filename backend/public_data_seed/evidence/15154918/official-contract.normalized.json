@@ -1,0 +1,112 @@
+{
+  "artifactType": "normalized-official-document-evidence",
+  "artifactVersion": "BE-016-v1",
+  "portalDataId": "15154918",
+  "checkedAt": "2026-07-25",
+  "officialDatasetUrl": "https://www.data.go.kr/data/15154918/openapi.do",
+  "portalPolicyUrl": "https://www.data.go.kr/ugs/selectPortalPolicyView.do",
+  "title": "행정안전부_생활_미용업 조회서비스",
+  "providerAgency": "행정안전부",
+  "descriptionScope": "전국 지방자치단체가 관리하는 미용업 인허가 정보",
+  "portalMetadata": {
+    "registeredAt": "2025-11-27",
+    "modifiedAt": "2026-04-16",
+    "apiType": "REST",
+    "formats": ["JSON", "XML"],
+    "cost": "무료",
+    "refreshCadence": "일간",
+    "reviewTypeDevelopment": "자동승인",
+    "reviewTypeProduction": "자동승인",
+    "trafficMetadata": "개발계정 10000, 운영계정 활용사례 등록 후 증량 신청 가능",
+    "licenseMetadataClaim": "이용허락범위 제한 없음"
+  },
+  "swagger": {
+    "version": "2.0",
+    "apiVersion": "1.0.0",
+    "host": "apis.data.go.kr/1741000/beauty_salons",
+    "schemes": ["https", "http"],
+    "paths": ["/info", "/history"],
+    "recordPath": "response.body.items.item",
+    "pageFields": ["pageNo", "numOfRows", "totalCount"],
+    "maxDocumentedPageSize": 100,
+    "infoRequiredParameters": ["serviceKey", "pageNo", "numOfRows"],
+    "infoOptionalFilters": [
+      "returnType",
+      "cond[LCPMT_YMD::GTE]",
+      "cond[LCPMT_YMD::LT]",
+      "cond[SALS_STTS_CD::EQ]",
+      "cond[BPLC_NM::LIKE]",
+      "cond[ROAD_NM_ADDR::LIKE]",
+      "cond[DAT_UPDT_PNT::GTE]",
+      "cond[DAT_UPDT_PNT::LT]",
+      "cond[OPN_ATMY_GRP_CD::EQ]"
+    ],
+    "historyRequiredParameters": [
+      "serviceKey",
+      "pageNo",
+      "numOfRows",
+      "cond[BASE_DATE::EQ]",
+      "cond[OPN_ATMY_GRP_CD::EQ]"
+    ],
+    "freshnessDescription": "매일 갱신, 2일 전 기준 현행화",
+    "historyDateDescription": "2026-01-01부터 조회일 전일까지"
+  },
+  "fieldPolicy": {
+    "physicalFieldCount": 37,
+    "privateObservationCandidateFields": [
+      "OPN_ATMY_GRP_CD",
+      "MNG_NO",
+      "DAT_UPDT_SE",
+      "DAT_UPDT_PNT",
+      "ROAD_NM_ZIP",
+      "ROAD_NM_ADDR",
+      "BPLC_NM",
+      "DTL_SALS_STTS_NM",
+      "DTL_SALS_STTS_CD",
+      "BZSTAT_SE_NM",
+      "SALS_STTS_NM",
+      "SALS_STTS_CD",
+      "SNTTN_BZSTAT_NM",
+      "LCPMT_YMD",
+      "LOTNO_ADDR",
+      "CLSBIZ_YMD",
+      "LCTN_ZIP",
+      "LAST_MDFCN_PNT"
+    ],
+    "forbiddenOrOutOfScopeFields": [
+      "BLDG_PSN_SE_NM",
+      "BLDG_GRND_FLR_CNT",
+      "BLDG_UDGD_FLR_CNT",
+      "ML_PRCTR_CNT",
+      "MLT_UTZTN_BSNSSP_YN",
+      "USE_ED_GRND_FLR",
+      "USE_ED_UDGD_FLR",
+      "USE_BGNG_GRND_FLR",
+      "USE_BGNG_UDGD_FLR",
+      "LCTN_AREA",
+      "FML_PRCTR_CNT",
+      "CHAI_CNT",
+      "TELNO",
+      "CNDNAL_PRMSN_BGNG_YMD",
+      "CNDNAL_PRMSN_DCLR_RSN",
+      "CNDNAL_PRMSN_END_YMD",
+      "CRD_INFO_X",
+      "CRD_INFO_Y",
+      "BED_CNT"
+    ],
+    "unknownFieldPolicy": "stop_schema"
+  },
+  "businessMeaningLimits": [
+    "미용업 인허가는 가족행사 헤어·메이크업 제공을 증명하지 않는다",
+    "출장 가능 여부, 대상 인원, 가격, 예약 가능 여부를 추론하지 않는다",
+    "전화번호, 좌표, 직원·시설 수치는 초기 후보에서 수집하지 않는다"
+  ],
+  "registryDecision": {
+    "state": "BLOCKED_REGISTRY",
+    "blockers": ["T", "S", "F", "K", "P", "Q", "G", "A", "R"],
+    "executionApproved": false,
+    "actualApiCallCount": 0,
+    "actualProviderRecordCount": 0
+  },
+  "provenanceLimits": "공식 상세 페이지의 inline Swagger와 포털 메타를 사람이 정규화한 파생 증거다. upstream HTML 또는 Swagger의 byte-for-byte 원본이나 공식 upstream hash가 아니다."
+}

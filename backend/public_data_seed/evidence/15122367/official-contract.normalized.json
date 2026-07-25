@@ -1,0 +1,74 @@
+{
+  "artifactType": "normalized-official-document-evidence",
+  "artifactVersion": "BE-016-v1",
+  "portalDataId": "15122367",
+  "checkedAt": "2026-07-25",
+  "officialDatasetUrl": "https://www.data.go.kr/data/15122367/openapi.do",
+  "portalPolicyUrl": "https://www.data.go.kr/ugs/selectPortalPolicyView.do",
+  "title": "보건복지부_보건·복지현황_전국 장례식장 현황",
+  "providerAgency": "보건복지부",
+  "descriptionScope": "2026-04-01 기준 전국 장례식장 현황",
+  "portalMetadata": {
+    "registeredAt": "2023-09-07",
+    "modifiedAt": "2026-04-09",
+    "sourceAsOf": "2026-04-01",
+    "apiType": "REST",
+    "formats": ["XML"],
+    "cost": "무료",
+    "refreshCadence": "연간",
+    "reviewTypeDevelopment": "심의승인",
+    "reviewTypeProduction": "자동승인",
+    "trafficMetadata": "개발계정 10000, 운영계정 활용사례 등록 후 증량 신청 가능",
+    "licenseMetadataClaim": "이용허락범위 제한 없음"
+  },
+  "swagger": {
+    "version": "2.0",
+    "apiVersion": "1.0.0",
+    "host": "apis.data.go.kr/1352000/ODMS_DATA_04_1",
+    "schemes": ["https", "http"],
+    "paths": ["/callData04_1Api"],
+    "recordPath": "body.items.item",
+    "pageFields": ["pageNo", "numOfRows", "totalCount"],
+    "requiredParameters": ["serviceKey", "pageNo", "numOfRows"],
+    "optionalFilters": ["apiType", "ctpv"],
+    "documentedResponseFormat": "XML"
+  },
+  "fieldPolicy": {
+    "physicalFieldCount": 17,
+    "privateObservationCandidateFields": [
+      "ctpv",
+      "sigungu",
+      "fcltNm",
+      "addr",
+      "gubun",
+      "operType"
+    ],
+    "forbiddenOrOutOfScopeFields": [
+      "telno",
+      "fxno",
+      "homepageUrl",
+      "tpkct",
+      "mtaCnt",
+      "ehrCnt",
+      "diningFclt",
+      "store",
+      "pklt",
+      "bereavedWaitRm",
+      "sdblsPfFclt"
+    ],
+    "unknownFieldPolicy": "stop_schema"
+  },
+  "businessMeaningLimits": [
+    "장례식장 시설 목록은 추모 의전·견적·예약 가능을 증명하지 않는다",
+    "전화·팩스·홈페이지와 주차·빈소·안치·편의시설 수치 및 표시는 초기 후보에서 수집하지 않는다",
+    "연간 기준일과 일간 인허가 데이터의 최근성을 같은 의미로 표시하지 않는다"
+  ],
+  "registryDecision": {
+    "state": "BLOCKED_REGISTRY",
+    "blockers": ["T", "S", "F", "K", "P", "Q", "G", "A", "R"],
+    "executionApproved": false,
+    "actualApiCallCount": 0,
+    "actualProviderRecordCount": 0
+  },
+  "provenanceLimits": "공식 상세 페이지의 inline Swagger와 포털 메타를 사람이 정규화한 파생 증거다. upstream HTML 또는 Swagger의 byte-for-byte 원본이나 공식 upstream hash가 아니다."
+}
