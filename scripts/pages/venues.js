@@ -4,7 +4,7 @@
   const PAGE_SIZE = 24;
   const EVENT_LABELS = window.SonpumEventTypes?.labels || { kids: "아이 행사", parents: "부모님 행사", meeting: "상견례", smallWedding: "소규모 결혼식", familyGathering: "가족 모임" };
   const SERVICES = ["공간 대여", "스냅·영상", "스타일링·케이터링", "의상·뷰티", "답례품·초대장"];
-  const state = { page: 1, items: [], filtered: [] };
+  const state = { page: 1, items: [], filtered: [], source: "static", loadError: null };
   const statusApi = window.TaranProviderStatus;
   const compareStore = window.TaranCompareStore;
   const placeholderApi = window.SonpumProviderPlaceholder;
@@ -19,6 +19,93 @@
     outsideVendor: $("#directory-outside-vendor"), status: $("#directory-status"), sort: $("#directory-sort-quick"),
     chips: $("#directory-filter-chips"), summary: $("#directory-result-summary"), results: $("#directory-results"), pagination: $("#directory-pagination")
   };
+  const PUBLIC_PROVIDER_SELECT = [
+    "id", "data", "event_types", "service_regions", "minimum_guests", "maximum_guests",
+    "minimum_guarantee", "adult_meal_price_min", "adult_meal_price_max", "child_meal_price",
+    "rental_fee", "parking_count", "private_room", "wheelchair_accessible",
+    "outside_food_policy", "outside_vendor_policy", "cancellation_summary",
+    "profile_status", "profile_completeness", "last_verified_at", "inquiry_enabled",
+    "response_rate", "average_response_minutes", "updated_at"
+  ].join(",");
+
+  function publicProvider(row) {
+    const data = row?.data && typeof row.data === "object" && !Array.isArray(row.data) ? row.data : {};
+    const detail = data.detailFacts && typeof data.detailFacts === "object" && !Array.isArray(data.detailFacts) ? data.detailFacts : {};
+    const detailFacts = {};
+    [
+      "적정 인원", "권장 인원", "문의 가능 시간", "영업시간", "어린이 식대", "소인 식대",
+      "패키지 가격", "상품 구성", "포함 항목", "주차", "주차 정보", "단독 공간",
+      "룸·좌석", "외부 음식 허용 여부", "외부 음식", "외부 업체 이용 가능 여부",
+      "외부 업체", "휠체어 접근", "접근 편의", "공간/서비스", "공간·시설",
+      "취소·환불", "취소 환불", "취소 규정"
+    ].forEach((key) => {
+      if (detail[key] !== undefined && detail[key] !== null) detailFacts[key] = detail[key];
+    });
+    const images = Array.isArray(data.images) ? data.images.filter((value) => typeof value === "string") : [];
+    return {
+      id: text(row?.id),
+      name: text(data.name),
+      category: text(data.category),
+      subcategory: text(data.subcategory),
+      region: text(data.region),
+      area: text(data.area),
+      address: text(data.address),
+      roadAddress: text(data.roadAddress),
+      telephone: text(data.phone || data.telephone),
+      officialLink: text(data.website || data.officialLink),
+      price: number(data.price),
+      priceLabel: text(data.priceLabel),
+      eventTags: Array.isArray(row?.event_types) ? row.event_types.map(text).filter(Boolean) : [],
+      tags: Array.isArray(data.tags) ? data.tags.map(text).filter(Boolean) : [],
+      serviceTags: Array.isArray(data.serviceTags) ? data.serviceTags.map(text).filter(Boolean) : [],
+      serviceRegions: Array.isArray(row?.service_regions) ? row.service_regions.map(text).filter(Boolean) : [],
+      image: images[0] || "",
+      imageVerified: false,
+      detailFacts,
+      minimumGuests: number(row?.minimum_guests),
+      maximumGuests: number(row?.maximum_guests),
+      minimumGuarantee: number(row?.minimum_guarantee),
+      adultMealPriceMin: number(row?.adult_meal_price_min),
+      adultMealPriceMax: number(row?.adult_meal_price_max),
+      childMealPrice: number(row?.child_meal_price),
+      rentalFee: number(row?.rental_fee),
+      parkingCount: number(row?.parking_count),
+      private: row?.private_room === true,
+      wheelchair: row?.wheelchair_accessible === true,
+      outsideFoodPolicy: text(row?.outside_food_policy),
+      outsideVendorPolicy: text(row?.outside_vendor_policy),
+      cancellationPolicy: text(row?.cancellation_summary),
+      profileStatus: text(row?.profile_status),
+      profileCompleteness: number(row?.profile_completeness),
+      lastVerifiedAt: text(row?.last_verified_at).slice(0, 10),
+      updatedAt: text(row?.updated_at).slice(0, 10),
+      inquiryEnabled: row?.inquiry_enabled === true,
+      responseRate: number(row?.response_rate),
+      averageResponseMinutes: number(row?.average_response_minutes),
+      publicationStatus: "published"
+    };
+  }
+
+  async function loadPublicProviders() {
+    const staticItems = uniqueItems(window.publicDirectoryData || []).filter(statusApi.isProviderPublic);
+    if (!window.TaranConfig?.isSupabaseConfigured || !window.TaranApi) {
+      return { items: staticItems, source: "static", error: null };
+    }
+    try {
+      const rows = await window.TaranApi.select("taran_public_providers", {
+        select: PUBLIC_PROVIDER_SELECT,
+        order: "updated_at.desc"
+      });
+      return {
+        items: uniqueItems((Array.isArray(rows) ? rows : []).map(publicProvider)).filter(statusApi.isProviderPublic),
+        source: "database",
+        error: null
+      };
+    } catch (error) {
+      console.warn("검수된 업체 정보를 불러오지 못해 저장된 정보를 표시합니다.", error);
+      return { items: staticItems, source: "fallback", error };
+    }
+  }
 
   function validImageUrl(value) {
     const url = text(value);
@@ -204,12 +291,6 @@
     placeholderApi.apply(image, item, requestedImage);
     image.loading = "lazy";
     media.append(image);
-    if (!requestedImage) {
-      const note = document.createElement("span");
-      note.className = "directory-card__image-note";
-      note.textContent = "업체 사진 준비 중";
-      media.append(note);
-    }
     const body = document.createElement("div");
     body.className = "directory-card__body";
     const status = statusApi.getProviderStatus(item);
@@ -314,9 +395,25 @@
 
   function render(updateHistory = true) {
     const total = state.filtered.length;
+    if (!state.items.length) {
+      controls.summary.textContent = state.loadError ? "업체 정보를 불러오지 못했습니다." : "확인된 업체 정보를 준비 중입니다.";
+      controls.results.replaceChildren();
+      controls.results.setAttribute("aria-busy", "false");
+      controls.results.append(window.TaranStates.message({
+        title: state.loadError ? "업체 정보를 잠시 불러올 수 없습니다." : "공개할 업체 정보를 확인하고 있습니다.",
+        description: state.loadError ? "잠시 후 다시 시도해 주세요." : "독립 출처와 업체 제출 정보를 검수한 뒤 순서대로 공개합니다.",
+        actionLabel: state.loadError ? "다시 시도" : "",
+        onAction: state.loadError ? () => location.reload() : undefined
+      }));
+      controls.pagination?.replaceChildren();
+      renderChips();
+      return;
+    }
     const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
     state.page = Math.min(state.page, totalPages);
-    controls.summary.textContent = total ? `${total.toLocaleString("ko-KR")}개의 공개 업체` : "검색 결과가 없습니다.";
+    controls.summary.textContent = total
+      ? `${total.toLocaleString("ko-KR")}개의 공개 업체${state.source === "fallback" ? " · 최신 연결 확인 필요" : ""}`
+      : "검색 결과가 없습니다.";
     controls.results.replaceChildren();
     controls.results.setAttribute("aria-busy", "false");
     if (!total) controls.results.append(window.TaranStates.message({ title: "조건에 맞는 업체가 없습니다.", description: "지역이나 인원, 예산 조건을 줄여 다시 찾아보세요.", actionLabel: "조건 초기화", onAction: resetFilters }));
@@ -328,7 +425,7 @@
 
   function applyFilters(updateHistory = true) {
     const query = controls.query.value.trim().toLowerCase();
-    state.filtered = sortItems(state.items.filter((item) => hasPublishedReviewOrRating(item) &&
+    state.filtered = sortItems(state.items.filter((item) =>
       (!query || searchText(item).includes(query)) &&
       eventMatches(item) &&
       (controls.category.value === "all" || serviceGroup(item) === controls.category.value) &&
@@ -406,8 +503,7 @@
   async function attachPublishedReviewStats(items) {
     if (!window.TaranConfig?.isSupabaseConfigured || !window.TaranApi) return items;
     try {
-      const rows = await window.TaranApi.select(window.TaranConfig.tables.reviews, {
-        status: "eq.published",
+      const rows = await window.TaranApi.select("taran_public_reviews", {
         select: "provider_id,rating"
       });
       const grouped = new Map();
@@ -435,8 +531,10 @@
   async function init() {
     if (!controls.form || !controls.results) return;
     controls.results.append(window.TaranStates.skeletonCards(6));
-    const publicItems = uniqueItems(window.publicDirectoryData || []).filter(statusApi.isProviderPublic);
-    state.items = await attachPublishedReviewStats(publicItems);
+    const loaded = await loadPublicProviders();
+    state.source = loaded.source;
+    state.loadError = loaded.error;
+    state.items = await attachPublishedReviewStats(loaded.items);
     setupOptions(); readUrl();
     controls.form.addEventListener("submit", (event) => { event.preventDefault(); state.page = 1; applyFilters(); closeFilter(); });
     controls.form.addEventListener("reset", (event) => { event.preventDefault(); resetFilters(); });

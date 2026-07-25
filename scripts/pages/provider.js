@@ -2,7 +2,8 @@
   "use strict";
 
   const id = new URLSearchParams(location.search).get("id");
-  const provider = (window.publicDirectoryData || []).find((item) => String(item.id) === String(id));
+  let provider = null;
+  let providerSource = "static";
   const statusApi = window.TaranProviderStatus;
   const store = window.TaranCompareStore;
   const $ = (selector) => document.querySelector(selector);
@@ -23,8 +24,100 @@
   const eventLabels = window.SonpumEventTypes?.labels || { kids: "아이 행사", parents: "부모님 행사", meeting: "상견례", smallWedding: "소규모 결혼식", familyGathering: "가족 모임" };
   const placeholderApi = window.SonpumProviderPlaceholder;
   let publishedInternalReviews = [];
+  let pendingChangeRequest = null;
+  const PUBLIC_PROVIDER_SELECT = [
+    "id", "data", "event_types", "service_regions", "minimum_guests", "maximum_guests",
+    "minimum_guarantee", "adult_meal_price_min", "adult_meal_price_max", "child_meal_price",
+    "rental_fee", "parking_count", "private_room", "wheelchair_accessible",
+    "outside_food_policy", "outside_vendor_policy", "cancellation_summary",
+    "profile_status", "profile_completeness", "last_verified_at", "inquiry_enabled",
+    "response_rate", "average_response_minutes", "updated_at"
+  ].join(",");
+
+  function number(value) {
+    return Number.isFinite(Number(value)) ? Number(value) : 0;
+  }
+
+  function publicProvider(row) {
+    const data = row?.data && typeof row.data === "object" && !Array.isArray(row.data) ? row.data : {};
+    const detail = data.detailFacts && typeof data.detailFacts === "object" && !Array.isArray(data.detailFacts) ? data.detailFacts : {};
+    const detailFacts = {};
+    [
+      "적정 인원", "권장 인원", "문의 가능 시간", "영업시간", "어린이 식대", "소인 식대",
+      "패키지 가격", "상품 구성", "포함 항목", "주차", "주차 정보", "단독 공간",
+      "룸·좌석", "외부 음식 허용 여부", "외부 음식", "외부 업체 이용 가능 여부",
+      "외부 업체", "휠체어 접근", "접근 편의", "공간/서비스", "공간·시설",
+      "취소·환불", "취소 환불", "취소 규정"
+    ].forEach((key) => {
+      if (detail[key] !== undefined && detail[key] !== null) detailFacts[key] = detail[key];
+    });
+    const images = Array.isArray(data.images) ? data.images.filter((value) => typeof value === "string") : [];
+    return {
+      id: text(row?.id),
+      name: text(data.name),
+      category: text(data.category),
+      subcategory: text(data.subcategory),
+      region: text(data.region),
+      area: text(data.area),
+      address: text(data.address),
+      roadAddress: text(data.roadAddress),
+      telephone: text(data.phone || data.telephone),
+      officialLink: text(data.website || data.officialLink),
+      price: number(data.price),
+      priceLabel: text(data.priceLabel),
+      eventTags: Array.isArray(row?.event_types) ? row.event_types.map(text).filter(Boolean) : [],
+      tags: Array.isArray(data.tags) ? data.tags.map(text).filter(Boolean) : [],
+      serviceRegions: Array.isArray(row?.service_regions) ? row.service_regions.map(text).filter(Boolean) : [],
+      image: images[0] || "",
+      imageVerified: false,
+      detailFacts,
+      minimumGuests: number(row?.minimum_guests),
+      maximumGuests: number(row?.maximum_guests),
+      minimumGuarantee: number(row?.minimum_guarantee),
+      adultMealPriceMin: number(row?.adult_meal_price_min),
+      adultMealPriceMax: number(row?.adult_meal_price_max),
+      childMealPrice: number(row?.child_meal_price),
+      rentalFee: number(row?.rental_fee),
+      parkingCount: number(row?.parking_count),
+      private: row?.private_room === true,
+      wheelchair: row?.wheelchair_accessible === true,
+      outsideFoodPolicy: text(row?.outside_food_policy),
+      outsideVendorPolicy: text(row?.outside_vendor_policy),
+      cancellationPolicy: text(row?.cancellation_summary),
+      profileStatus: text(row?.profile_status),
+      profileCompleteness: number(row?.profile_completeness),
+      lastVerifiedAt: text(row?.last_verified_at).slice(0, 10),
+      updatedAt: text(row?.updated_at).slice(0, 10),
+      inquiryEnabled: row?.inquiry_enabled === true,
+      responseRate: number(row?.response_rate),
+      averageResponseMinutes: number(row?.average_response_minutes),
+      publicationStatus: "published"
+    };
+  }
+
+  async function loadProvider() {
+    const staticProvider = (window.publicDirectoryData || []).find((item) => String(item.id) === String(id));
+    if (!window.TaranConfig?.isSupabaseConfigured || !window.TaranApi) {
+      providerSource = "static";
+      return staticProvider || null;
+    }
+    try {
+      const rows = await window.TaranApi.select("taran_public_providers", {
+        id: `eq.${id}`,
+        select: PUBLIC_PROVIDER_SELECT,
+        limit: "1"
+      });
+      providerSource = "database";
+      return Array.isArray(rows) && rows[0] ? publicProvider(rows[0]) : null;
+    } catch (error) {
+      providerSource = "fallback";
+      console.warn("검수된 업체 상세를 불러오지 못해 저장된 정보를 확인합니다.", error);
+      return staticProvider || null;
+    }
+  }
 
   function safeUrl(value) {
+    if (!text(value)) return "";
     try {
       const url = new URL(value, location.href);
       return ["http:", "https:", "tel:"].includes(url.protocol) ? url.href : "";
@@ -53,9 +146,8 @@
   async function loadPublishedReviews() {
     if (!window.TaranConfig?.isSupabaseConfigured || !window.TaranApi) return;
     try {
-      publishedInternalReviews = await window.TaranApi.select(window.TaranConfig.tables.reviews, {
+      publishedInternalReviews = await window.TaranApi.select("taran_public_reviews", {
         provider_id: `eq.${id}`,
-        status: "eq.published",
         select: "id,rating,author_name,content,created_at",
         order: "created_at.desc"
       });
@@ -127,7 +219,55 @@
     }
   }
 
+  function setPendingChange(request) {
+    pendingChangeRequest = request || null;
+    const form = $("#provider-change-form");
+    const pending = $("#provider-change-pending");
+    form.hidden = Boolean(pendingChangeRequest);
+    pending.hidden = !pendingChangeRequest;
+    if (pendingChangeRequest) {
+      const date = text(pendingChangeRequest.created_at).slice(0, 10);
+      $("#provider-change-pending-date").textContent = date
+        ? `${date}에 접수했습니다. 관리자 확인 전까지 현재 공개 정보가 유지됩니다.`
+        : "관리자 확인 전까지 현재 공개 정보가 유지됩니다.";
+    }
+  }
+
+  async function setupProviderChange(account) {
+    const section = $("#provider-change");
+    const nav = $("#provider-change-nav");
+    if (!window.TaranConfig?.isSupabaseConfigured || !account || providerSource !== "database") {
+      section.hidden = true;
+      nav.hidden = true;
+      return;
+    }
+    section.hidden = false;
+    nav.hidden = false;
+    const facts = statusApi.getProviderFacts(provider);
+    $("#provider-change-name").value = provider.name || "";
+    $("#provider-change-address").value = statusApi.getProviderAddress(provider) || "";
+    $("#provider-change-phone").value = provider.telephone || "";
+    $("#provider-change-website").value = safeUrl(provider.officialLink) || "";
+    $("#provider-change-guests").value = facts.maxGuests || "";
+    $("#provider-change-parking").value = facts.parking || "";
+    try {
+      const rows = await window.TaranApi.select("taran_provider_change_requests", {
+        provider_id: `eq.${id}`,
+        status: "eq.pending",
+        select: "id,provider_id,status,created_at",
+        order: "created_at.desc",
+        limit: "1"
+      });
+      setPendingChange(Array.isArray(rows) ? rows[0] : null);
+    } catch (error) {
+      console.warn("업체 수정 요청 상태를 불러오지 못했습니다.", error);
+      const status = $("[data-provider-change-status]");
+      status.textContent = "수정 요청 상태를 확인하지 못했습니다. 잠시 후 다시 시도해 주세요.";
+    }
+  }
+
   async function render() {
+    provider = await loadProvider();
     if (!provider || !statusApi.isProviderPublic(provider)) {
       $("#provider-content").hidden = true;
       $("#provider-not-found").hidden = false;
@@ -141,12 +281,11 @@
     const status = statusApi.getProviderStatus(provider);
     $("#provider-status").textContent = status.label;
     $("#provider-status").className = `badge badge--${status.key}`;
-    $("#provider-date").textContent = statusApi.getProviderFreshness(provider).label;
+    $("#provider-date").textContent = `${statusApi.getProviderFreshness(provider).label}${providerSource === "fallback" ? " · 최신 연결 확인 필요" : ""}`;
     const image = $("#provider-image");
     const requestedImage = provider.imageVerified ? safe(provider.image) : "";
     placeholderApi.apply(image, provider, requestedImage);
-    $("#provider-image-note").hidden = Boolean(requestedImage);
-    $("#provider-image-note").textContent = "업체 사진 준비 중";
+    $("#provider-image-note").hidden = true;
     (provider.eventTags || []).forEach((tag) => {
       const chip = document.createElement("span");
       chip.className = "badge";
@@ -232,6 +371,7 @@
       const nameInput = $("#review-name");
       if (nameInput && !nameInput.value) nameInput.value = account.display_name || "";
     }
+    await setupProviderChange(account);
   }
 
   $("#provider-compare").addEventListener("click", () => {
@@ -282,6 +422,69 @@
       window.TaranAnalytics?.track("provider_review_submitted", "provider.html", { providerId: id, rating: payload.rating }).catch(() => {});
     } catch (error) {
       reviewStatus.textContent = error.message || "후기를 등록하지 못했습니다.";
+    } finally {
+      button.disabled = false;
+    }
+  });
+  $("#provider-change-form").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const status = form.querySelector("[data-provider-change-status]");
+    const account = window.TaranAuth?.getAccount();
+    if (!window.TaranConfig?.isSupabaseConfigured || !account || providerSource !== "database") {
+      status.textContent = "로그인과 온라인 연결을 확인한 뒤 다시 시도해 주세요.";
+      return;
+    }
+    const data = new FormData(form);
+    if (data.get("consent") !== "on") {
+      status.textContent = "정보 제출 동의를 확인해 주세요.";
+      return;
+    }
+    const payload = {
+      consent_version: "provider-change-v1",
+      name: text(data.get("name")),
+      address: text(data.get("address")),
+      phone: text(data.get("phone")),
+      website: text(data.get("website")),
+      maximumGuests: text(data.get("maximumGuests")),
+      parkingCount: text(data.get("parkingCount"))
+    };
+    const button = form.querySelector('[type="submit"]');
+    button.disabled = true;
+    status.textContent = "수정 요청을 보내고 있습니다.";
+    try {
+      const requestId = await window.TaranApi.rpc("taran_submit_provider_change_request", {
+        p_provider_id: id,
+        p_data: payload
+      });
+      setPendingChange({ id: requestId, provider_id: id, status: "pending", created_at: new Date().toISOString() });
+      status.textContent = "";
+      window.TaranToast?.show("수정 요청이 접수되었습니다. 관리자 확인 전에는 현재 정보가 유지됩니다.");
+    } catch (error) {
+      const message = text(error?.message);
+      if (/Only the provider owner|Login is required/i.test(message)) {
+        status.textContent = "이 업체의 관리 권한이 승인된 담당자 계정만 수정 요청을 보낼 수 있습니다.";
+      } else if (/pending provider change|pending/i.test(message)) {
+        status.textContent = "이미 확인 중인 수정 요청이 있습니다.";
+      } else {
+        status.textContent = "수정 요청을 접수하지 못했습니다. 잠시 후 다시 시도해 주세요.";
+      }
+    } finally {
+      button.disabled = false;
+    }
+  });
+  $("#provider-change-withdraw").addEventListener("click", async (event) => {
+    if (!pendingChangeRequest?.id) return;
+    const button = event.currentTarget;
+    button.disabled = true;
+    try {
+      await window.TaranApi.rpc("taran_withdraw_provider_change_request", {
+        p_request_id: pendingChangeRequest.id
+      });
+      setPendingChange(null);
+      $("[data-provider-change-status]").textContent = "수정 요청을 취소했습니다.";
+    } catch (_error) {
+      $("#provider-change-pending-date").textContent = "요청을 취소하지 못했습니다. 잠시 후 다시 시도해 주세요.";
     } finally {
       button.disabled = false;
     }
