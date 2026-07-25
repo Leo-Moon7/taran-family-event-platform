@@ -402,12 +402,9 @@
       return;
     }
     const payload = {
-      provider_id: id,
-      user_id: account.id,
       rating: Number(data.get("rating")),
       author_name: text(data.get("name")),
-      content: text(data.get("content")),
-      status: "pending"
+      content: text(data.get("content"))
     };
     if (payload.content.length < 10) {
       reviewStatus.textContent = "이용 경험을 10자 이상 작성해 주세요.";
@@ -416,12 +413,26 @@
     const button = event.currentTarget.querySelector('[type="submit"]');
     button.disabled = true;
     try {
-      await window.TaranApi.upsert(window.TaranConfig.tables.reviews, payload);
+      await window.TaranApi.rpc("taran_submit_review", {
+        p_provider_id: id,
+        p_rating: payload.rating,
+        p_author_name: payload.author_name,
+        p_content: payload.content
+      });
       event.currentTarget.reset();
       reviewStatus.textContent = "후기가 접수되었습니다. 내용 확인 후 공개됩니다.";
       window.TaranAnalytics?.track("provider_review_submitted", "provider.html", { providerId: id, rating: payload.rating }).catch(() => {});
     } catch (error) {
-      reviewStatus.textContent = error.message || "후기를 등록하지 못했습니다.";
+      const message = text(error?.message);
+      if (/pending review already exists/i.test(message)) {
+        reviewStatus.textContent = "이 업체에 확인 중인 후기가 이미 있습니다.";
+      } else if (/published providers/i.test(message)) {
+        reviewStatus.textContent = "현재 공개 중인 업체에만 후기를 남길 수 있습니다.";
+      } else if (/Login is required/i.test(message)) {
+        reviewStatus.textContent = "로그인 후 후기를 등록할 수 있습니다.";
+      } else {
+        reviewStatus.textContent = "후기를 등록하지 못했습니다. 잠시 후 다시 시도해 주세요.";
+      }
     } finally {
       button.disabled = false;
     }

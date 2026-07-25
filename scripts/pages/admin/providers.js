@@ -126,14 +126,17 @@
   async function moderateReview(id, status, button) {
     button.disabled = true;
     try {
-      await window.TaranAdminData.update("reviews", { status, updated_at: new Date().toISOString() }, { id: `eq.${id}` });
+      await window.TaranApi.rpc("taran_moderate_review", {
+        p_review_id: id,
+        p_status: status
+      });
       await loadReviews();
     } catch (error) { alert(error.message); button.disabled = false; }
   }
   async function loadReviews() {
     if (!online || !reviewTable || !reviewSection) return;
     reviewSection.hidden = false;
-    const rows = await window.TaranAdminData.list("reviews", { status: "eq.pending", order: "created_at.asc", limit: 100 });
+    const rows = await window.TaranApi.rpc("taran_list_pending_reviews", { p_limit: 100 });
     reviewTable.replaceChildren();
     rows.forEach(item => {
       const row = document.createElement("tr");
