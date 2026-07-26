@@ -41,6 +41,7 @@
       wheelchair: data.get("wheelchair") === "on",
       owner_name: String(data.get("ownerName") || "").trim(),
       owner_email: String(data.get("ownerEmail") || "").trim(),
+      consent_version: "provider-registration-v1",
       status: "pending",
       created_at: new Date().toISOString()
     };
