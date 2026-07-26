@@ -7,6 +7,7 @@
   const empty = document.querySelector("[data-admin-empty]");
   let source = [];
   let online = false;
+  let workspace = { providers: [], claims: [], registrations: [] };
   let page = 1;
   const pageSize = 30;
   const reviewTable = document.querySelector("[data-review-table]");
@@ -37,6 +38,19 @@
   ];
 
   function safeId(value) { return String(value || "").trim().toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-+|-+$/g, ""); }
+  async function refreshWorkspace() {
+    if (!online) return workspace;
+    const result = await window.TaranApi.rpc("taran_list_admin_provider_workspace", {
+      p_provider_limit: 500,
+      p_queue_limit: 200
+    });
+    workspace = {
+      providers: Array.isArray(result?.providers) ? result.providers : [],
+      claims: Array.isArray(result?.claims) ? result.claims : [],
+      registrations: Array.isArray(result?.registrations) ? result.registrations : []
+    };
+    return workspace;
+  }
   function editorValues(item = {}) {
     const rawEvents = item.eventTypes || item.events || [];
     const eventTypes = rawEvents.map(value => window.SonpumEventTypes?.normalize(value, rawEvents) || value).filter(value => value !== "legacyWedding");
@@ -56,6 +70,7 @@
     };
     await window.TaranAdminData.upsert("providers", { id, data, status: values.status || "draft", updated_at: new Date().toISOString() }, "id");
     if (originalId && originalId !== id) await window.TaranAdminData.remove("providers", { id: `eq.${originalId}` });
+    await refreshWorkspace();
     await load();
   }
   function edit(item) { openEditor({ title: item ? "업체 정보 수정" : "업체 등록", fields, initial: editorValues(item), onSubmit: values => save(values, item?.id) }); }
@@ -78,7 +93,8 @@
     try {
       await window.TaranAdminData.update("providers", { status }, { id: `eq.${item.id}` });
       item.publicationStatus = status === "published" ? "published" : "hidden";
-      render();
+      await refreshWorkspace();
+      await load();
     } catch (error) { alert(error.message); }
   }
   function render() {
@@ -118,7 +134,7 @@
   }
   async function load() {
     if (online) {
-      const rows = await window.TaranAdminData.list("providers", { order: "updated_at.desc" });
+      const rows = workspace.providers;
       source = rows.map(row => ({ ...(row.data || {}), id: row.id, publicationStatus: row.status === "archived" ? "hidden" : row.status }));
     } else source = window.publicDirectoryData || [];
     render();
@@ -170,13 +186,14 @@
         reviewed_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       }, { id: `eq.${item.id}` });
+      await refreshWorkspace();
       await loadClaims();
     } catch (error) { alert(error.message); button.disabled = false; }
   }
   async function loadClaims() {
     if (!online || !claimTable || !claimSection) return;
     claimSection.hidden = false;
-    const rows = await window.TaranAdminData.list("providerClaims", { order: "created_at.asc", limit: 100 });
+    const rows = workspace.claims;
     claimTable.replaceChildren();
     rows.forEach(item => {
       const row = document.createElement("tr");
@@ -218,6 +235,7 @@
         p_approve: status === "approved",
         p_review_note: null
       });
+      await refreshWorkspace();
       await loadRegistrations();
       await load();
     } catch (error) {
@@ -229,7 +247,7 @@
   async function loadRegistrations() {
     if (!online || !registrationTable || !registrationSection) return;
     registrationSection.hidden = false;
-    const rows = await window.TaranAdminData.list("providerRegistrations", { order: "created_at.asc", limit: 200 });
+    const rows = workspace.registrations;
     registrationTable.replaceChildren();
     rows.forEach((item) => {
       const data = item.data || {};
@@ -265,10 +283,11 @@
     online = access.mode === "online";
     if (online) addPageAction("새 업체 등록", () => edit(null));
     form?.addEventListener("submit", event => { event.preventDefault(); page = 1; render(); });
-    await load();
-    await loadReviews();
-    await loadClaims();
-    await loadRegistrations();
+    if (online) {
+      try { await refreshWorkspace(); }
+      catch (error) { console.error("업체 관리 작업공간을 불러오지 못했습니다.", error); }
+    }
+    await Promise.allSettled([load(), loadReviews(), loadClaims(), loadRegistrations()]);
   }
   init().catch(error => console.error("업체 관리 목록을 불러오지 못했습니다.", error));
 })();
