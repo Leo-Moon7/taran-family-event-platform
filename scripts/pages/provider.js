@@ -394,8 +394,9 @@
   }));
   $("#review-form").addEventListener("submit", async (event) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    const reviewStatus = event.currentTarget.querySelector("[data-review-status]");
+    const form = event.currentTarget;
+    const data = new FormData(form);
+    const reviewStatus = form.querySelector("[data-review-status]");
     const account = window.TaranAuth?.getAccount();
     if (!window.TaranConfig?.isSupabaseConfigured || !account) {
       reviewStatus.textContent = "로그인 후 후기를 등록할 수 있습니다.";
@@ -410,7 +411,7 @@
       reviewStatus.textContent = "이용 경험을 10자 이상 작성해 주세요.";
       return;
     }
-    const button = event.currentTarget.querySelector('[type="submit"]');
+    const button = form.querySelector('[type="submit"]');
     button.disabled = true;
     try {
       await window.TaranApi.rpc("taran_submit_review", {
@@ -419,7 +420,7 @@
         p_author_name: payload.author_name,
         p_content: payload.content
       });
-      event.currentTarget.reset();
+      form.reset();
       reviewStatus.textContent = "후기가 접수되었습니다. 내용 확인 후 공개됩니다.";
       window.TaranAnalytics?.track("provider_review_submitted", "provider.html", { providerId: id, rating: payload.rating }).catch(() => {});
     } catch (error) {

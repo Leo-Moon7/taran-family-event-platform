@@ -17,6 +17,15 @@ assert.match(reviewSubmitBody, /p_provider_id:\s*id/, "Provider id must be sent 
 assert.match(reviewSubmitBody, /p_rating:\s*payload\.rating/, "Rating must be sent to the RPC.");
 assert.match(reviewSubmitBody, /p_author_name:\s*payload\.author_name/, "Display name must be sent to the RPC.");
 assert.match(reviewSubmitBody, /p_content:\s*payload\.content/, "Review content must be sent to the RPC.");
+assert.match(reviewSubmitBody, /const form = event\.currentTarget;/, "The form reference must be captured before the asynchronous RPC call.");
+assert.match(reviewSubmitBody, /form\.reset\(\);/, "A successful submission must reset the captured form.");
+const awaitIndex = reviewSubmitBody.indexOf('await window.TaranApi.rpc("taran_submit_review"');
+assert.ok(awaitIndex >= 0, "The review submit RPC must be awaited.");
+assert.doesNotMatch(
+  reviewSubmitBody.slice(awaitIndex),
+  /event\.currentTarget/,
+  "The submit handler must not dereference event.currentTarget after awaiting the RPC."
+);
 
 const moderationStart = adminProviders.indexOf("async function moderateReview");
 const moderationEnd = adminProviders.indexOf("async function moderateClaim", moderationStart);
