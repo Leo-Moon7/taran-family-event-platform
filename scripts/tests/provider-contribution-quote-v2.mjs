@@ -90,7 +90,10 @@ check("unknown fields are dictionary-gated", () => {
   has(/taran_submission_field_dictionary_v2/);
   has(/unknown or disallowed field/);
   has(/p_source_kind = any\(dictionary\.allowed_sources\)/);
-  has(/jsonb_typeof\(p_fields\) <> 'object'/);
+  has(/p_fields is null or jsonb_typeof\(p_fields\) <> 'object'/);
+  has(/from jsonb_object_keys\(p_fields\)/);
+  has(/v_field_count < 1 or v_field_count > 20/);
+  lacks(/jsonb_object_length/);
 });
 
 check("browser roles have no private base-table DML", () => {

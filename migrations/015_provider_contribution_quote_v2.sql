@@ -965,6 +965,7 @@ declare
   v_key text;
   v_value jsonb;
   v_kind text;
+  v_field_count integer;
   v_config public.taran_quote_runtime_config_v2;
 begin
   if auth.uid() is null or public.taran_account_deletion_self_is_active() then
@@ -983,10 +984,15 @@ begin
      and p_event_code not in ('kids','parents','meeting','anniversary','other') then
     raise exception 'Invalid canonical event code.' using errcode = '22023';
   end if;
-  if jsonb_typeof(p_fields) <> 'object'
-     or p_fields = '{}'::jsonb
-     or jsonb_object_length(p_fields) > 20 then
+  if p_fields is null or jsonb_typeof(p_fields) <> 'object' then
     raise exception 'At least one structured field is required.' using errcode = '22023';
+  end if;
+  select count(*)::integer
+  into v_field_count
+  from jsonb_object_keys(p_fields);
+  if v_field_count < 1 or v_field_count > 20 then
+    raise exception 'Between one and twenty structured fields are required.'
+      using errcode = '22023';
   end if;
   if nullif(btrim(p_policy_version), '') is null then
     raise exception 'A policy version is required.' using errcode = '22023';
