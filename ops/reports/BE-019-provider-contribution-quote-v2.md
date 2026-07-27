@@ -6,6 +6,12 @@
 
 운영 적용, 실제 견적·증빙 수집, Storage 생성, 외부 공개는 하지 않았다. 새 기능은 기본 설정에서 모두 꺼져 있으며 개인정보·약관·보안 처리 체계를 별도로 승인하고 실제 Supabase E2E를 통과하기 전에는 활성화하면 안 된다.
 
+2026-07-28 QA-041 실제 격리 Supabase 1차 실행에서 지원되지 않는
+`jsonb_object_length(jsonb)` 호출(SQLSTATE `42883`)이 발견됐다. 해당 호출을
+`jsonb_object_keys()`의 행 개수 검사로 교체하고 `NULL`, 빈 객체, 20개 초과를
+명시적으로 거부하도록 보완했다. 이 보완본은 QA-041 재검증 전까지 운영 적용
+근거가 아니다.
+
 ## 변경 범위
 
 - `migrations/015_provider_contribution_quote_v2.sql`
