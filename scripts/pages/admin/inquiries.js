@@ -13,9 +13,83 @@
     return time ? (Date.now() - time) / 3600000 : 0;
   }
 
+  async function loadOperationsQueues() {
+    const queues = [
+      { key: "providers", rpc: "taran_list_admin_provider_operations", limit: 5000 },
+      { key: "claims", rpc: "taran_list_admin_provider_claims", limit: 300 },
+      { key: "registrations", rpc: "taran_list_admin_provider_registrations", limit: 300 }
+    ];
+    const results = await Promise.allSettled(queues.map((queue) => (
+      window.TaranApi.rpc(queue.rpc, { p_limit: queue.limit })
+    )));
+    const snapshot = { providers: null, claims: null, registrations: null };
+    results.forEach((result, index) => {
+      const queue = queues[index];
+      if (result.status === "fulfilled" && Array.isArray(result.value)) {
+        snapshot[queue.key] = result.value;
+        return;
+      }
+      const reason = result.status === "rejected"
+        ? result.reason
+        : new Error("관리 목록 응답 형식이 올바르지 않습니다.");
+      console.error(`${queue.key} 운영 목록을 불러오지 못했습니다.`, reason);
+    });
+    return snapshot;
+  }
+
+  function buildLoadErrorRows({ claims, registrations, providers }) {
+    const errorRows = [];
+    if (!Array.isArray(claims)) {
+      errorRows.push({
+        id: "claim-load-error",
+        type: "claim",
+        createdAt: "",
+        label: "업체 소유권 목록 불러오기 실패",
+        target: "소유권 요청",
+        reason: "페이지를 새로고침해 다시 시도해 주세요.",
+        status: "불러오기 실패",
+        href: "inquiries.html",
+        actionLabel: "다시 시도",
+        isLoadError: true
+      });
+    }
+    if (!Array.isArray(registrations)) {
+      errorRows.push({
+        id: "registration-load-error",
+        type: "registration",
+        createdAt: "",
+        label: "신규 업체 등록 목록 불러오기 실패",
+        target: "등록 요청",
+        reason: "페이지를 새로고침해 다시 시도해 주세요.",
+        status: "불러오기 실패",
+        href: "inquiries.html",
+        actionLabel: "다시 시도",
+        isLoadError: true
+      });
+    }
+    if (!Array.isArray(providers)) {
+      errorRows.push({
+        id: "provider-load-error",
+        type: "provider-load",
+        types: ["nonresponse", "stale"],
+        createdAt: "",
+        label: "업체 운영 정보 불러오기 실패",
+        target: "담당·갱신 업체",
+        reason: "페이지를 새로고침해 다시 시도해 주세요.",
+        status: "불러오기 실패",
+        href: "inquiries.html",
+        actionLabel: "다시 시도",
+        isLoadError: true
+      });
+    }
+    return errorRows;
+  }
+
   function buildOnlineRows({ claims, registrations, recipients, providers, notificationJobs }) {
-    const providerNames = new Map(providers.map((row) => [String(row.id), row.data?.name || row.id]));
-    const claimRows = claims
+    const providerRows = Array.isArray(providers) ? providers : [];
+    const publishedProviders = providerRows.filter((item) => item.status === "published");
+    const providerNames = new Map(providerRows.map((row) => [String(row.id), row.name || row.id]));
+    const claimRows = (Array.isArray(claims) ? claims : [])
       .filter((item) => item.status === "pending")
       .map((item) => ({
         id: item.id,
@@ -27,7 +101,7 @@
         status: "검토 대기",
         href: "providers.html#claims"
       }));
-    const registrationRows = registrations
+    const registrationRows = (Array.isArray(registrations) ? registrations : [])
       .filter((item) => item.status === "pending")
       .map((item) => ({
         id: item.id,
@@ -83,9 +157,9 @@
         status: "전송 실패",
         href: "inquiries.html"
       }));
-    const repeatedNonresponseRows = providers
+    const repeatedNonresponseRows = publishedProviders
       .filter((item) => {
-        if (!item.owner_user_id || item.status !== "published" || item.inquiry_enabled !== false) return false;
+        if (!item.has_owner || item.inquiry_enabled !== false) return false;
         const checkedAt = item.last_verified_at || item.updated_at;
         const isFreshEnough = hoursSince(checkedAt) < (180 * 24);
         return isFreshEnough && Number(item.response_rate) < 20;
@@ -100,9 +174,9 @@
         status: "응답 확인",
         href: `../provider.html?id=${encodeURIComponent(item.id)}`
       }));
-    const staleRows = providers
+    const staleRows = publishedProviders
       .filter((item) => {
-        if (!item.owner_user_id || item.status !== "published") return false;
+        if (!item.has_owner) return false;
         const checkedAt = item.last_verified_at || item.updated_at;
         return hoursSince(checkedAt) >= (180 * 24);
       })
@@ -123,7 +197,8 @@
       ...unansweredRows,
       ...notificationRows,
       ...repeatedNonresponseRows,
-      ...staleRows
+      ...staleRows,
+      ...buildLoadErrorRows({ claims, registrations, providers })
     ]
       .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
   }
@@ -159,7 +234,7 @@
     const type = filter?.elements.type.value || "all";
     const query = String(filter?.elements.query.value || "").trim().toLowerCase();
     const filtered = rows.filter((item) => {
-      const typeMatch = type === "all" || item.type === type;
+      const typeMatch = type === "all" || item.type === type || item.types?.includes(type);
       const queryMatch = !query || [item.id, item.target, item.reason].join(" ").toLowerCase().includes(query);
       return typeMatch && queryMatch;
     });
@@ -175,13 +250,19 @@
       const state = document.createElement("td");
       state.append(element("span", item.status, "admin-status is-attention"));
       const action = document.createElement("td");
-      const link = element("a", "확인");
+      const link = element("a", item.actionLabel || "확인");
       link.href = item.href;
       action.append(link);
       row.append(state, action);
       table?.append(row);
     });
-    if (count) count.textContent = `확인 필요 ${filtered.length.toLocaleString("ko-KR")}건`;
+    const exceptionCount = filtered.filter((item) => !item.isLoadError).length;
+    const loadErrorCount = filtered.filter((item) => item.isLoadError).length;
+    if (count) {
+      count.textContent = loadErrorCount
+        ? `확인 필요 ${exceptionCount.toLocaleString("ko-KR")}건 · 불러오기 실패 ${loadErrorCount.toLocaleString("ko-KR")}개 목록`
+        : `확인 필요 ${exceptionCount.toLocaleString("ko-KR")}건`;
+    }
     setEmptyState(empty, filtered.length);
   }
 
@@ -197,17 +278,12 @@
       const safeList = async (tableKey, query) => {
         try { return await window.TaranAdminData.list(tableKey, query); } catch (_error) { return []; }
       };
-      const [claims, registrations, recipients, providers, notificationJobs] = await Promise.all([
-        safeList("providerClaims", { order: "created_at.desc", limit: 300 }),
-        safeList("providerRegistrations", { order: "created_at.desc", limit: 300 }),
+      const [operations, recipients, notificationJobs] = await Promise.all([
+        loadOperationsQueues(),
         safeList("inquiryRecipients", { order: "sent_at.desc", limit: 500 }),
-        safeList("providers", {
-          select: "id,data,status,owner_user_id,updated_at,last_verified_at,inquiry_enabled,response_rate",
-          limit: 5000
-        }),
         safeList("notificationJobs", { order: "created_at.desc", limit: 500 })
       ]);
-      rows = buildOnlineRows({ claims, registrations, recipients, providers, notificationJobs });
+      rows = buildOnlineRows({ ...operations, recipients, notificationJobs });
     } else {
       rows = buildPreviewRows();
     }

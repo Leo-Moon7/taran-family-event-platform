@@ -20,6 +20,30 @@
     return Math.round((part / total) * 100);
   }
 
+  async function loadOperationsQueues() {
+    const queues = [
+      { key: "providers", rpc: "taran_list_admin_provider_operations", limit: 10000 },
+      { key: "claims", rpc: "taran_list_admin_provider_claims", limit: 1000 },
+      { key: "registrations", rpc: "taran_list_admin_provider_registrations", limit: 1000 }
+    ];
+    const results = await Promise.allSettled(queues.map((queue) => (
+      window.TaranApi.rpc(queue.rpc, { p_limit: queue.limit })
+    )));
+    const snapshot = { providers: null, claims: null, registrations: null };
+    results.forEach((result, index) => {
+      const queue = queues[index];
+      if (result.status === "fulfilled" && Array.isArray(result.value)) {
+        snapshot[queue.key] = result.value;
+        return;
+      }
+      const reason = result.status === "rejected"
+        ? result.reason
+        : new Error("관리 목록 응답 형식이 올바르지 않습니다.");
+      console.error(`${queue.key} 운영 목록을 불러오지 못했습니다.`, reason);
+    });
+    return snapshot;
+  }
+
   async function onlineSnapshot() {
     try {
       await window.TaranApi.rpc("taran_apply_marketplace_maintenance");
@@ -29,12 +53,8 @@
     const safeList = async (tableKey, query) => {
       try { return await window.TaranAdminData.list(tableKey, query); } catch (_error) { return []; }
     };
-    const [providers, groups, recipients, responses, events, claims, registrations, notificationJobs] = await Promise.all([
-      safeList("providers", {
-        status: "eq.published",
-        select: "id,owner_user_id,profile_completeness,updated_at,last_verified_at,inquiry_enabled,response_rate",
-        limit: 10000
-      }),
+    const [operations, groups, recipients, responses, events, notificationJobs] = await Promise.all([
+      loadOperationsQueues(),
       safeList("inquiryGroups", { select: "id,status,created_at", limit: 10000 }),
       safeList("inquiryRecipients", {
         select: "id,status,sent_at,viewed_at,responded_at,expires_at",
@@ -42,13 +62,23 @@
       }),
       safeList("inquiryResponses", { select: "id,created_at", limit: 10000 }),
       safeList("adminEvents", { select: "event_name,created_at", limit: 10000 }),
-      safeList("providerClaims", { status: "eq.pending", select: "id", limit: 1000 }),
-      safeList("providerRegistrations", { status: "eq.pending", select: "id", limit: 1000 }),
       safeList("notificationJobs", { select: "id,status,event_type,scheduled_at", limit: 10000 })
     ]);
+    const providersAvailable = Array.isArray(operations.providers);
+    const claimsAvailable = Array.isArray(operations.claims);
+    const registrationsAvailable = Array.isArray(operations.registrations);
+    const providers = providersAvailable
+      ? operations.providers.filter((item) => item.status === "published")
+      : [];
+    const claims = claimsAvailable
+      ? operations.claims.filter((item) => item.status === "pending")
+      : [];
+    const registrations = registrationsAvailable
+      ? operations.registrations.filter((item) => item.status === "pending")
+      : [];
     const cutoff = Date.now() - (90 * 86400000);
     const refreshed = providers.filter((item) => new Date(item.updated_at || 0).getTime() >= cutoff).length;
-    const claimed = providers.filter((item) => item.owner_user_id).length;
+    const claimed = providers.filter((item) => item.has_owner).length;
     const complete = providers.filter((item) => Number(item.profile_completeness || 0) >= 80).length;
     const viewed = recipients.filter((item) => item.viewed_at || ["viewed", "responded"].includes(item.status)).length;
     const responded = recipients.filter((item) => item.responded_at || item.status === "responded").length;
@@ -66,7 +96,7 @@
         && new Date(item.expires_at || item.sent_at || 0).getTime() <= Date.now())
     )).length;
     const stale = providers.filter((item) => (
-      item.owner_user_id
+      item.has_owner
       && Date.now() - new Date(item.last_verified_at || item.updated_at || 0).getTime() >= 180 * 86400000
     )).length;
     const notificationFailed = notificationJobs.filter((item) => item.status === "failed").length;
@@ -82,17 +112,24 @@
         ? `${averageResponseMinutes}분`
         : `${Math.round(averageResponseMinutes / 60)}시간`;
     const repeatedNonresponse = providers.filter((item) => (
-      item.owner_user_id
+      item.has_owner
       && item.inquiry_enabled === false
       && Number(item.response_rate) < 20
       && Date.now() - new Date(item.last_verified_at || item.updated_at || 0).getTime() < 180 * 86400000
     )).length;
+    const claimsCount = claimsAvailable ? claims.length : null;
+    const registrationsCount = registrationsAvailable ? registrations.length : null;
+    const providerExceptions = providersAvailable ? stale + repeatedNonresponse : null;
+    const operationsExceptionParts = [claimsCount, registrationsCount, providerExceptions];
+    const operationsExceptionCount = operationsExceptionParts.every((value) => typeof value === "number")
+      ? operationsExceptionParts.reduce((sum, value) => sum + value, 0) + failed + unanswered + notificationFailed
+      : null;
     return {
       metrics: [
-        ["공개 업체", providers.length],
-        ["담당자 등록 업체", claimed],
-        ["정보 완성도 80% 이상", complete],
-        ["최근 90일 갱신률", percentage(refreshed, providers.length), "%"],
+        ["공개 업체", providersAvailable ? providers.length : null],
+        ["담당자 등록 업체", providersAvailable ? claimed : null],
+        ["정보 완성도 80% 이상", providersAvailable ? complete : null],
+        ["최근 90일 갱신률", providersAvailable ? percentage(refreshed, providers.length) : null, "%"],
         ["견적 문의", groups.length],
         ["업체 문의 열람률", percentage(viewed, recipients.length), "%"],
         ["업체 응답률", percentage(responded, recipients.length), "%"],
@@ -105,13 +142,13 @@
         ["체크리스트→업체 검색", percentage(eventCount("checklist_to_venues"), checklistCreated), "%"]
       ],
       tasks: [
-        ["운영 예외", claims.length + registrations.length + failed + unanswered + stale + notificationFailed + repeatedNonresponse, "inquiries.html"],
-        ["업체 소유권 요청", claims.length, "providers.html#claims"],
-        ["신규 업체 등록", registrations.length, "providers.html#registrations"],
+        ["운영 예외", operationsExceptionCount, "inquiries.html"],
+        ["업체 소유권 요청", claimsCount, "providers.html#claims"],
+        ["신규 업체 등록", registrationsCount, "providers.html#registrations"],
         ["문의 전송 실패", failed, "inquiries.html"],
         ["24시간 미응답", unanswered, "inquiries.html"],
-        ["반복 미응답 업체", repeatedNonresponse, "inquiries.html"],
-        ["업체 정보 갱신", stale, "inquiries.html"],
+        ["반복 미응답 업체", providersAvailable ? repeatedNonresponse : null, "inquiries.html"],
+        ["업체 정보 갱신", providersAvailable ? stale : null, "inquiries.html"],
         ["알림 처리 실패", notificationFailed, "inquiries.html"]
       ]
     };
