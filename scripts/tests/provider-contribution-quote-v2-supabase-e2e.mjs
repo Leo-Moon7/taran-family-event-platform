@@ -276,7 +276,7 @@ begin
   execute 'set local role authenticated';
   v_info := public.taran_submit_information_v2(
     'operator_seed',v_provider_id,'kids',
-    '{"price_note":"QA-041 synthetic high risk"}'::jsonb,
+    '{"provider_name":"QA-041 synthetic high risk"}'::jsonb,
     'qa-041-policy-v1','information_submission_180d'
   );
   select id into v_info_review
