@@ -67,7 +67,7 @@
     return { ...item, eventTypes, status: item.publicationStatus === "hidden" ? "archived" : item.publicationStatus || "draft" };
   }
   async function save(values, originalId) {
-    const id = safeId(values.id);
+    const id = originalId || safeId(values.id);
     if (!id) throw new Error("업체 관리 번호를 영문으로 입력해 주세요.");
     const minGuests = values.minGuests ? Number(values.minGuests) : null;
     const maxGuests = values.maxGuests ? Number(values.maxGuests) : null;
@@ -78,12 +78,31 @@
       minGuests, maxGuests, price: values.price.trim(), phone: values.phone.trim(), website: values.website.trim(),
       informationCheckedAt: new Date().toISOString().slice(0, 10)
     };
-    await window.TaranAdminData.upsert("providers", { id, data, status: values.status || "draft", updated_at: new Date().toISOString() }, "id");
-    if (originalId && originalId !== id) await window.TaranAdminData.remove("providers", { id: `eq.${originalId}` });
+    try {
+      await window.TaranApi.rpc("taran_save_admin_provider", {
+        p_provider_id: id,
+        p_data: data,
+        p_status: values.status || "draft",
+        p_original_id: originalId || null
+      });
+    } catch (error) {
+      console.error("업체 정보를 저장하지 못했습니다.", error);
+      throw new Error("업체 정보를 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.");
+    }
     await refreshWorkspace();
     await load();
   }
-  function edit(item) { openEditor({ title: item ? "업체 정보 수정" : "업체 등록", fields, initial: editorValues(item), onSubmit: values => save(values, item?.id) }); }
+  function edit(item) {
+    const editorFields = fields.map(field => (
+      field.name === "id" ? { ...field, readOnly: Boolean(item) } : field
+    ));
+    openEditor({
+      title: item ? "업체 정보 수정" : "업체 등록",
+      fields: editorFields,
+      initial: editorValues(item),
+      onSubmit: values => save(values, item?.id)
+    });
+  }
 
   function renderPagination(total) {
     const nav = document.querySelector("[data-admin-pagination]");
@@ -99,13 +118,19 @@
   }
   async function toggle(item, button) {
     button.disabled = true;
-    const status = item.publicationStatus === "hidden" ? "published" : "archived";
+    const status = item.publicationStatus === "published" ? "archived" : "published";
     try {
-      await window.TaranAdminData.update("providers", { status }, { id: `eq.${item.id}` });
-      item.publicationStatus = status === "published" ? "published" : "hidden";
+      await window.TaranApi.rpc("taran_set_admin_provider_status", {
+        p_provider_id: item.id,
+        p_status: status
+      });
       await refreshWorkspace();
       await load();
-    } catch (error) { alert(error.message); }
+    } catch (error) {
+      console.error("업체 공개 상태를 변경하지 못했습니다.", error);
+      alert("업체 공개 상태를 변경하지 못했습니다. 잠시 후 다시 시도해 주세요.");
+      button.disabled = false;
+    }
   }
   function render() {
     const query = form?.elements.query.value.trim().toLowerCase() || "";
@@ -184,21 +209,17 @@
   async function moderateClaim(item, status, button) {
     button.disabled = true;
     try {
-      const access = await window.TaranAdminData.context();
-      if (status === "approved") {
-        await window.TaranAdminData.update("providers", {
-          owner_user_id: item.user_id
-        }, { id: `eq.${item.provider_id}` });
-      }
-      await window.TaranAdminData.update("providerClaims", {
-        status,
-        reviewed_by: access.account.id,
-        reviewed_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      }, { id: `eq.${item.id}` });
+      await window.TaranApi.rpc("taran_review_admin_provider_claim", {
+        p_claim_id: item.id,
+        p_status: status
+      });
       await refreshWorkspace();
-      await loadClaims();
-    } catch (error) { alert(error.message); button.disabled = false; }
+      await Promise.all([loadClaims(), load()]);
+    } catch (error) {
+      console.error("업체 수정 권한 요청을 처리하지 못했습니다.", error);
+      alert("업체 수정 권한 요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.");
+      button.disabled = false;
+    }
   }
   async function loadClaims() {
     if (!online || !claimTable || !claimSection) return;
