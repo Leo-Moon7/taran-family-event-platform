@@ -40,15 +40,25 @@
   function safeId(value) { return String(value || "").trim().toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-+|-+$/g, ""); }
   async function refreshWorkspace() {
     if (!online) return workspace;
-    const result = await window.TaranApi.rpc("taran_list_admin_provider_workspace", {
-      p_provider_limit: 500,
-      p_queue_limit: 200
+    const queues = [
+      { key: "providers", rpc: "taran_list_admin_providers", limit: 500 },
+      { key: "claims", rpc: "taran_list_admin_provider_claims", limit: 200 },
+      { key: "registrations", rpc: "taran_list_admin_provider_registrations", limit: 200 }
+    ];
+    const results = await Promise.allSettled(queues.map((queue) => (
+      window.TaranApi.rpc(queue.rpc, { p_limit: queue.limit })
+    )));
+    const next = { ...workspace };
+    results.forEach((result, index) => {
+      const queue = queues[index];
+      if (result.status === "fulfilled") {
+        next[queue.key] = Array.isArray(result.value) ? result.value : [];
+      } else {
+        next[queue.key] = [];
+        console.error(`${queue.key} 관리 목록을 불러오지 못했습니다.`, result.reason);
+      }
     });
-    workspace = {
-      providers: Array.isArray(result?.providers) ? result.providers : [],
-      claims: Array.isArray(result?.claims) ? result.claims : [],
-      registrations: Array.isArray(result?.registrations) ? result.registrations : []
-    };
+    workspace = next;
     return workspace;
   }
   function editorValues(item = {}) {
@@ -283,10 +293,7 @@
     online = access.mode === "online";
     if (online) addPageAction("새 업체 등록", () => edit(null));
     form?.addEventListener("submit", event => { event.preventDefault(); page = 1; render(); });
-    if (online) {
-      try { await refreshWorkspace(); }
-      catch (error) { console.error("업체 관리 작업공간을 불러오지 못했습니다.", error); }
-    }
+    if (online) await refreshWorkspace();
     await Promise.allSettled([load(), loadReviews(), loadClaims(), loadRegistrations()]);
   }
   init().catch(error => console.error("업체 관리 목록을 불러오지 못했습니다.", error));
