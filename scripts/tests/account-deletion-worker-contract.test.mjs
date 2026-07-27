@@ -19,6 +19,15 @@ test("migration has a service-role-only, skip-locked, three-attempt queue", () =
   assert.match(migration, /grant execute on function public\.taran_claim_account_deletion_job\(\)[\s\S]*to service_role/i);
 });
 
+test("migration permits only one pending or processing request per user", () => {
+  assert.match(migration, /having count\(\*\) > 1/i);
+  assert.match(migration, /Duplicate active account deletion requests require manual review/i);
+  assert.match(
+    migration,
+    /create unique index if not exists taran_account_deletion_one_active_user_idx[\s\S]*on public\.taran_account_deletion_requests\(user_id\)[\s\S]*status in \('pending', 'processing'\)/i
+  );
+});
+
 test("migration preserves only intended redacted history and blocks unsafe dependencies", () => {
   for (const relation of [
     "taran_account_deletion_requests",
@@ -28,9 +37,7 @@ test("migration preserves only intended redacted history and blocks unsafe depen
     "taran_reward_redemptions",
     "taran_community_posts",
     "taran_community_comments",
-    "taran_inquiry_groups",
-    "taran_inquiry_responses",
-    "taran_provider_change_requests"
+    "taran_inquiry_groups"
   ]) {
     assert.match(migration, new RegExp(`public\\.${relation.replaceAll("_", "_")}`, "i"));
   }
@@ -39,8 +46,15 @@ test("migration preserves only intended redacted history and blocks unsafe depen
   assert.match(migration, /provider\.owner_user_id = v_request\.user_id/i);
   assert.match(migration, /from public\.taran_provider_claims/i);
   assert.match(migration, /from public\.taran_provider_registrations/i);
+  assert.match(migration, /from public\.taran_provider_change_requests/i);
+  assert.match(migration, /from public\.taran_inquiry_responses/i);
   assert.match(migration, /bucket_id = 'taran-private-evidence'/i);
   assert.match(migration, /manual_review_required/i);
+
+  const fkMapping = migration.match(/from \(values([\s\S]*?)\) mapping\(relation_name, column_name, constraint_name\)/i)?.[1];
+  assert.ok(fkMapping, "FK preservation mapping must exist");
+  assert.doesNotMatch(fkMapping, /taran_provider_change_requests/i);
+  assert.doesNotMatch(fkMapping, /taran_inquiry_responses/i);
 });
 
 test("completion history has no user identifier or free-text payload columns", () => {

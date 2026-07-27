@@ -21,9 +21,7 @@ begin
       ('public.taran_reward_redemptions', 'user_id', 'taran_reward_redemptions_user_id_fkey'),
       ('public.taran_community_posts', 'user_id', 'taran_community_posts_user_id_fkey'),
       ('public.taran_community_comments', 'user_id', 'taran_community_comments_user_id_fkey'),
-      ('public.taran_inquiry_groups', 'user_id', 'taran_inquiry_groups_user_id_fkey'),
-      ('public.taran_inquiry_responses', 'provider_user_id', 'taran_inquiry_responses_provider_user_id_fkey'),
-      ('public.taran_provider_change_requests', 'requested_by', 'taran_provider_change_requests_requested_by_fkey')
+      ('public.taran_inquiry_groups', 'user_id', 'taran_inquiry_groups_user_id_fkey')
     ) mapping(relation_name, column_name, constraint_name)
   loop
     v_relation := to_regclass(v_fk.relation_name);
@@ -108,6 +106,32 @@ $migration$;
 create unique index if not exists taran_account_deletion_claim_token_idx
   on public.taran_account_deletion_requests(claim_token)
   where claim_token is not null;
+
+-- Migration 006 uses a (user_id, status) conflict target. Without this broader
+-- active-request invariant, a request can be submitted again after the worker
+-- changes the existing row from pending to processing. Fail closed if a legacy
+-- database already contains that ambiguous state; it must be reviewed instead
+-- of deleting either request automatically.
+do $migration$
+begin
+  if exists (
+    select request.user_id
+    from public.taran_account_deletion_requests request
+    where request.user_id is not null
+      and request.status in ('pending', 'processing')
+    group by request.user_id
+    having count(*) > 1
+  ) then
+    raise exception 'Duplicate active account deletion requests require manual review.'
+      using errcode = '55000';
+  end if;
+end;
+$migration$;
+
+create unique index if not exists taran_account_deletion_one_active_user_idx
+  on public.taran_account_deletion_requests(user_id)
+  where user_id is not null
+    and status in ('pending', 'processing');
 
 create index if not exists taran_account_deletion_worker_queue_idx
   on public.taran_account_deletion_requests(status, next_attempt_at, requested_at)
@@ -250,6 +274,16 @@ begin
       select 1
       from public.taran_provider_registrations registration
       where registration.user_id = v_request.user_id
+    )
+    or exists (
+      select 1
+      from public.taran_provider_change_requests change_request
+      where change_request.requested_by = v_request.user_id
+    )
+    or exists (
+      select 1
+      from public.taran_inquiry_responses response
+      where response.provider_user_id = v_request.user_id
     )
     or exists (
       select 1

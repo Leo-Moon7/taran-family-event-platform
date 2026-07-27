@@ -12,13 +12,14 @@
 `migrations/013_account_deletion_worker.sql`은 다음 계약을 추가한다.
 
 1. 기존 탈퇴 요청에 시도 횟수, 다음 시도 시각, claim token, lease 만료, 제한된 오류 코드를 추가한다.
-2. `FOR UPDATE SKIP LOCKED`와 5분 lease로 하나의 요청을 동시에 두 worker가 claim하지 못하게 한다.
-3. 자동 시도는 최대 3회이며 1회 실패 뒤 1분, 2회 실패 뒤 5분 후 재시도한다. 3회 실패는 `retry_exhausted`로 종결한다.
-4. 관리자 프로필, 업체 소유자, 업체 claim·registration, 비식별화되지 않은 제보, 남은 비공개 증빙이 연결된 계정은 Auth 삭제 전에 `manual_review_required`로 차단한다.
-5. D-31 RPC가 이미 비식별화한 후기·커뮤니티·문의·제보와 거래성 포인트 기록은 사용자 FK를 nullable `ON DELETE SET NULL`로 바꾸어 Auth 삭제 cascade로 사라지지 않게 한다.
-6. Auth 삭제가 성공하면 요청 행을 제거하고 식별자가 없는 job 이력에서 완료 상태를 정확히 1건 만든다.
-7. 완료·실패 이력에는 원본 사용자 식별자, 이메일, 전화, 요청 ID, 자유 입력 오류, 삭제된 내용 컬럼이 없다. D-24의 삭제 증명 1년 기준을 적용할 수 있도록 `purge_after`를 기록하지만 자동 파기 스케줄은 만들지 않는다.
-8. claim·완료·실패 RPC는 `service_role`만 실행할 수 있고 `anon`·일반 회원에게는 권한이 없다.
+2. pending·processing 활성 요청은 사용자당 1개만 허용하는 partial unique index를 추가한다. migration 006 RPC가 processing 중 재호출되어 새 pending 행을 만들려 하면 안전하게 거부된다. 기존 DB에 이미 두 활성 행이 있으면 어느 행도 자동 삭제하지 않고 migration을 중단해 수동 검토를 요구한다.
+3. `FOR UPDATE SKIP LOCKED`와 5분 lease로 하나의 요청을 동시에 두 worker가 claim하지 못하게 한다.
+4. 자동 시도는 최대 3회이며 1회 실패 뒤 1분, 2회 실패 뒤 5분 후 재시도한다. 3회 실패는 `retry_exhausted`로 종결한다.
+5. 관리자 프로필, 업체 소유자, 업체 claim·registration·변경 요청·문의 응답, 비식별화되지 않은 제보, 남은 비공개 증빙이 연결된 계정은 Auth 삭제 전에 `manual_review_required`로 차단한다.
+6. D-31 RPC가 이미 비식별화한 후기·커뮤니티·고객 문의·제보와 거래성 포인트 기록의 8개 사용자 FK만 nullable `ON DELETE SET NULL`로 바꾸어 Auth 삭제 cascade로 사라지지 않게 한다. D-31에서 비식별화하지 않는 업체 변경 요청과 업체 문의 응답은 이 대상에서 제외한다.
+7. Auth 삭제가 성공하면 요청 행을 제거하고 식별자가 없는 job 이력에서 완료 상태를 정확히 1건 만든다.
+8. 완료·실패 이력에는 원본 사용자 식별자, 이메일, 전화, 요청 ID, 자유 입력 오류, 삭제된 내용 컬럼이 없다. D-24의 삭제 증명 1년 기준을 적용할 수 있도록 `purge_after`를 기록하지만 자동 파기 스케줄은 만들지 않는다.
+9. claim·완료·실패 RPC는 `service_role`만 실행할 수 있고 `anon`·일반 회원에게는 권한이 없다.
 
 ### Edge Function 계약
 
@@ -49,8 +50,8 @@
 
 | 구분 | 영향 |
 | --- | --- |
-| 기존 요청 테이블 | worker claim·lease·최대 3회 재시도용 컬럼과 제한 조건 추가 |
-| 기존 비식별 기록 | 10개 사용자 FK를 nullable `ON DELETE SET NULL`로 전환 |
+| 기존 요청 테이블 | 사용자당 활성 요청 1개 + worker claim·lease·최대 3회 재시도용 컬럼과 제한 조건 추가 |
+| 기존 비식별 기록 | D-31이 비식별화하는 8개 사용자 FK만 nullable `ON DELETE SET NULL`로 전환 |
 | 신규 이력 | 비식별 job 이력과 1년 후 파기 기준 시각 추가 |
 | 신규 내부 RPC | claim, complete, fail 3개. service role 전용 |
 | 신규 서버 API | Edge Function POST 1개. 일반 client 거부 |
@@ -69,8 +70,8 @@ git diff --check
 
 결과:
 
-- 전용 테스트 15개 통과, 실패 0
-- idle·manual review 차단·성공·Auth 실패·재시도 소진·완료 간극 복구·동시 호출 1회 효과 검증
+- 전용 테스트 16개 통과, 실패 0
+- idle·manual review 차단·성공·Auth 실패·재시도 소진·완료 간극 복구·동시 호출 1회 효과·사용자당 활성 요청 1개 계약 검증
 - service role 전용 RPC, client 거부, 최대 3회, `SKIP LOCKED`, D-24 1년 기준, Storage mutation·scheduler 부재 정적 검증
 - 신규 migration·Function source에서 구체적인 secret·이메일·사용자 식별자 값 0건
 - console 출력 0건
@@ -83,6 +84,7 @@ git diff --check
 | 완료 조건 | 판정 | 근거 |
 | --- | --- | --- |
 | 중복·동시 실행 1회 효과 | 코드 충족, E2E 대기 | DB skip-locked claim + 동시 unit test |
+| processing 중 재요청 중복 방지 | 코드 충족, E2E 대기 | 사용자당 pending·processing partial unique index + 기존 중복 fail-closed 검사 |
 | 성공 시 Auth 사용자·요청 제거·완료 이력 1건 | 코드 충족, E2E 대기 | Auth delete → FK null 확인 → job 완료/요청 삭제 |
 | 실패 재시도·완료 오표시 0 | 충족 | 최대 3회와 complete FK 재확인, 단위 테스트 |
 | 일반 client 실행 거부 | 충족 | Edge bearer 검사 + RPC revoke/grant 정적 검사 |
@@ -112,9 +114,10 @@ git diff --check
 
 1. 로컬에는 Supabase CLI/PostgreSQL 격리 실행기가 없어 실제 migration 재적용, RLS, Auth 관리자 API는 아직 검증하지 않았다.
 2. Auth 삭제와 완료 RPC는 분산 트랜잭션이므로 QA-040에서 삭제 직후 완료 실패와 `complete_only` 복구를 실제로 검증해야 한다.
-3. Edge Function 배포 시 JWT gateway 설정과 service role 전달 경로가 일반 client에 노출되지 않는지 확인해야 한다.
-4. `purge_after`를 실제로 파기하는 운영 스케줄은 구현하지 않았다. 운영 활성화와 보존 이력 파기는 별도 카드·승인이 필요하다.
-5. manual review 대상의 실제 파기 절차는 별도 운영 절차가 필요하며 이 worker가 임의로 삭제하지 않는다.
+3. QA-040에서 processing 상태 중 같은 사용자의 재요청이 새 pending 행을 만들지 않고, worker 두 개가 동시에 호출돼도 Auth 실제 삭제 효과와 완료 이력이 각 1건인지 검증해야 한다.
+4. Edge Function 배포 시 JWT gateway 설정과 service role 전달 경로가 일반 client에 노출되지 않는지 확인해야 한다.
+5. `purge_after`를 실제로 파기하는 운영 스케줄은 구현하지 않았다. 운영 활성화와 보존 이력 파기는 별도 카드·승인이 필요하다.
+6. manual review 대상의 실제 파기 절차는 별도 운영 절차가 필요하며 이 worker가 임의로 삭제하지 않는다.
 
 ## 10. 병합 권고
 
