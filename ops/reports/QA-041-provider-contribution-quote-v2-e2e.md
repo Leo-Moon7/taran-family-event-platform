@@ -3,115 +3,133 @@
 ## 작업 ID / 결과
 
 - 작업 ID: `QA-041`
-- 판정: `BLOCKED`
-- 완료 상태: 격리 프로젝트·migration·runtime·합성 잔여 안전 게이트만 실제 확인했다. 역할별 변이 시나리오와 실제 Auth/JWT/PostgREST E2E는 실행하지 않았으므로 `PASS`가 아니다.
+- 수정 회차: 1
+- 판정: `REVISION_REQUIRED`
+- 결과: commit `9fe7b76`의 `scenario` SQL을 정확한 격리 프로젝트에서 실제 실행했다. 업체 정보 제출 단계에서 migration 015의 PostgreSQL 호환성 결함이 SQLSTATE `42883`로 재현되어 이후 역할 시나리오는 진행되지 않았다.
+- 안전 종료: 실패 직후 `cleanup`과 별도 final preflight를 실행했다. QA-041 namespace는 0이고 runtime 4종은 모두 `false`다.
+- 별도 차단: 실제 GoTrue 서명 JWT/PostgREST HTTP 및 AAL2 MFA 자격 경로는 실행하지 않았으므로 이 부분은 계속 `BLOCKED`다.
 
 ## 수정·추가·삭제 파일
 
-- 추가: `scripts/tests/provider-contribution-quote-v2-supabase-e2e.mjs`
-- 추가: `ops/reports/QA-041-provider-contribution-quote-v2-e2e.md`
-- 수정·삭제: 없음
+- 수정: `ops/reports/QA-041-provider-contribution-quote-v2-e2e.md`
+- harness: `scripts/tests/provider-contribution-quote-v2-supabase-e2e.mjs`는 변경하지 않았다. 기존 scenario가 실제 결함을 정확히 재현했고 migration 오류를 우회하거나 기대값을 낮출 변경은 하지 않았다.
+- 추가·삭제: 없음
 - migration `001~015`, 제품, package/lock, 환경변수, 브라우저 테스트 정본 변경: 0
 
 ## 환경
 
-- 로컬 기준: branch `codex/qa-041-provider-contribution-quote-v2-e2e`, base `b969191`
-- 격리 DB: Taran 조직의 Free 프로젝트 `Sonpum QA Isolated`
-- 재식별 결과: `Healthy`, compute `nano`
-- 금지 환경 영향: 운영 Supabase, 실제 고객·업체·견적·증빙, Storage, 외부 알림, GitHub main, production 모두 0
+- 로컬 branch: `codex/qa-041-provider-contribution-quote-v2-e2e`
+- 실행 대상 commit: `9fe7b76`
+- 격리 DB: Taran 조직 Free 프로젝트 `Sonpum QA Isolated`
+- 브라우저 재식별: 프로젝트명 일치, `Healthy`, compute `nano`
+- migration 상태: 015 최초 적용과 동일 원문 재적용 성공 이력, v2 table 22개
+- 금지 환경 영향: 운영 Supabase, 다른 프로젝트, 실제 고객·업체·견적·증빙, Storage, 외부 알림, production 모두 0
 - 비밀값: token, key, 실제 이메일, 실제 UUID, project ref를 파일·보고·메시지에 기록하지 않음
 
 ## 실행 테스트·명령
 
-| 검사 | 결과 | 근거 |
+| 검사 | 결과 | 재현 근거 |
 | --- | --- | --- |
 | 브라우저 프로젝트 재식별 | PASS | Taran / Free / 정확한 프로젝트명 / Healthy / nano |
-| migration 015 설치 상태 | PASS | public v2 table 22개 |
-| migration 015 최초·동일 원문 재적용 | 이전 재개 지점 PASS | 이전 에이전트가 commit 원문으로 각 1회 실행했고 오류 0. 이번 재개에서는 재실행하지 않음 |
-| 마지막 읽기 전용 통합 감사 | PASS | JSON 결과가 `v2_tables=22`, `runtime_false=true`, `namespace_zero=true` |
-| QA-041 합성 Auth·행 사전 잔여 | PASS | Auth/admin/provider/submission/evidence/provider grant/audit prefix count 모두 0 |
-| E2E harness 모듈 구문 로드 | PASS | 브라우저 제어용 Node 환경에서 ESM import 및 SQL 세 그룹 export 확인 |
-| 로컬 CLI 실행 | BLOCKED_ENV | 현재 PowerShell PATH에 `node` 실행 파일이 없어 CLI 실행 불가 |
-| SQL 역할 변이 시나리오 | NOT_RUN | 중단 지시에 따라 실제 합성 변이를 시작하지 않음 |
-| 실제 Auth 가입·로그인·JWT·PostgREST HTTP | NOT_RUN | 안전하게 범위가 고정된 test credential/token을 확보하지 않음 |
+| scenario 전 안전 게이트 확인 | PASS | SQL Editor의 직전 감사 결과 `v2_tables=22`, `runtime_false=true`, `namespace_zero=true`를 확인했고 PM이 해당 값으로 실행을 승인 |
+| harness 구문 검사 | PASS | 지정 Node로 `--check` 성공 |
+| commit scenario SQL 생성 | PASS | 지정 Node로 `scenario` 출력 587줄·21,591자 생성 |
+| SQL managed-session scenario | FAIL | SQLSTATE `42883`, 첫 실패 단계와 함수는 아래에 기록 |
+| cleanup | PASS | prefix 카운트 7종 모두 0, `namespace_zero=true` |
+| 별도 final preflight | PASS | prefix 카운트 7종 모두 0, namespace 0, runtime false 플래그 4종 모두 `true` |
+| 실제 Auth/JWT/PostgREST HTTP | BLOCKED | 안전하게 고정된 실제 자격 경로가 없어 실행하지 않음 |
+| 실제 AAL2 MFA | BLOCKED | SQL의 claim 모의와 별개인 실제 MFA 세션이 없어 실행하지 않음 |
 
-작성한 harness는 `preflight`, `scenario`, `cleanup` 세 모드를 제공한다. 고정 `QA-041` namespace, transaction, `set local role`, `request.jwt.claims`, base-table deny, 최소권한 RPC, 2인 검수, HMAC unique, 철회·분쟁·9-target 삭제·계정 삭제 연계, 별도 cleanup, 최종 runtime false/잔여 0을 포함한다. 단, scenario SQL은 실제 DB에서 실행·파싱되지 않았으므로 검증 완료 근거로 사용하면 안 된다.
+사용한 로컬 명령:
+
+```text
+C:\Users\mch45\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe --check scripts\tests\provider-contribution-quote-v2-supabase-e2e.mjs
+C:\Users\mch45\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe scripts\tests\provider-contribution-quote-v2-supabase-e2e.mjs scenario
+```
+
+브라우저 실행 순서:
+
+```text
+직전 안전 감사 확인 → scenario → cleanup → final preflight
+```
+
+추가 scenario 재실행은 하지 않았다.
 
 ## 통과·실패
 
+### 실패
+
+- SQLSTATE: `42883`
+- 오류: `function jsonb_object_length(jsonb) does not exist`
+- migration 함수: `public.taran_submit_information_v2(text,text,text,jsonb,text,text)`
+- 함수 위치: PL/pgSQL 함수 line 25의 입력 필드 개수 검사
+- scenario 위치: inline code block line 195의 첫 `taran_submit_information_v2` 대입
+- 시나리오 단계: `provider: scoped submission RPC allowed, base table denied`
+- 중단 지점: 업체 역할의 정보 제출 RPC 호출. 이 호출이 실패해 뒤의 base-table deny, 자기검수, 견적, 2인 승인, 공개 RPC, 분쟁, 철회, 9-target 삭제 시나리오는 실행되지 않았다.
+
+migration 015는 PL/pgSQL 함수 본문에서 `jsonb_object_length(p_fields)`를 호출한다. 해당 함수가 대상 PostgreSQL에 없기 때문에 함수 생성과 migration 재적용은 성공해도 실제 RPC 실행 시 이름 해석에서 `42883`이 발생한다.
+
 ### 통과
 
-- 정확한 무료 격리 프로젝트를 재식별했다.
-- migration 015의 v2 table 22개가 존재한다.
-- runtime 4종이 모두 `false`다.
-- QA-041 합성 Auth와 prefix 행은 모두 0이다.
-- 실제 합성 변이를 시작하지 않았으므로 cleanup 대상도 0이다.
-- Storage object·bucket·policy, signed URL, scanner, preview, 외부 전송을 만들지 않았다.
-
-### 미검증
-
-- anon/customer/provider/content/operations의 실제 PostgREST base-table/RPC HTTP
-- 실제 Auth user 생성·로그인·세션 갱신과 JWT `aal`
-- SQL managed session에서의 `set local role`·`request.jwt.claims` 역할 시나리오
-- AAL1 거부와 서로 다른 AAL2 운영자 2인 승인
-- 자기검수 거부
-- 동일 HMAC 두 번째 `unique` 거부
-- 활성 provider grant 계정의 customer reward 위장 거부
-- public RPC 반환 private 열 0
-- 철회 뒤 public 0과 grant revoke
-- 원검수자 dispute resolve 거부, 독립 operations 허용, 자유문 reason 거부
-- 9-target 완료 전 미완료와 완료 후 private 잔여 0
-- v2 job 전 계정 삭제 완료 거부와 완료 후 허용
+- 정확한 격리 프로젝트와 Healthy/nano 상태를 재확인했다.
+- scenario 전 v2 table 22개, runtime 4종 false, namespace 0을 확인했다.
+- scenario SQL 전체 587줄을 SQL Editor에 붙여 실행해 첫 migration 오류를 재현했다.
+- 실패 직후 cleanup을 완료했다.
+- final preflight에서 Auth/admin/provider/submission/evidence/provider grant/audit QA-041 카운트가 모두 0이었다.
+- final preflight에서 contribution/evidence/public projection/exact amount runtime이 모두 `false`였다.
+- 실제 Storage object·bucket·policy, signed URL, scanner, preview, 외부 이메일·SMS·webhook을 만들거나 호출하지 않았다.
 
 ## 재현 근거
 
-1. 기준 commit `b969191`의 migration 015는 격리 프로젝트에 설치되어 v2 table 22개를 반환했다.
-2. 마지막 읽기 전용 감사는 한 셀에 다음 세 값만 반환했다.
-   - v2 tables: 22
-   - runtime 4종 false: true
-   - QA-041 namespace zero: true
-3. harness의 `preflight`는 동일 prefix와 고정 합성 actor namespace를 count-only로 검사한다.
-4. harness의 `scenario`는 실제 파일 없이 evidence metadata만 사용하도록 작성했다.
-5. harness의 `cleanup`은 해당 prefix·actor만 대상으로 하며 runtime을 false로 복구한 뒤 동일 preflight를 재실행하도록 작성했다.
+1. `9fe7b76`의 harness를 지정 Node로 실행해 scenario SQL을 생성했다.
+2. 브라우저에서 정확한 프로젝트명, Taran Free, Healthy, nano를 확인했다.
+3. 직전 안전 감사의 `22 / true / true` 값을 확인한 뒤 scenario를 실행했다.
+4. PostgreSQL은 첫 정보 제출 RPC에서 SQLSTATE `42883`과 함수/inline-block 위치를 반환했다.
+5. 즉시 cleanup을 실행했고 7개 namespace 카운트가 모두 0이었다.
+6. 별도 final preflight를 다시 실행해 namespace 0과 runtime 4종 false를 확인했다.
 
 ## 완료 조건
 
 | 완료 조건 | 상태 |
 | --- | --- |
-| migration 최초·멱등 적용 | 이전 재개 지점 PASS |
+| migration 최초·멱등 적용 | PASS — 이전 실행 이력 |
 | 정확한 격리 프로젝트·runtime 시작 false | PASS |
-| anon/customer/provider/content/operations 역할 기대값 | 미검증 |
-| AAL1 deny·AAL2 2인 승인·자기검수 deny | 미검증 |
-| HMAC unique·provider reward deny | 미검증 |
-| public RPC 최소 열 | 미검증 |
-| 철회·분쟁 독립 재심 | 미검증 |
-| 9-target 삭제·계정 삭제 연계 | 미검증 |
-| 종료 합성 Auth·행·임시 객체 0 | PASS — 합성 변이 자체가 0 |
+| commit 그대로 scenario SQL 실제 실행 | PASS |
+| anon/customer/provider/content/operations 역할 기대값 | FAIL/BLOCKED — provider 정보 제출 RPC에서 `42883` |
+| AAL1 deny·AAL2 2인 승인·자기검수 deny | NOT_REACHED |
+| HMAC unique·provider reward deny | NOT_REACHED |
+| public RPC 최소 열 | NOT_REACHED |
+| 철회·분쟁 독립 재심 | NOT_REACHED |
+| 9-target 삭제·계정 삭제 연계 | NOT_REACHED |
+| 종료 합성 Auth·행 0 | PASS |
 | 종료 runtime 4종 false | PASS |
+| 실제 GoTrue JWT/PostgREST/AAL2 MFA | BLOCKED |
 | secret·PII output 0 | PASS |
 
 ## 보안·개인정보 영향
 
 - 실제 개인정보·실제 견적·실제 증빙 처리: 0
-- 실제 Auth 계정 생성: 0
 - 실제 upload/Storage/signed URL/scanner/preview: 0
 - 외부 이메일·SMS·webhook: 0
-- DB 변이: 이전 에이전트의 격리 migration 015 적용 외 이번 재개 변이 0
-- SQL Editor의 count-only 감사만 실행했다.
+- scenario의 고정 QA-041 합성 Auth·행은 transaction 실패 후 cleanup됐고 final 잔여는 0이다.
+- runtime 4종은 종료 시 모두 `false`다.
+- 실제 운영 권한·비밀값을 파일이나 보고서에 저장하지 않았다.
 
-SQL Editor의 `set local role`과 `request.jwt.claims`는 실제 Supabase Postgres의 권한 함수·RLS·RPC를 검증하는 데 유효하지만 실제 GoTrue 로그인, 서명된 JWT, PostgREST HTTP 권한 경계를 대체하지 않는다.
+SQL Editor의 `set local role`과 `request.jwt.claims`는 실제 Supabase Postgres의 함수 권한·RLS/RPC를 검증하는 데 유효하지만 실제 GoTrue 로그인, 서명된 JWT, PostgREST HTTP 권한 경계, 실제 AAL2 MFA를 대체하지 않는다. 이번 scenario는 첫 RPC 오류에서 중단됐으므로 SQL managed-session 역할 검증도 완료되지 않았다.
 
 ## 신규 결함
 
-- 제품·migration 결함으로 확정한 항목은 없다. 필수 역할 시나리오가 미실행이라 결함 부재도 증명하지 못했다.
-- 환경 blocker:
-  - 현재 로컬 shell에서 `node` CLI를 실행할 수 없다.
-  - 실제 Auth/JWT/PostgREST용으로 안전하게 격리된 credential/token 경로가 제공되지 않았다.
-  - 중단 지시에 따라 SQL 역할 scenario도 실행하지 않았다.
+- 결함: migration 015의 `taran_submit_information_v2`가 대상 PostgreSQL에 없는 `jsonb_object_length(jsonb)`를 호출한다.
+- 심각도: `HIGH` — 정보 제출 핵심 RPC가 실행 불가하고 이후 RLS/RPC E2E 전체를 차단한다.
+- 영향: provider/content/operations의 정보 제출 경로가 동일 함수에서 실패할 수 있다. 현재 runtime이 기본 비활성이고 격리 환경만 사용해 운영 데이터 노출은 없다.
+- 예상 원인: PGlite 모델 검사에서 허용된 JSONB 함수 가정과 실제 Supabase PostgreSQL 함수 집합의 차이.
+- 추천 담당: `backend-data`, BE-019/migration 015 소유자.
+- 재현: 고정 QA-041 namespace에서 유효한 JSON object를 전달해 `taran_submit_information_v2`를 호출하면 SQLSTATE `42883`.
+- 수정 요청: migration 015의 JSON object 필드 수 검사를 실제 PostgreSQL 호환 방식으로 고친 뒤 동일 원문 멱등 적용과 QA-041 전체 재실행이 필요하다.
 
 ## 병합 권고
 
-- 제품·migration의 `PASS` 또는 운영 적용 근거로 병합 금지.
-- 이 commit은 미실행 harness와 `BLOCKED` 감사 기록으로만 보존 가능하다.
-- 재개 시 정확한 같은 격리 프로젝트에서 `preflight → scenario → cleanup → final preflight`를 실행하고, 별도의 합성 Auth/PostgREST 세션으로 HTTP 상태·DB 변화까지 확인해야 한다.
-- 재개 후에도 실제 upload/signed URL/scanner/preview는 fail-closed 미검증으로 유지한다.
+- QA-041 제품 판정과 migration 015의 Supabase 준비 상태는 `PASS`로 병합하거나 릴리스하지 않는다.
+- 이 보고서 수정 commit은 재현·cleanup 증거로 보존할 수 있다.
+- backend-data 수정 후 새 격리 프로젝트 또는 정리된 동일 프로젝트에서 migration 적용·재적용을 확인하고 `preflight → scenario → cleanup → final preflight` 전체를 다시 실행한다.
+- SQL scenario 통과 뒤에도 실제 GoTrue JWT/PostgREST HTTP와 실제 AAL2 MFA는 별도 안전 자격 경로에서 검증해야 한다.
