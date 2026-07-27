@@ -28,6 +28,55 @@ test("migration permits only one pending or processing request per user", () => 
   );
 });
 
+test("request, user writes, Auth, and evidence share the deletion lock", () => {
+  assert.match(migration, /pg_advisory_xact_lock/i);
+  assert.match(migration, /hashtextextended\('taran-account-deletion:'/i);
+  assert.match(
+    migration,
+    /create or replace function public\.taran_request_account_deletion\(\)[\s\S]*taran_account_deletion_lock_user\(v_user\)[\s\S]*insert into public\.taran_account_deletion_requests/i
+  );
+  assert.match(migration, /create trigger taran_guard_account_deletion_writes before insert or update or delete/i);
+  assert.match(migration, /create trigger taran_guard_account_deletion_evidence_writes[\s\S]*before insert or update or delete on storage\.objects/i);
+  assert.match(migration, /before update on auth\.users/i);
+  assert.match(migration, /before delete on auth\.users[\s\S]*taran_lock_account_deletion_auth_delete/i);
+});
+
+test("every user-owned write surface is protected before SECURITY DEFINER writes", () => {
+  for (const target of [
+    "taran_customers",
+    "taran_inquiries",
+    "taran_reviews",
+    "taran_contributions",
+    "taran_member_states",
+    "taran_saved_providers",
+    "taran_provider_claims",
+    "taran_community_posts",
+    "taran_community_comments",
+    "taran_inquiry_groups",
+    "taran_inquiry_responses",
+    "taran_provider_registrations",
+    "taran_user_comparisons",
+    "taran_user_checklists",
+    "taran_provider_change_requests"
+  ]) {
+    assert.match(migration, new RegExp(`public\\.${target}`, "i"));
+  }
+  assert.match(migration, /tg_op = 'INSERT'[\s\S]*Writes are disabled while account deletion is active/i);
+  assert.match(migration, /Only account-deletion cleanup is allowed for this user/i);
+});
+
+test("claim takes the user lock before row lock and repeats the fail-closed scan", () => {
+  const claim = migration.match(/create or replace function public\.taran_claim_account_deletion_job\(\)([\s\S]*?)create or replace function public\.taran_complete_account_deletion_job/i)?.[1];
+  assert.ok(claim, "claim RPC must exist");
+  const advisoryPosition = claim.indexOf("taran_account_deletion_lock_user(v_candidate_user)");
+  const rowLockPosition = claim.indexOf("where request.id = v_candidate_id");
+  assert.ok(advisoryPosition >= 0 && advisoryPosition < rowLockPosition);
+  assert.match(claim, /inquiry\.contact <> '\{\}'::jsonb/i);
+  assert.match(claim, /inquiry_group\.request_note is not null/i);
+  assert.match(claim, /from public\.taran_provider_registrations/i);
+  assert.match(claim, /from storage\.objects/i);
+});
+
 test("migration preserves only intended redacted history and blocks unsafe dependencies", () => {
   for (const relation of [
     "taran_account_deletion_requests",

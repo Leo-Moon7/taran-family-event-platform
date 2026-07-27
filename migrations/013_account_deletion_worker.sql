@@ -137,6 +137,456 @@ create index if not exists taran_account_deletion_worker_queue_idx
   on public.taran_account_deletion_requests(status, next_attempt_at, requested_at)
   where status in ('pending', 'processing');
 
+-- Every user-owned write and deletion request takes the same transaction lock.
+-- A write that started first commits before the deletion cleanup runs; a
+-- deletion request that started first makes the later write fail closed.
+create or replace function public.taran_account_deletion_parse_uuid(p_value text)
+returns uuid
+language plpgsql
+immutable
+strict
+set search_path = pg_catalog
+as $$
+begin
+  return p_value::uuid;
+exception
+  when invalid_text_representation then
+    return null;
+end;
+$$;
+
+create or replace function public.taran_account_deletion_lock_user(p_user uuid)
+returns void
+language plpgsql
+security definer
+set search_path = pg_catalog
+as $$
+begin
+  if p_user is not null then
+    perform pg_catalog.pg_advisory_xact_lock(
+      pg_catalog.hashtextextended('taran-account-deletion:' || p_user::text, 0)
+    );
+  end if;
+end;
+$$;
+
+create or replace function public.taran_account_deletion_is_active(p_user uuid)
+returns boolean
+language sql
+volatile
+security definer
+set search_path = public, pg_catalog
+as $$
+  select p_user is not null and exists (
+    select 1
+    from public.taran_account_deletion_requests request
+    where request.user_id = p_user
+      and request.status in ('pending', 'processing')
+  );
+$$;
+
+-- This trigger runs for direct table writes and SECURITY DEFINER RPC writes.
+-- It permits deletes and the exact D-31 redaction shapes, but no new or
+-- unrelated mutation once the subject has an active deletion request.
+create or replace function public.taran_guard_account_deletion_user_write()
+returns trigger
+language plpgsql
+security definer
+set search_path = public, pg_catalog
+as $$
+declare
+  v_subject_column text := tg_argv[0];
+  v_old jsonb;
+  v_new jsonb;
+  v_old_user uuid;
+  v_new_user uuid;
+  v_old_active boolean := false;
+  v_new_active boolean := false;
+  v_safe_redaction boolean := false;
+begin
+  if tg_op <> 'INSERT' then
+    v_old := to_jsonb(old);
+    v_old_user := public.taran_account_deletion_parse_uuid(v_old->>v_subject_column);
+  end if;
+  if tg_op <> 'DELETE' then
+    v_new := to_jsonb(new);
+    v_new_user := public.taran_account_deletion_parse_uuid(v_new->>v_subject_column);
+  end if;
+
+  -- Lock two subjects in deterministic order if a privileged operation tries
+  -- to reassign ownership. This avoids cross-user advisory-lock deadlocks.
+  if v_old_user is not null and v_new_user is not null
+    and v_old_user <> v_new_user then
+    if v_old_user::text < v_new_user::text then
+      perform public.taran_account_deletion_lock_user(v_old_user);
+      perform public.taran_account_deletion_lock_user(v_new_user);
+    else
+      perform public.taran_account_deletion_lock_user(v_new_user);
+      perform public.taran_account_deletion_lock_user(v_old_user);
+    end if;
+  else
+    perform public.taran_account_deletion_lock_user(coalesce(v_old_user, v_new_user));
+  end if;
+
+  if v_old_user is not null then
+    v_old_active := public.taran_account_deletion_is_active(v_old_user);
+  end if;
+  if v_new_user is not null then
+    v_new_active := public.taran_account_deletion_is_active(v_new_user);
+  end if;
+
+  if not v_old_active and not v_new_active then
+    if tg_op = 'DELETE' then
+      return old;
+    end if;
+    return new;
+  end if;
+
+  if tg_op = 'DELETE' then
+    return old;
+  end if;
+
+  if tg_op = 'INSERT' then
+    raise exception 'Writes are disabled while account deletion is active.'
+      using errcode = '42501';
+  end if;
+
+  if v_old_user is not null and v_new_user is not null
+    and v_old_user <> v_new_user then
+    raise exception 'User ownership cannot be reassigned during account deletion.'
+      using errcode = '42501';
+  end if;
+
+  if tg_table_schema = 'public' and tg_table_name = 'taran_customers' then
+    v_safe_redaction :=
+      v_new->>'status' = 'deleted'
+      and v_new->'data' = jsonb_build_object(
+        'name', '탈퇴한 사용자',
+        'email', '',
+        'phone', '',
+        'accountType', 'deleted'
+      )
+      and (v_new - array['status', 'data', 'updated_at']::text[])
+        = (v_old - array['status', 'data', 'updated_at']::text[]);
+  elsif tg_table_schema = 'public' and tg_table_name = 'taran_inquiries' then
+    v_safe_redaction :=
+      v_new->'contact' = '{}'::jsonb
+      and v_new->'details' = '{}'::jsonb
+      and (v_new - array['user_id', 'contact', 'details', 'updated_at']::text[])
+        = (v_old - array['user_id', 'contact', 'details', 'updated_at']::text[]);
+  elsif tg_table_schema = 'public' and tg_table_name = 'taran_inquiry_groups' then
+    v_safe_redaction :=
+      v_new->'contact' = '{}'::jsonb
+      and v_new->>'request_note' is null
+      and (v_new - array['user_id', 'contact', 'request_note', 'updated_at']::text[])
+        = (v_old - array['user_id', 'contact', 'request_note', 'updated_at']::text[]);
+  elsif tg_table_schema = 'public' and tg_table_name = 'taran_contributions' then
+    v_safe_redaction :=
+      v_new->'data' = jsonb_build_object('redacted', true)
+      and v_new->'file_paths' = '[]'::jsonb
+      and v_new->>'status' = 'deleted'
+      and (v_new - array['user_id', 'data', 'file_paths', 'status']::text[])
+        = (v_old - array['user_id', 'data', 'file_paths', 'status']::text[]);
+  elsif tg_table_schema = 'public' and tg_table_name = 'taran_reviews' then
+    v_safe_redaction :=
+      v_new->>'author_name' = '탈퇴한 사용자'
+      and (v_new - array['user_id', 'author_name', 'updated_at']::text[])
+        = (v_old - array['user_id', 'author_name', 'updated_at']::text[]);
+  elsif tg_table_schema = 'public'
+    and tg_table_name in ('taran_community_posts', 'taran_community_comments') then
+    v_safe_redaction :=
+      v_new->>'author_name' = '탈퇴한 사용자'
+      and (v_new - array['user_id', 'author_name', 'updated_at']::text[])
+        = (v_old - array['user_id', 'author_name', 'updated_at']::text[]);
+  elsif tg_table_schema = 'public'
+    and tg_table_name in ('taran_point_ledger', 'taran_reward_redemptions') then
+    -- These rows contain transaction history, not user-entered profile/contact
+    -- fields. Only the FK nulling performed by Auth deletion is allowed.
+    v_safe_redaction :=
+      v_new_user is null
+      and (v_new - v_subject_column) = (v_old - v_subject_column);
+  end if;
+
+  if v_safe_redaction then
+    return new;
+  end if;
+
+  raise exception 'Only account-deletion cleanup is allowed for this user.'
+    using errcode = '42501';
+end;
+$$;
+
+do $migration$
+declare
+  v_target record;
+  v_relation regclass;
+begin
+  for v_target in
+    select *
+    from (values
+      ('public.taran_admin_profiles', 'user_id'),
+      ('public.taran_customers', 'id'),
+      ('public.taran_providers', 'owner_user_id'),
+      ('public.taran_inquiries', 'user_id'),
+      ('public.taran_reviews', 'user_id'),
+      ('public.taran_contributions', 'user_id'),
+      ('public.taran_point_ledger', 'user_id'),
+      ('public.taran_member_states', 'user_id'),
+      ('public.taran_saved_providers', 'user_id'),
+      ('public.taran_reward_redemptions', 'user_id'),
+      ('public.taran_provider_claims', 'user_id'),
+      ('public.taran_community_posts', 'user_id'),
+      ('public.taran_community_comments', 'user_id'),
+      ('public.taran_inquiry_groups', 'user_id'),
+      ('public.taran_inquiry_responses', 'provider_user_id'),
+      ('public.taran_provider_registrations', 'user_id'),
+      ('public.taran_user_comparisons', 'user_id'),
+      ('public.taran_user_checklists', 'user_id'),
+      ('public.taran_provider_change_requests', 'requested_by'),
+      ('public.taran_provider_review_events', 'actor_user_id'),
+      ('public.taran_notification_jobs', 'recipient_user_id')
+    ) target(relation_name, column_name)
+  loop
+    v_relation := to_regclass(v_target.relation_name);
+    if v_relation is null then
+      raise exception 'Required account-deletion write target is missing.'
+        using errcode = '55000';
+    end if;
+
+    execute format(
+      'drop trigger if exists taran_guard_account_deletion_writes on %s',
+      v_relation
+    );
+    execute format(
+      'create trigger taran_guard_account_deletion_writes before insert or update or delete on %s for each row execute function public.taran_guard_account_deletion_user_write(%L)',
+      v_relation,
+      v_target.column_name
+    );
+  end loop;
+end;
+$migration$;
+
+-- Evidence objects are keyed by the first path component. The trigger does not
+-- delete or change retention; it only serializes and blocks new raw evidence.
+create or replace function public.taran_guard_account_deletion_evidence_write()
+returns trigger
+language plpgsql
+security definer
+set search_path = public, pg_catalog
+as $$
+declare
+  v_old_user uuid;
+  v_new_user uuid;
+  v_old_active boolean := false;
+  v_new_active boolean := false;
+begin
+  if tg_op <> 'INSERT' and old.bucket_id = 'taran-private-evidence' then
+    v_old_user := public.taran_account_deletion_parse_uuid(
+      (storage.foldername(old.name))[1]
+    );
+  end if;
+  if tg_op <> 'DELETE' and new.bucket_id = 'taran-private-evidence' then
+    v_new_user := public.taran_account_deletion_parse_uuid(
+      (storage.foldername(new.name))[1]
+    );
+  end if;
+
+  if v_old_user is not null and v_new_user is not null
+    and v_old_user <> v_new_user then
+    if v_old_user::text < v_new_user::text then
+      perform public.taran_account_deletion_lock_user(v_old_user);
+      perform public.taran_account_deletion_lock_user(v_new_user);
+    else
+      perform public.taran_account_deletion_lock_user(v_new_user);
+      perform public.taran_account_deletion_lock_user(v_old_user);
+    end if;
+  else
+    perform public.taran_account_deletion_lock_user(coalesce(v_old_user, v_new_user));
+  end if;
+
+  if v_old_user is not null then
+    v_old_active := public.taran_account_deletion_is_active(v_old_user);
+  end if;
+  if v_new_user is not null then
+    v_new_active := public.taran_account_deletion_is_active(v_new_user);
+  end if;
+
+  if (v_old_active or v_new_active) and tg_op <> 'DELETE' then
+    raise exception 'Evidence writes are disabled while account deletion is active.'
+      using errcode = '42501';
+  end if;
+
+  if tg_op = 'DELETE' then
+    return old;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists taran_guard_account_deletion_evidence_writes
+  on storage.objects;
+create trigger taran_guard_account_deletion_evidence_writes
+before insert or update or delete on storage.objects
+for each row execute function public.taran_guard_account_deletion_evidence_write();
+
+-- Auth updates use the same lock so a metadata/email/phone write that starts
+-- first is subsequently redacted, while one that starts after the request is
+-- rejected before it can repopulate taran_customers.
+create or replace function public.taran_guard_account_deletion_auth_metadata()
+returns trigger
+language plpgsql
+security definer
+set search_path = public, pg_catalog
+as $$
+begin
+  perform public.taran_account_deletion_lock_user(new.id);
+  if public.taran_account_deletion_is_active(new.id) then
+    raise exception 'Auth profile writes are disabled while account deletion is active.'
+      using errcode = '42501';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists taran_guard_account_deletion_auth_metadata_writes
+  on auth.users;
+create trigger taran_guard_account_deletion_auth_metadata_writes
+before update on auth.users
+for each row execute function public.taran_guard_account_deletion_auth_metadata();
+
+-- Hold the user lock for the complete Auth deletion transaction. Even if the
+-- request FK is nulled before another FK action, no concurrent protected write
+-- can enter that gap.
+create or replace function public.taran_lock_account_deletion_auth_delete()
+returns trigger
+language plpgsql
+security definer
+set search_path = public, pg_catalog
+as $$
+begin
+  perform public.taran_account_deletion_lock_user(old.id);
+  return old;
+end;
+$$;
+
+drop trigger if exists taran_lock_account_deletion_auth_delete
+  on auth.users;
+create trigger taran_lock_account_deletion_auth_delete
+before delete on auth.users
+for each row execute function public.taran_lock_account_deletion_auth_delete();
+
+-- Replace migration 006's request RPC so request creation and every cleanup
+-- statement share the same per-user lock used by all protected writes.
+create or replace function public.taran_request_account_deletion()
+returns uuid
+language plpgsql
+security definer
+set search_path = public, pg_catalog
+as $$
+declare
+  v_user uuid := auth.uid();
+  v_id uuid;
+  v_status text;
+begin
+  if v_user is null then
+    raise exception 'Login is required to request account deletion.'
+      using errcode = '42501';
+  end if;
+
+  perform public.taran_account_deletion_lock_user(v_user);
+
+  select request.id, request.status
+  into v_id, v_status
+  from public.taran_account_deletion_requests request
+  where request.user_id = v_user
+    and request.status in ('pending', 'processing')
+  for update;
+
+  if found and v_status = 'processing' then
+    raise exception 'Account deletion is already processing.'
+      using errcode = '55000';
+  elsif found then
+    update public.taran_account_deletion_requests request
+    set requested_at = now()
+    where request.id = v_id;
+  else
+    insert into public.taran_account_deletion_requests (user_id, status)
+    values (v_user, 'pending')
+    returning id into v_id;
+  end if;
+
+  update public.taran_customers
+  set status = 'deleted',
+      data = jsonb_build_object(
+        'name', '탈퇴한 사용자',
+        'email', '',
+        'phone', '',
+        'accountType', 'deleted'
+      ),
+      updated_at = now()
+  where id = v_user::text;
+
+  delete from public.taran_saved_providers where user_id = v_user;
+  delete from public.taran_member_states where user_id = v_user;
+  delete from public.taran_user_comparisons where user_id = v_user;
+  delete from public.taran_user_checklists where user_id = v_user;
+
+  update public.taran_inquiries
+  set contact = '{}'::jsonb,
+      details = '{}'::jsonb,
+      updated_at = now()
+  where user_id = v_user;
+
+  update public.taran_inquiry_groups
+  set contact = '{}'::jsonb,
+      request_note = null,
+      updated_at = now()
+  where user_id = v_user;
+
+  update public.taran_contributions
+  set data = jsonb_build_object('redacted', true),
+      file_paths = '{}',
+      status = 'deleted'
+  where user_id = v_user;
+
+  update public.taran_reviews
+  set author_name = '탈퇴한 사용자',
+      updated_at = now()
+  where user_id = v_user;
+
+  update public.taran_community_posts
+  set author_name = '탈퇴한 사용자',
+      updated_at = now()
+  where user_id = v_user;
+
+  update public.taran_community_comments
+  set author_name = '탈퇴한 사용자',
+      updated_at = now()
+  where user_id = v_user;
+
+  return v_id;
+end;
+$$;
+
+revoke all on function public.taran_account_deletion_parse_uuid(text)
+  from public, anon, authenticated;
+revoke all on function public.taran_account_deletion_lock_user(uuid)
+  from public, anon, authenticated;
+revoke all on function public.taran_account_deletion_is_active(uuid)
+  from public, anon, authenticated;
+revoke all on function public.taran_guard_account_deletion_user_write()
+  from public, anon, authenticated;
+revoke all on function public.taran_guard_account_deletion_evidence_write()
+  from public, anon, authenticated;
+revoke all on function public.taran_guard_account_deletion_auth_metadata()
+  from public, anon, authenticated;
+revoke all on function public.taran_lock_account_deletion_auth_delete()
+  from public, anon, authenticated;
+revoke all on function public.taran_request_account_deletion()
+  from public, anon;
+grant execute on function public.taran_request_account_deletion()
+  to authenticated;
+
 -- This table is the non-identifying worker history. It deliberately has no
 -- request ID, Auth user UUID, email, phone, payload, or free-text error field.
 create table if not exists public.taran_account_deletion_jobs (
@@ -176,6 +626,8 @@ set search_path = public, pg_catalog
 as $$
 declare
   v_request public.taran_account_deletion_requests;
+  v_candidate_id uuid;
+  v_candidate_user uuid;
   v_claim_token uuid;
   v_attempt smallint;
   v_manual_review boolean := false;
@@ -203,7 +655,11 @@ begin
     );
   end if;
 
-  select request.* into v_request
+  -- Choose without a row lock, take the same user advisory lock used by every
+  -- protected write, then re-read and lock the still-eligible request. This
+  -- lock ordering avoids a request-row/advisory-lock deadlock.
+  select request.id, request.user_id
+  into v_candidate_id, v_candidate_user
   from public.taran_account_deletion_requests request
   where request.user_id is not null
     and (
@@ -217,8 +673,29 @@ begin
       )
     )
   order by request.requested_at
-  for update skip locked
   limit 1;
+
+  if not found then
+    return null;
+  end if;
+
+  perform public.taran_account_deletion_lock_user(v_candidate_user);
+
+  select request.* into v_request
+  from public.taran_account_deletion_requests request
+  where request.id = v_candidate_id
+    and request.user_id = v_candidate_user
+    and (
+      (
+        request.status = 'pending'
+        and coalesce(request.next_attempt_at, request.requested_at) <= now()
+      )
+      or (
+        request.status = 'processing'
+        and request.claim_expires_at <= now()
+      )
+    )
+  for update skip locked;
 
   if not found then
     return null;
@@ -262,6 +739,20 @@ begin
     )
     or exists (
       select 1
+      from public.taran_customers customer
+      where customer.id = v_request.user_id::text
+        and (
+          customer.status <> 'deleted'
+          or customer.data <> jsonb_build_object(
+            'name', '탈퇴한 사용자',
+            'email', '',
+            'phone', '',
+            'accountType', 'deleted'
+          )
+        )
+    )
+    or exists (
+      select 1
       from public.taran_providers provider
       where provider.owner_user_id = v_request.user_id
     )
@@ -287,12 +778,78 @@ begin
     )
     or exists (
       select 1
+      from public.taran_notification_jobs notification
+      where notification.recipient_user_id = v_request.user_id
+    )
+    or exists (
+      select 1
+      from public.taran_provider_review_events review_event
+      where review_event.actor_user_id = v_request.user_id
+    )
+    or exists (
+      select 1
+      from public.taran_inquiries inquiry
+      where inquiry.user_id = v_request.user_id
+        and (
+          inquiry.contact <> '{}'::jsonb
+          or inquiry.details <> '{}'::jsonb
+        )
+    )
+    or exists (
+      select 1
+      from public.taran_inquiry_groups inquiry_group
+      where inquiry_group.user_id = v_request.user_id
+        and (
+          inquiry_group.contact <> '{}'::jsonb
+          or inquiry_group.request_note is not null
+        )
+    )
+    or exists (
+      select 1
       from public.taran_contributions contribution
       where contribution.user_id = v_request.user_id
         and (
           coalesce(cardinality(contribution.file_paths), 0) > 0
           or contribution.data <> jsonb_build_object('redacted', true)
         )
+    )
+    or exists (
+      select 1
+      from public.taran_reviews review
+      where review.user_id = v_request.user_id
+        and review.author_name <> '탈퇴한 사용자'
+    )
+    or exists (
+      select 1
+      from public.taran_community_posts post
+      where post.user_id = v_request.user_id
+        and post.author_name <> '탈퇴한 사용자'
+    )
+    or exists (
+      select 1
+      from public.taran_community_comments comment_row
+      where comment_row.user_id = v_request.user_id
+        and comment_row.author_name <> '탈퇴한 사용자'
+    )
+    or exists (
+      select 1
+      from public.taran_member_states state
+      where state.user_id = v_request.user_id
+    )
+    or exists (
+      select 1
+      from public.taran_saved_providers saved
+      where saved.user_id = v_request.user_id
+    )
+    or exists (
+      select 1
+      from public.taran_user_comparisons comparison
+      where comparison.user_id = v_request.user_id
+    )
+    or exists (
+      select 1
+      from public.taran_user_checklists checklist
+      where checklist.user_id = v_request.user_id
     )
     or exists (
       select 1

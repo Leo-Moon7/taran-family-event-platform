@@ -143,3 +143,64 @@ test("rejects an invalid private claim contract", async () => {
     /invalid_claim_contract/
   );
 });
+
+function createDeletionGateModel() {
+  let lock = Promise.resolve();
+  let active = false;
+  const record = { contact: "raw", evidence: false };
+
+  async function transaction(operation) {
+    const previous = lock;
+    let release;
+    lock = new Promise((resolve) => { release = resolve; });
+    await previous;
+    try {
+      return await operation();
+    } finally {
+      release();
+    }
+  }
+
+  return {
+    record,
+    request: () => transaction(async () => {
+      active = true;
+      record.contact = "redacted";
+    }),
+    writeContact: (value) => transaction(async () => {
+      if (active) throw new Error("deletion_active");
+      record.contact = value;
+    }),
+    writeEvidence: () => transaction(async () => {
+      if (active) throw new Error("deletion_active");
+      record.evidence = true;
+    }),
+    claim: () => transaction(async () => {
+      if (!active || record.contact !== "redacted" || record.evidence) {
+        return { action: "blocked" };
+      }
+      return { action: "delete" };
+    })
+  };
+}
+
+test("a write that starts before the request is redacted after serialization", async () => {
+  const gate = createDeletionGateModel();
+  const write = gate.writeContact("concurrent raw value");
+  const request = gate.request();
+  await Promise.all([write, request]);
+
+  assert.equal(gate.record.contact, "redacted");
+  assert.deepEqual(await gate.claim(), { action: "delete" });
+});
+
+test("writes and evidence that start after the request are rejected", async () => {
+  const gate = createDeletionGateModel();
+  await gate.request();
+
+  await assert.rejects(gate.writeContact("new raw value"), /deletion_active/);
+  await assert.rejects(gate.writeEvidence(), /deletion_active/);
+  assert.equal(gate.record.contact, "redacted");
+  assert.equal(gate.record.evidence, false);
+  assert.deepEqual(await gate.claim(), { action: "delete" });
+});
