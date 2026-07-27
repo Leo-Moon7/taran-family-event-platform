@@ -1,6 +1,6 @@
 # 손품해방 운영 배포 점검표
 
-기준일: 2026-07-20
+기준일: 2026-07-27
 
 ## 소스 코드 완료
 
@@ -28,19 +28,23 @@
 - [x] 24시간 문의 만료와 반복 미응답 업체 자동 제외
 - [x] 관리자 운영 예외 큐와 실제 성과 지표
 
-## 최초 배포 때 운영자가 입력할 값
+## 운영 Supabase 적용 전 확인
 
-- [x] Supabase에서 `admin-schema.sql` 실행
-- [x] 기존 Supabase 프로젝트라면 `migrations/002_security_hardening.sql` 실행
-- [ ] Supabase SQL Editor에서 `migrations/003_marketplace_comparison_flow.sql` 실행 여부 확인
-- [ ] Supabase SQL Editor에서 `migrations/004_provider_automation.sql` 실행
+- [ ] 대상이 새 프로젝트인지 기존 프로젝트인지 구분
+- [ ] 기존 프로젝트는 `admin-schema.sql`을 실행하지 않고 적용 이력·백업 확인
+- [ ] 새 프로젝트는 `admin-schema.sql` 1회 후 `003`부터 순차 적용
+- [ ] 현재 checkout에 `001`~`014`가 연속해서 존재하는지 확인
+- [ ] 격리 프로젝트에서 같은 migration 순서와 QA-003·QA-040 통과
+- [ ] 운영 적용 전 활성 탈퇴 요청·장시간 transaction·worker·cron 중지 확인
+- [ ] `013`·`014` 적용 뒤 계정 삭제 runtime이 비활성·미설정 상태인지 확인
+- [ ] Edge Function·실제 runtime 값·스케줄을 DB migration과 분리 승인
 - [x] Supabase Auth에서 첫 관리자 생성 후 owner 역할 등록
 - [x] Netlify 환경변수 `SUPABASE_URL`, `SUPABASE_ANON_KEY` 입력
 - [ ] Supabase Auth의 Site URL과 Redirect URL에 실제 도메인 입력
 - [ ] 개인정보처리방침·푸터에 실제 사업자명, 대표자, 사업자등록번호, 연락처, 이메일 반영
 - [ ] sitemap.xml의 테스트 주소를 실제 도메인으로 교체
 
-위 미체크 항목은 비밀키와 실제 사업자 정보가 필요한 외부 운영 설정이며 소스 코드에 미리 넣으면 안 됩니다. 상세 절차는 `SUPABASE-SETUP-GUIDE.md`를 따릅니다.
+격리 프로젝트의 PASS는 운영 체크 완료로 바꾸지 않습니다. 위 미체크 항목은 운영 DB·비밀키·실제 사업자 정보·외부 설정이 필요한 단계이며 소스 코드에 미리 넣으면 안 됩니다. 상세 절차는 `migrations/README.md`와 `SUPABASE-SETUP-GUIDE.md`를 따릅니다.
 
 ## 배포 후 10분 확인
 
@@ -56,3 +60,4 @@
 10. 모바일 390px, 태블릿 768px, PC 1440px 확인
 11. 관리자 URL을 로그아웃 상태에서 열었을 때 로그인 화면으로 이동하는지 확인
 12. 12시간 리마인드와 24시간 만료가 운영 예외 화면에 반영되는지 확인
+13. 합성 탈퇴 요청의 DB·Storage·Auth 삭제, 실패 재시도, 완료 이력 최소화와 잔존 0 확인

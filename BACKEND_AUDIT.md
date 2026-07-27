@@ -31,4 +31,10 @@
 
 ## 운영 전 외부 확인
 
-`admin-schema.sql` 실행, 첫 owner 계정 등록, Netlify의 `SUPABASE_URL`·`SUPABASE_ANON_KEY` 설정이 필요합니다. 이는 소스 코드에 비밀값을 넣지 않기 위한 정상적인 배포 절차입니다.
+- 새 프로젝트는 `admin-schema.sql` 1회 후 `003`~`014`, 기존 프로젝트는 적용 이력 확인 뒤 누락 migration만 번호 순서대로 실행합니다.
+- 먼저 별도 격리 프로젝트에서 QA-003·QA-040 계약을 통과해야 합니다.
+- `013`·`014` DB 적용과 계정 삭제 Edge Function·runtime·스케줄 활성화는 분리합니다.
+- 첫 owner 계정과 Netlify의 `SUPABASE_URL`·`SUPABASE_ANON_KEY` 설정이 필요합니다.
+- 운영 DB·실제 계정·main·production은 별도 승인 전 변경하지 않습니다.
+
+상세 순서와 중단 조건은 `migrations/README.md`와 `SUPABASE-SETUP-GUIDE.md`를 따릅니다. 이는 소스 코드에 비밀값을 넣지 않고 누락·중복 적용을 막기 위한 배포 절차입니다.

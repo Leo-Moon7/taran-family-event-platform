@@ -1,24 +1,18 @@
 # 손품해방 온라인 저장 연결 가이드
 
-개발 지식이 없어도 아래 순서대로 한 번만 설정하면 됩니다. `service_role` 키는 어떤 경우에도 사이트 파일·GitHub·채팅에 넣지 않습니다.
+개발 지식이 없어도 순서대로 확인할 수 있는 안내입니다. 다만 운영 DB 적용은 별도 승인 뒤 진행합니다. `service_role` 키는 어떤 경우에도 사이트 파일·GitHub·채팅에 넣지 않습니다.
 
 ## 1. Supabase 프로젝트 만들기
 
 1. Supabase에서 새 프로젝트를 만듭니다.
 2. `SQL Editor > New query`를 엽니다.
 3. 저장소의 `admin-schema.sql` 전체를 붙여넣고 `Run`을 누릅니다.
-4. 오류 없이 완료되는지 확인합니다. 같은 SQL을 다시 실행해도 기존 표를 지우지 않도록 작성되어 있습니다.
+4. 오류 없이 완료되는지 확인합니다. `admin-schema.sql`은 새 빈 프로젝트에서 한 번만 실행하며 재실행하지 않습니다.
+5. `migrations/README.md`의 새 프로젝트 절차에 따라 `003`부터 현재 저장소의 마지막 번호까지 한 파일씩 실행합니다.
 
-기존 프로젝트에 이전 스키마를 이미 실행했다면 아래 파일을 번호 순서대로 실행합니다. 각 마이그레이션은 기존 업체·회원·콘텐츠 데이터를 삭제하지 않고 필요한 열과 정책을 추가합니다.
+기존 프로젝트라면 `admin-schema.sql`을 실행하지 않습니다. 적용 이력과 백업을 확인한 뒤 `migrations/README.md`에 따라 누락된 첫 번호부터 실행합니다.
 
-1. `migrations/002_security_hardening.sql`
-2. `migrations/003_marketplace_comparison_flow.sql`
-3. `migrations/004_provider_automation.sql`
-4. `migrations/005_sonpum_brand_and_event_types.sql`
-
-`004_provider_automation.sql`은 업체 정보 완성도, 문의 즉시 웹 알림, 12시간 리마인드, 24시간 만료, 응답률·평균 응답 시간, 오래된 정보의 문의 수신 제한을 추가합니다. 실행 후 `migrations/README.md`의 확인 항목을 순서대로 점검합니다.
-
-`005_sonpum_brand_and_event_types.sql`은 돌잔치·백일, 환갑·칠순·팔순, 상견례, 스몰웨딩, 가족모임, 기념일·생신, 추모 가족행사, 기타 가족행사로 분류를 확장합니다. 기존 `wedding` 데이터는 이름과 설명에 근거가 분명할 때만 자동 분류하며, 애매한 자료는 삭제하지 않고 관리자 검토 대상으로 남깁니다.
+`013`·`014`를 적용하는 것만으로 실제 계정 자동 삭제가 켜지지 않습니다. Edge Function 배포, 대상 프로젝트의 실제 TTL·쓰기 상한 측정, runtime config, 합성 E2E와 스케줄은 각각 별도 단계입니다. 격리 QA 값을 운영에 복사하지 않습니다.
 
 ## 2. 로그인 주소 설정
 
@@ -66,9 +60,11 @@ SUPABASE_ANON_KEY=anon public key
 
 다시 배포하면 `scripts/build/write-config.mjs`가 공개용 설정 파일을 자동 생성합니다. `service_role` 키는 넣지 않습니다.
 
-## 5. 최초 동작 확인
+## 5. 격리 환경 최초 동작 확인
 
-1. `/login.html`에서 회원 로그인
+실제 고객·업체·증빙 대신 명백한 합성 계정과 파일만 사용하고 종료 후 전부 정리합니다.
+
+1. `/login.html`에서 합성 회원 로그인
 2. `/admin/`에서 관리자 화면 진입
 3. 테스트 업체를 `검수 중`으로 등록 후 `공개` 전환
 4. 공개 목록과 상세 화면에서 업체 확인
@@ -79,6 +75,7 @@ SUPABASE_ANON_KEY=anon public key
 9. 업체 관리 화면에서 프로필 완성도와 빠진 정보 확인
 10. 테스트 문의를 열어 `신규 문의 → 열람` 상태 변경 확인
 11. 관리자 `운영 예외`에서 전송 실패·미응답·오래된 정보만 표시되는지 확인
+12. 계정 삭제는 runtime이 활성화된 격리 환경에서만 stale JWT·Storage·재시도·완료 이력·잔존 0을 확인
 
 ## 6. 알림 처리 범위
 
@@ -91,5 +88,6 @@ SUPABASE_ANON_KEY=anon public key
 - 관리자 권한은 필요한 사람에게만 부여합니다.
 - 견적서·사진은 비공개 Storage에 저장되며 공개 URL을 만들지 않습니다.
 - 고객 연락처는 견적 처리 목적 외에 사용하지 않습니다.
-- 탈퇴 요청은 관리자 DB에서 확인하고, 법정 보관 의무가 없는 Auth 사용자와 자료를 삭제합니다.
+- 탈퇴 요청은 승인된 server-only worker만 처리합니다. runtime config·Edge Function·스케줄이 검증되지 않았다면 자동 삭제가 작동한다고 공개하지 않습니다.
 - SQL, 정책 또는 키를 바꾼 뒤에는 로그인·저장·공개 읽기를 다시 시험합니다.
+- 운영 DB migration, 실제 고객 탈퇴, Edge 배포·스케줄, main 병합과 production 배포는 별도 사용자 승인 전 실행하지 않습니다.
