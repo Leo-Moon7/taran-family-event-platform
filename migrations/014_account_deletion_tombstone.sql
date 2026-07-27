@@ -3,23 +3,14 @@
 -- Production application, runtime configuration, Edge deployment, and
 -- scheduling require separate approval.
 
--- Replacing migration 013 while it owns an active request can lose the worker
--- state that is being converted. Fail closed on the first application. A
--- rerun after this migration created its tombstone table remains idempotent.
-do $migration$
-begin
-  if to_regclass('public.taran_account_deletion_tombstones') is null
-    and exists (
-      select 1
-      from public.taran_account_deletion_requests request
-      where request.status in ('pending', 'processing')
-        or request.claim_token is not null
-    ) then
-    raise exception 'Pause the deletion worker and resolve all active migration 013 requests before applying migration 014.'
-      using errcode = '55000';
-  end if;
-end;
-$migration$;
+begin;
+
+-- Cutover barrier: wait for every transaction that already touched the
+-- migration 013 request table, then block new request INSERT/UPDATE statements
+-- until the persistent tombstone invariant below is installed and committed.
+-- A legacy RPC that started earlier but has not touched this table waits here
+-- and resumes only after the invariant trigger is visible.
+lock table public.taran_account_deletion_requests in access exclusive mode;
 
 -- Runtime values deliberately have no defaults. The migration is safe to
 -- validate in isolation, but account deletion remains disabled until an
@@ -93,6 +84,77 @@ create index if not exists taran_account_deletion_tombstone_queue_idx
 alter table public.taran_account_deletion_tombstones enable row level security;
 revoke all on public.taran_account_deletion_tombstones
   from public, anon, authenticated, service_role;
+
+-- Persistent cutover invariant. It is not enough to inspect the queue once:
+-- a migration 013 function can have started before the table lock and resume
+-- after migration 014 commits. Any such legacy request INSERT lacks a
+-- pre-created matching tombstone and is rejected by this trigger.
+create or replace function public.taran_require_account_deletion_tombstone()
+returns trigger
+language plpgsql
+security definer
+set search_path = public, pg_catalog
+set row_security = off
+as $$
+begin
+  if new.status in ('pending', 'processing') or new.claim_token is not null then
+    if not exists (
+      select 1
+      from public.taran_account_deletion_tombstones tombstone
+      where tombstone.request_id = new.id
+        and (new.user_id is null or tombstone.user_id = new.user_id)
+    ) then
+      raise exception 'An active account deletion request requires a matching tombstone.'
+        using errcode = '55000';
+    end if;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists taran_require_account_deletion_tombstone
+  on public.taran_account_deletion_requests;
+create trigger taran_require_account_deletion_tombstone
+before insert or update on public.taran_account_deletion_requests
+for each row execute function public.taran_require_account_deletion_tombstone();
+
+-- This audit runs on every application, not only when the tombstone table was
+-- absent. It catches an incomplete previous application, manual mutation, or
+-- legacy request that committed before the cutover lock was acquired.
+do $migration$
+begin
+  if exists (
+    select 1
+    from public.taran_account_deletion_requests request
+    where (
+      request.status in ('pending', 'processing')
+      or request.claim_token is not null
+    )
+      and not exists (
+        select 1
+        from public.taran_account_deletion_tombstones tombstone
+        where tombstone.request_id = request.id
+          and (request.user_id is null or tombstone.user_id = request.user_id)
+      )
+  ) then
+    raise exception 'Every active account deletion request must have a matching tombstone before migration 014 can commit.'
+      using errcode = '55000';
+  end if;
+
+  if exists (
+    select 1
+    from public.taran_account_deletion_tombstones tombstone
+    where not exists (
+      select 1
+      from public.taran_account_deletion_requests request
+      where request.id = tombstone.request_id
+    )
+  ) then
+    raise exception 'Every account deletion tombstone must have a matching request before migration 014 can commit.'
+      using errcode = '55000';
+  end if;
+end;
+$migration$;
 
 -- Any surviving tombstone blocks the subject. In particular this does not
 -- depend on an auth.users FK or taran_account_deletion_requests.user_id.
@@ -688,16 +750,34 @@ begin
     raise exception 'Account deletion is already processing.'
       using errcode = '55000';
   elsif found then
+    -- The persistent request trigger verifies the existing matching tombstone
+    -- before this refresh can commit.
     update public.taran_account_deletion_requests request
     set requested_at = now()
     where request.id = v_id;
   else
+    v_id := gen_random_uuid();
     begin
-      insert into public.taran_account_deletion_requests (user_id, status)
-      values (v_user, 'pending')
-      returning id into v_id;
+      -- Pre-create the tombstone. The following request INSERT is accepted
+      -- only because the persistent trigger can already see this exact pair.
+      insert into public.taran_account_deletion_tombstones (
+        user_id, request_id, state, preflight_after
+      ) values (
+        v_user,
+        v_id,
+        'requested',
+        now() + pg_catalog.make_interval(
+          secs => v_max_inflight_write_seconds + v_buffer_seconds
+        )
+      );
+
+      insert into public.taran_account_deletion_requests (id, user_id, status)
+      values (v_id, v_user, 'pending');
     exception
       when unique_violation then
+        -- Both inserts above are in this subtransaction. If either conflicts,
+        -- its tombstone is rolled back before an already committed active pair
+        -- is selected.
         select request.id, request.status
         into v_id, v_existing_status
         from public.taran_account_deletion_requests request
@@ -709,33 +789,12 @@ begin
           raise exception 'Account deletion is already processing.'
             using errcode = '55000';
         end if;
+
+        update public.taran_account_deletion_requests request
+        set requested_at = now()
+        where request.id = v_id;
     end;
   end if;
-
-  begin
-    insert into public.taran_account_deletion_tombstones (
-      user_id, request_id, state, preflight_after
-    ) values (
-      v_user,
-      v_id,
-      'requested',
-      now() + pg_catalog.make_interval(
-        secs => v_max_inflight_write_seconds + v_buffer_seconds
-      )
-    );
-  exception
-    when unique_violation then
-      if not exists (
-        select 1
-        from public.taran_account_deletion_tombstones tombstone
-        where tombstone.user_id = v_user
-          and tombstone.request_id = v_id
-          and tombstone.state in ('requested', 'retry_wait')
-      ) then
-        raise exception 'An unresolved account deletion tombstone already exists.'
-          using errcode = '55000';
-      end if;
-  end;
 
   perform public.taran_account_deletion_cleanup_user(v_user);
   return v_id;
@@ -1318,6 +1377,8 @@ revoke all on function public.taran_account_deletion_cleanup_user(uuid)
   from public, anon, authenticated, service_role;
 revoke all on function public.taran_account_deletion_requires_manual_review(uuid)
   from public, anon, authenticated, service_role;
+revoke all on function public.taran_require_account_deletion_tombstone()
+  from public, anon, authenticated, service_role;
 revoke all on function public.taran_account_deletion_is_active(uuid)
   from public, anon, authenticated;
 revoke all on function public.taran_account_deletion_self_is_active()
@@ -1361,3 +1422,5 @@ grant execute on function public.taran_fail_account_deletion_job(uuid, text)
 -- lock ordering.
 drop function if exists public.taran_lock_account_deletion_auth_delete();
 drop function if exists public.taran_account_deletion_lock_user(uuid);
+
+commit;

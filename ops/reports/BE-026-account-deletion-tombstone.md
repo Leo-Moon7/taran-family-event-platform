@@ -11,17 +11,20 @@
 ### DB·RLS
 
 1. `taran_account_deletion_tombstones`를 추가했다. `user_id`와 `request_id`에 Auth/request FK를 두지 않아 Auth 삭제가 `request.user_id`를 NULL로 바꿔도 차단 상태가 유지된다.
-2. 최초 014 적용 때 013의 pending·processing·claim 요청이 한 건이라도 있으면 migration이 `55000`으로 중단된다. worker 중지와 활성 요청 0건 없이 교체하지 못한다. 014 생성 뒤의 재적용은 이 최초 전환 검사에 걸리지 않는다.
-3. 013의 public 21개 user-owned trigger, Storage trigger, Auth metadata trigger가 참조하는 함수를 no-lock tombstone 검사로 재정의했다. row trigger 안의 account-deletion advisory lock을 제거하고 Auth delete advisory trigger와 helper를 제거했다.
-4. 일반 사용자의 legacy `taran_inquiries` 직접 INSERT 정책을 제거했다. 현재 제품의 견적 문의는 `taran_create_inquiry_group()` 서버 RPC가 `auth.uid()`를 강제로 저장한다.
-5. 후기·제보·회원 상태·저장 업체·업체 claim·커뮤니티·비교함·체크리스트·문의 응답·Storage upload/delete 정책에 tombstone 조건을 추가했다.
-6. UUID를 받는 내부 `taran_account_deletion_is_active(uuid)`는 일반 사용자에게 계속 비공개다. RLS는 UUID 인자가 없는 `taran_account_deletion_self_is_active()`만 호출하고, authenticated에는 이 self-only helper만 EXECUTE를 허용한다. 다른 사용자의 tombstone 존재 여부를 조회하는 oracle을 만들지 않았다.
-7. 설정값을 추측하지 않는다. `taran_account_deletion_runtime_config`는 기본 비활성이며 다음 값과 검증시각이 모두 설정되어야 요청 RPC가 작동한다.
+2. migration 전체를 명시적 transaction으로 감싸고 가장 먼저 `taran_account_deletion_requests`에 `ACCESS EXCLUSIVE` 전환 잠금을 획득한다. 이미 request 테이블을 수정한 013 transaction이 끝날 때까지 기다리고, 아직 테이블을 건드리지 않은 구 RPC는 014 commit 뒤까지 대기한다.
+3. pending·processing 또는 claim token이 있는 request는 정확히 일치하는 tombstone이 없으면 INSERT·UPDATE를 거부하는 영속 trigger를 설치했다. 구 RPC가 cutover 검사 뒤 재개되더라도 tombstone 없는 request를 커밋할 수 없다.
+4. 최초 적용과 재적용 모두 모든 active/claimed request와 tombstone의 일치 여부를 검사한다. tombstone 테이블이 이미 존재해도 불일치가 있으면 `55000`으로 전체 transaction을 중단한다.
+5. 새 request RPC는 UUID를 먼저 생성하고 `tombstone → request` 순서로 같은 subtransaction에 기록한다. 둘 중 하나가 충돌하면 tombstone도 함께 롤백한 뒤 이미 커밋된 일치 pair만 다시 사용한다.
+6. 013의 public 21개 user-owned trigger, Storage trigger, Auth metadata trigger가 참조하는 함수를 no-lock tombstone 검사로 재정의했다. row trigger 안의 account-deletion advisory lock을 제거하고 Auth delete advisory trigger와 helper를 제거했다.
+7. 일반 사용자의 legacy `taran_inquiries` 직접 INSERT 정책을 제거했다. 현재 제품의 견적 문의는 `taran_create_inquiry_group()` 서버 RPC가 `auth.uid()`를 강제로 저장한다.
+8. 후기·제보·회원 상태·저장 업체·업체 claim·커뮤니티·비교함·체크리스트·문의 응답·Storage upload/delete 정책에 tombstone 조건을 추가했다.
+9. UUID를 받는 내부 `taran_account_deletion_is_active(uuid)`는 일반 사용자에게 계속 비공개다. RLS는 UUID 인자가 없는 `taran_account_deletion_self_is_active()`만 호출하고, authenticated에는 이 self-only helper만 EXECUTE를 허용한다. 다른 사용자의 tombstone 존재 여부를 조회하는 oracle을 만들지 않았다.
+10. 설정값을 추측하지 않는다. `taran_account_deletion_runtime_config`는 기본 비활성이며 다음 값과 검증시각이 모두 설정되어야 요청 RPC가 작동한다.
    - 실제 Supabase 최대 access JWT TTL
    - PostgREST·Storage·Auth metadata 쓰기 중 가장 긴 검증된 transaction 상한
    - 상한보다 큰 안전 buffer
    - 설정 검증시각
-8. old-snapshot write는 `max_inflight_write_seconds + buffer_seconds`가 지난 뒤 다시 비식별화하고 preflight한다. 실제 상한이 설정되지 않았거나 buffer가 상한 이하이면 요청을 fail-closed한다.
+11. old-snapshot write는 `max_inflight_write_seconds + buffer_seconds`가 지난 뒤 다시 비식별화하고 preflight한다. 실제 상한이 설정되지 않았거나 buffer가 상한 이하이면 요청을 fail-closed한다.
 
 ### 상태 전이
 
@@ -88,11 +91,16 @@ $node = 'C:\Users\mch45\.cache\codex-runtimes\codex-primary-runtime\dependencies
   scripts/tests/account-deletion-tombstone.test.mjs
 ```
 
-결과: 34개 통과, 실패 0.
+결과: 38개 통과, 실패 0.
 
 검증 범위:
 
 - runtime config 비활성·불충분 buffer fail-closed
+- requests 전환 table lock과 commit 범위
+- cutover 뒤 재개되는 legacy request의 영속 trigger 거부
+- cutover 전 커밋된 legacy orphan의 전체 migration 중단
+- 최초·재적용 모두 active/claimed request와 tombstone 일치 검사
+- 신규 RPC의 tombstone→request 원자 작성 순서
 - Auth/request FK 독립 tombstone
 - self-only RLS helper EXECUTE와 UUID oracle 차단
 - 013 guard advisory lock 제거
@@ -131,7 +139,7 @@ git diff --check
 
 ## 5. 롤백
 
-- 격리 환경: migration transaction 실패 시 전체 중단하고 합성 환경을 초기화한다.
+- 격리 환경: 명시적 migration transaction 실패 시 cutover lock·trigger·DDL을 포함해 전체 중단하고 합성 환경을 초기화한다.
 - 운영 적용 전: 신규 후보 변경을 폐기하면 된다.
 - 운영 적용 뒤: tombstone을 임의 삭제하거나 013의 교착 가능 구조로 즉시 복귀하지 않는다. worker를 중지하고 상태별 건수를 확인한 뒤 forward-fix한다.
 - 014 적용과 Edge worker 교체 사이에는 worker schedule을 반드시 중지한다. 구 worker용 immediate completion RPC는 의도적으로 비활성화되어 있다.
@@ -141,17 +149,18 @@ git diff --check
 QA-040에서 다음을 실제 격리 Supabase 두 세션으로 검증해야 한다.
 
 1. migration 014 최초 적용과 재적용
-2. active 013 request가 있는 최초 적용 실패
-3. 실제 authenticated RLS self helper 실행
-4. stale JWT의 문의 NULL insert, 후기·커뮤니티·비교·체크리스트 쓰기 거부
-5. 실제 Storage upload/update/delete 거부
-6. Auth metadata update 거부
-7. old-snapshot transaction과 request/preflight 경쟁에서 deadlock 0·원본 잔존 0
-8. 동시 worker Auth 삭제·완료 이력 각 1건
-9. Auth 삭제 직후 mark 실패 복구
-10. drain 전 tombstone 삭제 0, drain 후 request/tombstone 0
-11. 다른 사용자 기능 정상
-12. 합성 Auth·행·Storage 객체 cleanup 0건
+2. cutover lock 직전·직후 두 session legacy request 경쟁에서 orphan commit 0
+3. active/claimed request와 tombstone 불일치 상태의 최초·재적용 실패
+4. 실제 authenticated RLS self helper 실행
+5. stale JWT의 문의 NULL insert, 후기·커뮤니티·비교·체크리스트 쓰기 거부
+6. 실제 Storage upload/update/delete 거부
+7. Auth metadata update 거부
+8. old-snapshot transaction과 request/preflight 경쟁에서 deadlock 0·원본 잔존 0
+9. 동시 worker Auth 삭제·완료 이력 각 1건
+10. Auth 삭제 직후 mark 실패 복구
+11. drain 전 tombstone 삭제 0, drain 후 request/tombstone 0
+12. 다른 사용자 기능 정상
+13. 합성 Auth·행·Storage 객체 cleanup 0건
 
 운영 활성화 전에는 실제 Supabase JWT TTL과 PostgREST·Storage·Auth metadata transaction 상한을 확인해야 한다. 값이 확인되지 않으면 runtime config를 활성화하지 않고 탈퇴 요청은 fail-closed 상태를 유지한다.
 

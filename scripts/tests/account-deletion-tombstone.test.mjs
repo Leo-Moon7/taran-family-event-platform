@@ -117,6 +117,45 @@ function createTombstoneModel({
   };
 }
 
+function createCutoverModel() {
+  const requests = [];
+  const tombstones = new Set();
+  let requestTableLocked = false;
+  let invariantInstalled = false;
+
+  function hasMatchingTombstone(request) {
+    return tombstones.has(`${request.userId}:${request.id}`);
+  }
+
+  function insertLegacyRequest(request) {
+    if (requestTableLocked) return "waiting";
+    if (invariantInstalled && !hasMatchingTombstone(request)) {
+      throw new Error("matching_tombstone_required");
+    }
+    requests.push(request);
+    return "inserted";
+  }
+
+  return {
+    insertLegacyRequest,
+    startCutover() {
+      requestTableLocked = true;
+    },
+    installInvariant() {
+      invariantInstalled = true;
+    },
+    audit() {
+      if (requests.some((request) => !hasMatchingTombstone(request))) {
+        throw new Error("cutover_mismatch");
+      }
+    },
+    commitCutover() {
+      this.audit();
+      requestTableLocked = false;
+    }
+  };
+}
+
 test("request fails closed when the actual JWT runtime values are unset", () => {
   const model = createTombstoneModel();
   assert.throws(() => model.requestDeletion(), /runtime_config_disabled/);
@@ -242,4 +281,30 @@ test("two workers cannot claim the same state transition twice", async () => {
 
   assert.equal(claims.filter((claim) => claim.action === "delete").length, 1);
   assert.equal(claims.filter((claim) => claim.action === "wait").length, 1);
+});
+
+test("legacy request waiting behind cutover cannot commit without a tombstone", () => {
+  const model = createCutoverModel();
+  const legacyRequest = { id: "legacy-after-guard", userId: "legacy-user" };
+
+  model.startCutover();
+  assert.equal(model.insertLegacyRequest(legacyRequest), "waiting");
+  model.installInvariant();
+  model.commitCutover();
+
+  assert.throws(
+    () => model.insertLegacyRequest(legacyRequest),
+    /matching_tombstone_required/
+  );
+});
+
+test("legacy request committed before the cutover lock aborts the migration audit", () => {
+  const model = createCutoverModel();
+  const legacyRequest = { id: "legacy-before-lock", userId: "legacy-user" };
+
+  assert.equal(model.insertLegacyRequest(legacyRequest), "inserted");
+  model.startCutover();
+  model.installInvariant();
+
+  assert.throws(() => model.commitCutover(), /cutover_mismatch/);
 });

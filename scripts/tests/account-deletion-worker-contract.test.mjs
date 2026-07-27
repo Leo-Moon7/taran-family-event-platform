@@ -27,11 +27,60 @@ const marketplaceMigration = await readFile(
   "utf8"
 );
 
-test("014 refuses first replacement while migration 013 has active work", () => {
-  assert.match(migration014, /to_regclass\('public\.taran_account_deletion_tombstones'\) is null/i);
+test("014 cutover holds the request table until a persistent invariant commits", () => {
+  const beginPosition = migration014.indexOf("begin;");
+  const lockPosition = migration014.indexOf(
+    "lock table public.taran_account_deletion_requests in access exclusive mode"
+  );
+  const triggerPosition = migration014.indexOf(
+    "create trigger taran_require_account_deletion_tombstone"
+  );
+  const commitPosition = migration014.lastIndexOf("commit;");
+
+  assert.ok(beginPosition >= 0);
+  assert.ok(beginPosition < lockPosition);
+  assert.ok(lockPosition < triggerPosition);
+  assert.ok(triggerPosition < commitPosition);
+  assert.match(
+    migration014,
+    /before insert or update on public\.taran_account_deletion_requests[\s\S]*taran_require_account_deletion_tombstone/i
+  );
+});
+
+test("every application audits active and claimed requests against tombstones", () => {
+  assert.doesNotMatch(
+    migration014,
+    /to_regclass\('public\.taran_account_deletion_tombstones'\) is null[\s\S]*request\.status/i
+  );
   assert.match(migration014, /request\.status in \('pending', 'processing'\)/i);
   assert.match(migration014, /request\.claim_token is not null/i);
-  assert.match(migration014, /Pause the deletion worker and resolve all active migration 013 requests/i);
+  assert.match(
+    migration014,
+    /tombstone\.request_id = request\.id[\s\S]*request\.user_id is null or tombstone\.user_id = request\.user_id/i
+  );
+  assert.match(
+    migration014,
+    /Every active account deletion request must have a matching tombstone before migration 014 can commit/i
+  );
+});
+
+test("new request RPC pre-creates one exact tombstone before request insert", () => {
+  const requestRpc = migration014.match(
+    /create or replace function public\.taran_request_account_deletion\(\)([\s\S]*?)create or replace function public\.taran_claim_account_deletion_job/i
+  )?.[1];
+  assert.ok(requestRpc, "request RPC must exist");
+  assert.match(requestRpc, /v_id := gen_random_uuid\(\)/i);
+  const tombstonePosition = requestRpc.indexOf(
+    "insert into public.taran_account_deletion_tombstones"
+  );
+  const requestPosition = requestRpc.indexOf(
+    "insert into public.taran_account_deletion_requests (id, user_id, status)"
+  );
+  assert.ok(tombstonePosition >= 0 && tombstonePosition < requestPosition);
+  assert.match(
+    requestRpc,
+    /insert into public\.taran_account_deletion_requests \(id, user_id, status\)[\s\S]*values \(v_id, v_user, 'pending'\)/i
+  );
 });
 
 test("runtime configuration is disabled without guessing JWT values", () => {
