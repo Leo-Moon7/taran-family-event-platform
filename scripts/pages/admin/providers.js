@@ -61,10 +61,11 @@
     workspace = next;
     return workspace;
   }
-  function editorValues(item = {}) {
-    const rawEvents = item.eventTypes || item.events || [];
+  function editorValues(item) {
+    const provider = item || {};
+    const rawEvents = provider.eventTypes || provider.events || [];
     const eventTypes = rawEvents.map(value => window.SonpumEventTypes?.normalize(value, rawEvents) || value).filter(value => value !== "legacyWedding");
-    return { ...item, eventTypes, status: item.publicationStatus === "hidden" ? "archived" : item.publicationStatus || "draft" };
+    return { ...provider, eventTypes, status: provider.publicationStatus === "hidden" ? "archived" : provider.publicationStatus || "draft" };
   }
   async function save(values, originalId) {
     const id = originalId || safeId(values.id);

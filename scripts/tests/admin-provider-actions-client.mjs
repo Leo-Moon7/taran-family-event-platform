@@ -18,6 +18,21 @@ function functionBody(name, nextName) {
   return client.slice(start, end);
 }
 
+const editorValuesStart = client.indexOf("function editorValues");
+const editorValuesEnd = client.indexOf("async function save", editorValuesStart);
+assert.notEqual(editorValuesStart, -1, "editorValues must exist.");
+assert.notEqual(editorValuesEnd, -1, "editorValues must have a stable boundary.");
+const editorValuesSource = client.slice(editorValuesStart, editorValuesEnd);
+const newProviderInitial = Function(
+  "window",
+  `"use strict"; ${editorValuesSource}; return editorValues(null);`
+)({ SonpumEventTypes: {} });
+assert.deepEqual(
+  newProviderInitial,
+  { eventTypes: [], status: "draft" },
+  "New provider registration must open with null-safe draft defaults."
+);
+
 const saveBody = functionBody("save", "edit");
 assert.match(
   saveBody,
