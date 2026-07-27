@@ -6,136 +6,264 @@ import test from "node:test";
 
 const testDirectory = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(testDirectory, "../..");
-const migration = await readFile(path.join(root, "migrations/013_account_deletion_worker.sql"), "utf8");
-const edgeIndex = await readFile(path.join(root, "supabase/functions/finalize-account-deletion/index.ts"), "utf8");
-const worker = await readFile(path.join(root, "supabase/functions/finalize-account-deletion/worker.mjs"), "utf8");
+const migration013 = await readFile(
+  path.join(root, "migrations/013_account_deletion_worker.sql"),
+  "utf8"
+);
+const migration014 = await readFile(
+  path.join(root, "migrations/014_account_deletion_tombstone.sql"),
+  "utf8"
+);
+const edgeIndex = await readFile(
+  path.join(root, "supabase/functions/finalize-account-deletion/index.ts"),
+  "utf8"
+);
+const worker = await readFile(
+  path.join(root, "supabase/functions/finalize-account-deletion/worker.mjs"),
+  "utf8"
+);
+const marketplaceMigration = await readFile(
+  path.join(root, "migrations/003_marketplace_comparison_flow.sql"),
+  "utf8"
+);
 
-test("migration has a service-role-only, skip-locked, three-attempt queue", () => {
-  assert.match(migration, /for update skip locked/gi);
-  assert.match(migration, /attempt_count between 0 and 3/i);
-  assert.match(migration, /v_request\.attempt_count >= 3/i);
-  assert.match(migration, /coalesce\(auth\.role\(\), ''\) <> 'service_role'/i);
-  assert.match(migration, /revoke all on function public\.taran_claim_account_deletion_job\(\)[\s\S]*from public, anon, authenticated/i);
-  assert.match(migration, /grant execute on function public\.taran_claim_account_deletion_job\(\)[\s\S]*to service_role/i);
+test("014 refuses first replacement while migration 013 has active work", () => {
+  assert.match(migration014, /to_regclass\('public\.taran_account_deletion_tombstones'\) is null/i);
+  assert.match(migration014, /request\.status in \('pending', 'processing'\)/i);
+  assert.match(migration014, /request\.claim_token is not null/i);
+  assert.match(migration014, /Pause the deletion worker and resolve all active migration 013 requests/i);
 });
 
-test("migration permits only one pending or processing request per user", () => {
-  assert.match(migration, /having count\(\*\) > 1/i);
-  assert.match(migration, /Duplicate active account deletion requests require manual review/i);
+test("runtime configuration is disabled without guessing JWT values", () => {
+  const configTable = migration014.match(
+    /create table if not exists public\.taran_account_deletion_runtime_config \(([\s\S]*?)\n\);/i
+  )?.[1];
+  assert.ok(configTable, "runtime config table must exist");
+  assert.match(configTable, /enabled boolean not null default false/i);
+  assert.match(configTable, /max_jwt_ttl_seconds integer/i);
+  assert.match(configTable, /max_inflight_write_seconds integer/i);
+  assert.match(configTable, /buffer_seconds integer/i);
+  assert.match(configTable, /verified_at timestamptz/i);
+  assert.match(configTable, /buffer_seconds > max_inflight_write_seconds/i);
+  assert.doesNotMatch(configTable, /max_jwt_ttl_seconds integer\s+not null\s+default/i);
+  assert.match(migration014, /Account deletion runtime configuration is not enabled/i);
   assert.match(
-    migration,
-    /create unique index if not exists taran_account_deletion_one_active_user_idx[\s\S]*on public\.taran_account_deletion_requests\(user_id\)[\s\S]*status in \('pending', 'processing'\)/i
+    migration014,
+    /preflight_after[\s\S]*v_max_inflight_write_seconds \+ v_buffer_seconds/i
   );
 });
 
-test("request, user writes, Auth, and evidence share the deletion lock", () => {
-  assert.match(migration, /pg_advisory_xact_lock/i);
-  assert.match(migration, /hashtextextended\('taran-account-deletion:'/i);
+test("tombstone is independent from Auth and request foreign keys", () => {
+  const table = migration014.match(
+    /create table if not exists public\.taran_account_deletion_tombstones \(([\s\S]*?)\n\);/i
+  )?.[1];
+  assert.ok(table, "tombstone table must exist");
+  assert.match(table, /user_id uuid primary key/i);
+  assert.match(table, /request_id uuid not null unique/i);
+  assert.doesNotMatch(table, /\breferences\b/i);
+  assert.match(table, /auth_deleted_at timestamptz/i);
+  assert.match(table, /release_after timestamptz/i);
   assert.match(
-    migration,
-    /create or replace function public\.taran_request_account_deletion\(\)[\s\S]*taran_account_deletion_lock_user\(v_user\)[\s\S]*insert into public\.taran_account_deletion_requests/i
+    migration014,
+    /taran_account_deletion_is_active[\s\S]*from public\.taran_account_deletion_tombstones/i
   );
-  assert.match(migration, /create trigger taran_guard_account_deletion_writes before insert or update or delete/i);
-  assert.match(migration, /create trigger taran_guard_account_deletion_evidence_writes[\s\S]*before insert or update or delete on storage\.objects/i);
-  assert.match(migration, /before update on auth\.users/i);
-  assert.match(migration, /before delete on auth\.users[\s\S]*taran_lock_account_deletion_auth_delete/i);
+  assert.doesNotMatch(
+    migration014.match(
+      /create or replace function public\.taran_account_deletion_is_active[\s\S]*?\$\$;/i
+    )?.[0] ?? "",
+    /taran_account_deletion_requests/
+  );
 });
 
-test("every user-owned write surface is protected before SECURITY DEFINER writes", () => {
-  for (const target of [
-    "taran_customers",
-    "taran_inquiries",
-    "taran_reviews",
-    "taran_contributions",
-    "taran_member_states",
-    "taran_saved_providers",
-    "taran_provider_claims",
-    "taran_community_posts",
-    "taran_community_comments",
-    "taran_inquiry_groups",
-    "taran_inquiry_responses",
-    "taran_provider_registrations",
-    "taran_user_comparisons",
-    "taran_user_checklists",
-    "taran_provider_change_requests"
+test("014 replaces every deletion advisory guard with no-lock checks", () => {
+  assert.doesNotMatch(migration014, /pg_advisory_xact_lock/i);
+  assert.doesNotMatch(migration014, /perform\s+public\.taran_account_deletion_lock_user\s*\(/i);
+  assert.match(migration014, /drop trigger if exists taran_lock_account_deletion_auth_delete on auth\.users/i);
+  assert.match(migration014, /drop function if exists public\.taran_account_deletion_lock_user\(uuid\)/i);
+  assert.match(
+    migration014,
+    /create or replace function public\.taran_guard_account_deletion_user_write\(\)[\s\S]*taran_account_deletion_is_active/i
+  );
+  assert.match(
+    migration014,
+    /create or replace function public\.taran_guard_account_deletion_evidence_write\(\)[\s\S]*taran_account_deletion_is_active/i
+  );
+  assert.match(
+    migration014,
+    /create or replace function public\.taran_guard_account_deletion_auth_metadata\(\)[\s\S]*taran_account_deletion_is_active/i
+  );
+  assert.match(migration013, /create trigger taran_guard_account_deletion_writes before insert or update or delete/i);
+  assert.match(migration013, /create trigger taran_guard_account_deletion_evidence_writes/i);
+  assert.match(migration013, /create trigger taran_guard_account_deletion_auth_metadata_writes/i);
+});
+
+test("legacy inquiry null-subject insertion is removed and server RPC forces auth uid", () => {
+  assert.match(
+    migration014,
+    /drop policy if exists "users can create inquiries" on public\.taran_inquiries/i
+  );
+  assert.doesNotMatch(migration014, /user_id is null or user_id = auth\.uid\(\)/i);
+  assert.match(
+    migration013,
+    /create or replace function public\.taran_request_account_deletion\(\)/i
+  );
+  assert.match(
+    marketplaceMigration,
+    /create or replace function public\.taran_create_inquiry_group[\s\S]*insert into public\.taran_inquiry_groups[\s\S]*auth\.uid\(\)/i
+  );
+});
+
+test("direct customer mutation and evidence policies include the tombstone", () => {
+  for (const policy of [
+    "users can create reviews",
+    "users can update own pending reviews",
+    "users can create contributions",
+    "users can manage own member state",
+    "users can manage own saved providers",
+    "users can create provider claims",
+    "users can update own pending provider claims",
+    "users can create community posts",
+    "users can create community comments",
+    "users manage own comparisons",
+    "users manage own checklists",
+    "providers manage own inquiry responses",
+    "users can upload own evidence",
+    "operations can delete evidence"
   ]) {
-    assert.match(migration, new RegExp(`public\\.${target}`, "i"));
+    assert.match(
+      migration014,
+      new RegExp(
+        `create policy "${policy}"[\\s\\S]*?not public\\.taran_account_deletion_self_is_active\\(\\)`,
+        "i"
+      )
+    );
   }
-  assert.match(migration, /tg_op = 'INSERT'[\s\S]*Writes are disabled while account deletion is active/i);
-  assert.match(migration, /Only account-deletion cleanup is allowed for this user/i);
 });
 
-test("claim takes the user lock before row lock and repeats the fail-closed scan", () => {
-  const claim = migration.match(/create or replace function public\.taran_claim_account_deletion_job\(\)([\s\S]*?)create or replace function public\.taran_complete_account_deletion_job/i)?.[1];
+test("RLS uses an executable self-only helper without exposing a UUID oracle", () => {
+  const helper = migration014.match(
+    /create or replace function public\.taran_account_deletion_self_is_active\(\)([\s\S]*?)\$\$;/i
+  )?.[0];
+  assert.ok(helper, "self-only RLS helper must exist");
+  assert.doesNotMatch(helper, /\([^)]*uuid[^)]*\)/i);
+  assert.match(helper, /taran_account_deletion_is_active\(auth\.uid\(\)\)/i);
+  assert.match(
+    migration014,
+    /revoke all on function public\.taran_account_deletion_is_active\(uuid\)[\s\S]*from public, anon, authenticated/i
+  );
+  assert.match(
+    migration014,
+    /grant execute on function public\.taran_account_deletion_self_is_active\(\)[\s\S]*to authenticated/i
+  );
+  assert.doesNotMatch(
+    migration014.match(/drop policy if exists "users can create reviews"[\s\S]*?create or replace function public\.taran_account_deletion_cleanup_user/i)?.[0] ?? "",
+    /taran_account_deletion_is_active\(auth\.uid\(\)\)/i
+  );
+  for (const policy of [
+    "users can create reviews",
+    "users can update own pending reviews",
+    "users can create contributions",
+    "users can manage own member state",
+    "users can manage own saved providers",
+    "users can create provider claims",
+    "users can update own pending provider claims",
+    "users can create community posts",
+    "users can create community comments",
+    "users manage own comparisons",
+    "users manage own checklists",
+    "providers manage own inquiry responses",
+    "users can upload own evidence",
+    "operations can delete evidence"
+  ]) {
+    assert.match(
+      migration014,
+      new RegExp(
+        `create policy "${policy}"[\\s\\S]*?not public\\.taran_account_deletion_self_is_active\\(\\)`,
+        "i"
+      )
+    );
+  }
+});
+
+test("state contract separates Auth deletion, JWT drain, and finalization", () => {
+  for (const state of [
+    "requested",
+    "auth_deleting",
+    "token_drain",
+    "finalizing",
+    "manual_review_required",
+    "retry_wait",
+    "blocked"
+  ]) {
+    assert.match(migration014, new RegExp(`'${state}'`, "i"));
+  }
+  assert.match(
+    migration014,
+    /release_after = v_deleted_at \+ pg_catalog\.make_interval\([\s\S]*v_max_jwt_ttl_seconds \+ v_buffer_seconds/i
+  );
+  assert.match(
+    migration014,
+    /v_tombstone\.release_after > now\(\)[\s\S]*stale JWT drain period is not complete/i
+  );
+  assert.match(
+    migration014,
+    /delete from public\.taran_account_deletion_tombstones[\s\S]*release_after <= now\(\)/i
+  );
+});
+
+test("claim remains single-use and service-role-only without a lock-order cycle", () => {
+  const claim = migration014.match(
+    /create or replace function public\.taran_claim_account_deletion_job\(\)([\s\S]*?)create or replace function public\.taran_mark_account_deletion_auth_deleted/i
+  )?.[1];
   assert.ok(claim, "claim RPC must exist");
-  const advisoryPosition = claim.indexOf("taran_account_deletion_lock_user(v_candidate_user)");
-  const rowLockPosition = claim.indexOf("where request.id = v_candidate_id");
-  assert.ok(advisoryPosition >= 0 && advisoryPosition < rowLockPosition);
-  assert.match(claim, /inquiry\.contact <> '\{\}'::jsonb/i);
-  assert.match(claim, /inquiry_group\.request_note is not null/i);
-  assert.match(claim, /from public\.taran_provider_registrations/i);
-  assert.match(claim, /from storage\.objects/i);
+  assert.match(claim, /for update skip locked/gi);
+  assert.match(claim, /coalesce\(auth\.role\(\), ''\) <> 'service_role'/i);
+  assert.match(claim, /taran_account_deletion_requires_manual_review/i);
+  assert.doesNotMatch(claim, /pg_advisory_xact_lock|taran_account_deletion_lock_user\s*\(/i);
+  assert.match(
+    migration014,
+    /grant execute on function public\.taran_claim_account_deletion_job\(\)[\s\S]*to service_role/i
+  );
 });
 
-test("migration preserves only intended redacted history and blocks unsafe dependencies", () => {
-  for (const relation of [
-    "taran_account_deletion_requests",
-    "taran_reviews",
-    "taran_contributions",
-    "taran_point_ledger",
-    "taran_reward_redemptions",
-    "taran_community_posts",
-    "taran_community_comments",
-    "taran_inquiry_groups"
-  ]) {
-    assert.match(migration, new RegExp(`public\\.${relation.replaceAll("_", "_")}`, "i"));
-  }
-  assert.match(migration, /on delete set null/i);
-  assert.match(migration, /from public\.taran_admin_profiles/i);
-  assert.match(migration, /provider\.owner_user_id = v_request\.user_id/i);
-  assert.match(migration, /from public\.taran_provider_claims/i);
-  assert.match(migration, /from public\.taran_provider_registrations/i);
-  assert.match(migration, /from public\.taran_provider_change_requests/i);
-  assert.match(migration, /from public\.taran_inquiry_responses/i);
-  assert.match(migration, /bucket_id = 'taran-private-evidence'/i);
-  assert.match(migration, /manual_review_required/i);
-
-  const fkMapping = migration.match(/from \(values([\s\S]*?)\) mapping\(relation_name, column_name, constraint_name\)/i)?.[1];
-  assert.ok(fkMapping, "FK preservation mapping must exist");
-  assert.doesNotMatch(fkMapping, /taran_provider_change_requests/i);
-  assert.doesNotMatch(fkMapping, /taran_inquiry_responses/i);
-});
-
-test("completion history has no user identifier or free-text payload columns", () => {
-  const table = migration.match(/create table if not exists public\.taran_account_deletion_jobs \(([\s\S]*?)\n\);/i)?.[1];
+test("completion history remains non-identifying", () => {
+  const table = migration013.match(
+    /create table if not exists public\.taran_account_deletion_jobs \(([\s\S]*?)\n\);/i
+  )?.[1];
   assert.ok(table, "job table contract must exist");
   assert.doesNotMatch(table, /\b(user_id|email|phone|payload|error_message|request_id)\b/i);
-  assert.match(table, /purge_after timestamptz/i);
-  assert.match(migration, /purge_after = now\(\) \+ interval '1 year'/i);
-  assert.match(migration, /delete from public\.taran_account_deletion_requests/i);
+  assert.match(migration014, /outcome_code = 'auth_deleted'/i);
+  assert.match(migration014, /purge_after = now\(\) \+ interval '1 year'/i);
 });
 
-test("migration is rerunnable and does not add a scheduler or storage mutation", () => {
-  assert.match(migration, /create table if not exists public\.taran_account_deletion_jobs/i);
-  assert.match(migration, /add column if not exists attempt_count/i);
-  assert.match(migration, /create unique index if not exists taran_account_deletion_claim_token_idx/i);
-  assert.match(migration, /create or replace function public\.taran_claim_account_deletion_job/i);
-  assert.doesNotMatch(migration, /\b(cron\.schedule|pg_cron|delete\s+from\s+storage\.objects|update\s+storage\.objects)\b/i);
+test("legacy immediate completion is disabled during rollout", () => {
+  assert.match(
+    migration014,
+    /create or replace function public\.taran_complete_account_deletion_job[\s\S]*Legacy account deletion completion is disabled/i
+  );
+  assert.match(
+    migration014,
+    /revoke all on function public\.taran_complete_account_deletion_job\(uuid\)[\s\S]*service_role/i
+  );
 });
 
-test("Edge Function rejects ordinary clients and masks every public response", () => {
+test("Edge Function uses mark then finalize and masks public responses", () => {
   assert.match(edgeIndex, /request\.method !== "POST"/);
   assert.match(edgeIndex, /secureEqual\(bearer, serviceRoleKey\)/);
-  assert.match(edgeIndex, /service_role_required/);
-  assert.match(edgeIndex, /cache-control": "no-store"/);
-  assert.match(edgeIndex, /error\.status !== 404/);
+  assert.match(edgeIndex, /taran_mark_account_deletion_auth_deleted/);
+  assert.match(edgeIndex, /taran_finalize_account_deletion_job/);
+  assert.doesNotMatch(edgeIndex, /taran_complete_account_deletion_job/);
+  assert.match(worker, /claimed\.action === "wait"/);
+  assert.match(worker, /claimed\.action === "mark_auth_deleted"/);
+  assert.match(worker, /claimed\.action === "finalize"/);
   assert.doesNotMatch(edgeIndex, /console\.(log|info|warn|error)/);
   assert.doesNotMatch(worker, /console\.(log|info|warn|error)/);
   assert.doesNotMatch(worker, /return\s+claimed/);
 });
 
-test("source contains no concrete secret, email, or identity value", () => {
-  const source = `${migration}\n${edgeIndex}\n${worker}`;
+test("014 adds no scheduler, storage deletion, concrete secret, or identity", () => {
+  const source = `${migration014}\n${edgeIndex}\n${worker}`;
+  assert.doesNotMatch(source, /\b(cron\.schedule|pg_cron|delete\s+from\s+storage\.objects|update\s+storage\.objects)\b/i);
   assert.doesNotMatch(source, /eyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}/);
   assert.doesNotMatch(source, /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
   assert.doesNotMatch(source, /[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/i);

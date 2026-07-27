@@ -59,7 +59,10 @@ Deno.serve(async (request: Request): Promise<Response> => {
   try {
     const result = await runAccountDeletionWorker({
       claim: () => rpc("taran_claim_account_deletion_job"),
-      complete: (claimToken: string) => rpc("taran_complete_account_deletion_job", {
+      markAuthDeleted: (claimToken: string) => rpc("taran_mark_account_deletion_auth_deleted", {
+        p_claim_token: claimToken
+      }),
+      finalize: (claimToken: string) => rpc("taran_finalize_account_deletion_job", {
         p_claim_token: claimToken
       }),
       fail: (claimToken: string, errorCode: string) => rpc("taran_fail_account_deletion_job", {

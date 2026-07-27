@@ -33,22 +33,22 @@ test("does not call Auth for a fail-closed manual-review account", async () => {
   assertPublicResult(result);
 });
 
-test("deletes Auth once and records completion without returning identifiers", async () => {
+test("deletes Auth once and enters identifier-free token drain", async () => {
   const calls = [];
   const result = await runAccountDeletionWorker({
     claim: async () => ({ action: "delete", claim_token: CLAIM_TOKEN, user_id: PRIVATE_VALUE }),
     deleteAuthUser: async (userId) => { calls.push(["delete", userId]); },
-    complete: async (claimToken) => {
-      calls.push(["complete", claimToken]);
-      return { status: "completed" };
+    markAuthDeleted: async (claimToken) => {
+      calls.push(["mark", claimToken]);
+      return { status: "token_drain" };
     }
   });
 
   assert.deepEqual(calls, [
     ["delete", PRIVATE_VALUE],
-    ["complete", CLAIM_TOKEN]
+    ["mark", CLAIM_TOKEN]
   ]);
-  assert.deepEqual(result, { status: "completed" });
+  assert.deepEqual(result, { status: "waiting", code: "token_drain" });
   assertPublicResult(result);
 });
 
@@ -62,7 +62,7 @@ test("two concurrent invocations have one Auth effect when the claim is single-u
       return { action: "delete", claim_token: CLAIM_TOKEN, user_id: PRIVATE_VALUE };
     },
     deleteAuthUser: async () => { deleteCalls += 1; },
-    complete: async () => ({ status: "completed" })
+    markAuthDeleted: async () => ({ status: "token_drain" })
   };
 
   const results = await Promise.all([
@@ -71,7 +71,7 @@ test("two concurrent invocations have one Auth effect when the claim is single-u
   ]);
 
   assert.equal(deleteCalls, 1);
-  assert.deepEqual(results.map((result) => result.status).sort(), ["completed", "idle"]);
+  assert.deepEqual(results.map((result) => result.status).sort(), ["idle", "waiting"]);
   results.forEach(assertPublicResult);
 });
 
@@ -102,39 +102,67 @@ test("reports retry exhaustion without exposing the claim", async () => {
   assertPublicResult(result);
 });
 
-test("recovers completion if Auth disappeared before the failure was recorded", async () => {
+test("records token drain if Auth disappeared before failure was recorded", async () => {
   const calls = [];
   const result = await runAccountDeletionWorker({
     claim: async () => ({ action: "delete", claim_token: CLAIM_TOKEN, user_id: PRIVATE_VALUE }),
     deleteAuthUser: async () => { throw new Error("not found"); },
-    fail: async () => ({ status: "complete_required" }),
-    complete: async (claimToken) => {
+    fail: async () => ({ status: "mark_required" }),
+    markAuthDeleted: async (claimToken) => {
+      calls.push(claimToken);
+      return { status: "token_drain" };
+    }
+  });
+
+  assert.deepEqual(calls, [CLAIM_TOKEN]);
+  assert.deepEqual(result, { status: "waiting", code: "token_drain" });
+  assertPublicResult(result);
+});
+
+test("an Auth mark gap is recoverable without another Auth deletion", async () => {
+  const first = await runAccountDeletionWorker({
+    claim: async () => ({ action: "delete", claim_token: CLAIM_TOKEN, user_id: PRIVATE_VALUE }),
+    deleteAuthUser: async () => {},
+    markAuthDeleted: async () => { throw new Error("temporary database failure"); }
+  });
+  const second = await runAccountDeletionWorker({
+    claim: async () => ({ action: "mark_auth_deleted", claim_token: CLAIM_TOKEN }),
+    markAuthDeleted: async () => ({ status: "token_drain" }),
+    deleteAuthUser: async () => { assert.fail("Auth must not be called during completion recovery"); }
+  });
+
+  assert.deepEqual(first, { status: "incomplete", code: "completion_pending" });
+  assert.deepEqual(second, { status: "waiting", code: "token_drain" });
+  assertPublicResult(first);
+  assertPublicResult(second);
+});
+
+test("wait action does not call Auth or expose timing identifiers", async () => {
+  let deleteCalls = 0;
+  const result = await runAccountDeletionWorker({
+    claim: async () => ({ action: "wait", code: "token_drain" }),
+    deleteAuthUser: async () => { deleteCalls += 1; }
+  });
+
+  assert.equal(deleteCalls, 0);
+  assert.deepEqual(result, { status: "waiting", code: "token_drain" });
+  assertPublicResult(result);
+});
+
+test("finalizes only after the database emits a finalize action", async () => {
+  const calls = [];
+  const result = await runAccountDeletionWorker({
+    claim: async () => ({ action: "finalize", claim_token: CLAIM_TOKEN }),
+    finalize: async (claimToken) => {
       calls.push(claimToken);
       return { status: "completed" };
-    }
+    },
+    deleteAuthUser: async () => { assert.fail("Auth must not be called during finalization"); }
   });
 
   assert.deepEqual(calls, [CLAIM_TOKEN]);
   assert.deepEqual(result, { status: "completed" });
   assertPublicResult(result);
-});
-
-test("a completion write gap is recoverable without another Auth deletion", async () => {
-  const first = await runAccountDeletionWorker({
-    claim: async () => ({ action: "delete", claim_token: CLAIM_TOKEN, user_id: PRIVATE_VALUE }),
-    deleteAuthUser: async () => {},
-    complete: async () => { throw new Error("temporary database failure"); }
-  });
-  const second = await runAccountDeletionWorker({
-    claim: async () => ({ action: "complete_only", claim_token: CLAIM_TOKEN }),
-    complete: async () => ({ status: "completed" }),
-    deleteAuthUser: async () => { assert.fail("Auth must not be called during completion recovery"); }
-  });
-
-  assert.deepEqual(first, { status: "incomplete", code: "completion_pending" });
-  assert.deepEqual(second, { status: "completed" });
-  assertPublicResult(first);
-  assertPublicResult(second);
 });
 
 test("rejects an invalid private claim contract", async () => {
@@ -145,53 +173,41 @@ test("rejects an invalid private claim contract", async () => {
 });
 
 function createDeletionGateModel() {
-  let lock = Promise.resolve();
   let active = false;
   const record = { contact: "raw", evidence: false };
 
-  async function transaction(operation) {
-    const previous = lock;
-    let release;
-    lock = new Promise((resolve) => { release = resolve; });
-    await previous;
-    try {
-      return await operation();
-    } finally {
-      release();
-    }
-  }
-
   return {
     record,
-    request: () => transaction(async () => {
+    request: async () => {
       active = true;
       record.contact = "redacted";
-    }),
-    writeContact: (value) => transaction(async () => {
-      if (active) throw new Error("deletion_active");
+    },
+    writeContact: async (value, { oldSnapshot = false } = {}) => {
+      if (active && !oldSnapshot) throw new Error("deletion_active");
       record.contact = value;
-    }),
-    writeEvidence: () => transaction(async () => {
+    },
+    writeEvidence: async () => {
       if (active) throw new Error("deletion_active");
       record.evidence = true;
-    }),
-    claim: () => transaction(async () => {
+    },
+    preflight: async () => {
+      record.contact = "redacted";
       if (!active || record.contact !== "redacted" || record.evidence) {
         return { action: "blocked" };
       }
       return { action: "delete" };
-    })
+    }
   };
 }
 
-test("a write that starts before the request is redacted after serialization", async () => {
+test("an old-snapshot write is redacted again by delayed preflight", async () => {
   const gate = createDeletionGateModel();
-  const write = gate.writeContact("concurrent raw value");
-  const request = gate.request();
-  await Promise.all([write, request]);
+  await gate.request();
+  await gate.writeContact("concurrent raw value", { oldSnapshot: true });
 
+  assert.equal(gate.record.contact, "concurrent raw value");
+  assert.deepEqual(await gate.preflight(), { action: "delete" });
   assert.equal(gate.record.contact, "redacted");
-  assert.deepEqual(await gate.claim(), { action: "delete" });
 });
 
 test("writes and evidence that start after the request are rejected", async () => {
@@ -202,5 +218,5 @@ test("writes and evidence that start after the request are rejected", async () =
   await assert.rejects(gate.writeEvidence(), /deletion_active/);
   assert.equal(gate.record.contact, "redacted");
   assert.equal(gate.record.evidence, false);
-  assert.deepEqual(await gate.claim(), { action: "delete" });
+  assert.deepEqual(await gate.preflight(), { action: "delete" });
 });
