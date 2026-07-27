@@ -279,8 +279,15 @@ begin
     '{"provider_name":"QA-041 synthetic high risk"}'::jsonb,
     'qa-041-policy-v1','information_submission_180d'
   );
+  execute 'reset role';
   select id into v_info_review
   from public.taran_review_cases_v2 where submission_case_id = v_info;
+  perform set_config(
+    'request.jwt.claims',
+    jsonb_build_object('sub',v_ops1,'role','authenticated','aal','aal2')::text,
+    true
+  );
+  execute 'set local role authenticated';
   v_denied := false;
   begin
     perform public.taran_assign_review_case_v2(v_info_review,v_ops1);
@@ -402,10 +409,17 @@ begin
   end;
   if not v_denied then raise exception 'QA-041 duplicate HMAC uniqueness was not enforced.'; end if;
 
+  execute 'reset role';
   select submission_case_id into v_submission1
   from public.taran_quote_cases_v2 where id = v_quote1;
   select id into v_review1
   from public.taran_review_cases_v2 where submission_case_id = v_submission1;
+  perform set_config(
+    'request.jwt.claims',
+    jsonb_build_object('sub',v_ops1,'role','authenticated','aal','aal2')::text,
+    true
+  );
+  execute 'set local role authenticated';
   perform public.taran_assign_review_case_v2(v_review1,v_ops1);
   v_result := public.taran_decide_quote_v2(
     v_review1,'04100000-0000-4000-8000-000000000101',
