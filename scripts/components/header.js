@@ -6,19 +6,47 @@
   header.dataset.initialized = "true";
 
   const toggle = header.querySelector("[data-menu-toggle]");
+  const toggleLabel = toggle?.querySelector(".visually-hidden");
   const navigation = header.querySelector("#site-navigation");
-  const menuButtons = header.querySelectorAll("[data-nav-menu-button]");
   const page = location.pathname.split("/").pop() || "index.html";
 
-  function compareIds() {
-    return window.TaranCompareStore?.read?.() || [];
+  const PUBLIC_NAV_ITEMS = Object.freeze([
+    { href: "venues.html", label: "업체 찾기" },
+    { href: "calculator.html", label: "비용 계산기" },
+    { href: "checklist.html", label: "준비 체크리스트" },
+    { href: "articles.html", label: "준비백과" },
+    { href: "provider-register.html", label: "업체 등록" }
+  ]);
+  const MOBILE_NAV_ITEMS = Object.freeze([
+    { href: "index.html", label: "홈", icon: "⌂" },
+    { href: "venues.html", label: "업체 찾기", icon: "⌕" },
+    { href: "calculator.html", label: "비용 계산기", icon: "₩" },
+    { href: "checklist.html", label: "준비 체크리스트", icon: "✓" }
+  ]);
+
+  function isCurrentPage(href) {
+    return page === href || (href === "login.html" && page === "account.html");
   }
 
-  function updateCompareCounts(ids = compareIds()) {
-    document.querySelectorAll("[data-compare-count]").forEach((badge) => {
-      badge.textContent = String(ids.length);
-      badge.hidden = !ids.length;
-    });
+  function createNavigationLink({ href, label }, className = "") {
+    const link = document.createElement("a");
+    link.href = href;
+    link.textContent = label;
+    if (className) link.className = className;
+    if (isCurrentPage(href)) link.setAttribute("aria-current", "page");
+    return link;
+  }
+
+  function normalizeDesktopNavigation() {
+    if (!navigation) return;
+    const links = PUBLIC_NAV_ITEMS.map((item) => createNavigationLink(item));
+    const authLink = createNavigationLink(
+      { href: page === "account.html" ? "account.html" : "login.html", label: page === "account.html" ? "내 정보" : "로그인" },
+      "site-nav__auth"
+    );
+    authLink.dataset.authLink = "";
+    if (page === "account.html" || page === "login.html") authLink.setAttribute("aria-current", "page");
+    navigation.replaceChildren(...links, authLink);
   }
 
   function appendMobileNavigation() {
@@ -26,47 +54,50 @@
     const mobile = document.createElement("nav");
     mobile.className = "mobile-bottom-nav";
     mobile.setAttribute("aria-label", "모바일 주요 메뉴");
-    [
-      ["index.html", "홈", "⌂"],
-      ["venues.html", "업체 찾기", "⌕"],
-      ["compare.html", "비교함", "⇄"],
-      ["checklist.html", "체크리스트", "✓"],
-      ["account.html", "마이페이지", "●"]
-    ].forEach(([href, label, icon]) => {
-      const link = document.createElement("a");
-      link.href = href;
-      if (page === href || (href === "account.html" && page === "login.html")) link.setAttribute("aria-current", "page");
+    [...MOBILE_NAV_ITEMS, { href: "login.html", label: "로그인", icon: "●", auth: true }].forEach(({ href, label, icon, auth }) => {
+      const link = createNavigationLink({ href, label });
+      if (auth) {
+        link.dataset.mobileAuthLink = "";
+        if (page === "account.html" || page === "login.html") link.setAttribute("aria-current", "page");
+      }
       const symbol = document.createElement("span");
       symbol.setAttribute("aria-hidden", "true");
       symbol.textContent = icon;
       const name = document.createElement("strong");
       name.textContent = label;
+      link.textContent = "";
       link.append(symbol, name);
-      if (href === "compare.html") {
-        const count = document.createElement("b");
-        count.className = "mobile-bottom-nav__count";
-        count.dataset.compareCount = "";
-        count.hidden = true;
-        link.append(count);
-      }
       mobile.append(link);
     });
     document.body.append(mobile);
   }
 
+  normalizeDesktopNavigation();
+  const menuButtons = header.querySelectorAll("[data-nav-menu-button]");
+
+  function updateNavigationState(isOpen) {
+    header.dataset.menuOpen = String(isOpen);
+    toggle?.setAttribute("aria-expanded", String(isOpen));
+    if (toggleLabel) {
+      toggleLabel.textContent = isOpen ? "메뉴 닫기" : "메뉴 열기";
+    } else {
+      toggle?.setAttribute("aria-label", isOpen ? "메뉴 닫기" : "메뉴 열기");
+    }
+  }
+
   function closeNavigation() {
-    header.dataset.menuOpen = "false";
-    toggle?.setAttribute("aria-expanded", "false");
+    updateNavigationState(false);
     menuButtons.forEach(button => {
       button.setAttribute("aria-expanded", "false");
       button.closest(".nav-menu")?.setAttribute("data-open", "false");
     });
   }
 
+  updateNavigationState(false);
+
   toggle?.addEventListener("click", () => {
     const isOpen = header.dataset.menuOpen === "true";
-    header.dataset.menuOpen = String(!isOpen);
-    toggle.setAttribute("aria-expanded", String(!isOpen));
+    updateNavigationState(!isOpen);
     if (!isOpen) navigation?.querySelector("a, button")?.focus();
   });
 
@@ -99,13 +130,15 @@
   });
 
   Promise.resolve(window.TaranAuth?.ready).then(account => {
-    header.querySelectorAll("[data-auth-link]").forEach(link => {
+    header.querySelectorAll("[data-auth-link]").forEach((link) => {
       link.textContent = account ? "내 정보" : "로그인";
       link.href = account ? "account.html" : "login.html";
+    });
+    document.querySelectorAll("[data-mobile-auth-link]").forEach((link) => {
+      link.href = account ? "account.html" : "login.html";
+      link.querySelector("strong").textContent = account ? "내 정보" : "로그인";
     });
   });
 
   appendMobileNavigation();
-  updateCompareCounts();
-  window.TaranCompareStore?.subscribe?.(updateCompareCounts);
 })();

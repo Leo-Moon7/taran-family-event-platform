@@ -1,4 +1,4 @@
-(function () {
+(async function () {
   "use strict";
 
   const store = window.TaranCompareStore;
@@ -16,6 +16,27 @@
   const emptyTitle = document.getElementById("compare-empty-title");
   const emptyDescription = document.getElementById("compare-empty-description");
   const emptyLink = document.getElementById("compare-empty-link");
+  const authGate = document.getElementById("compare-auth-gate");
+  const content = document.getElementById("compare-content");
+  const loginLink = document.getElementById("compare-login-link");
+  const authMessage = document.getElementById("compare-auth-message");
+
+  const account = await Promise.resolve(window.TaranAuth?.ready);
+  if (!account) {
+    const loginUrl = window.TaranAuth?.loginUrl?.("compare.html") || "login.html?return=compare.html";
+    if (location.protocol === "file:" && !window.TaranAuth?.isConfigured?.()) {
+      authGate.hidden = false;
+      content.hidden = true;
+      loginLink.href = loginUrl;
+      authMessage.textContent = "로컬 파일에서는 로그인 환경이 연결되지 않아 비교함을 열지 않았습니다. 로그인 환경에서 다시 확인해 주세요.";
+      return;
+    }
+    location.replace(loginUrl);
+    return;
+  }
+
+  authGate.hidden = true;
+  content.hidden = false;
 
   const formatWon = (value) => Number(value) > 0 ? `${Number(value).toLocaleString("ko-KR")}원` : "정보 없음";
   const text = (value) => String(value ?? "").trim();
