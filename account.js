@@ -8,6 +8,11 @@
   document.querySelector("#info-name").textContent = account.display_name;
   document.querySelector("#info-email").textContent = account.email;
 
+  const compareCount = document.querySelector("#account-compare-count");
+  window.TaranCompareStore?.subscribe?.((ids) => {
+    if (compareCount) compareCount.textContent = String(ids.length);
+  });
+
   if (window.TaranAuth.isConfigured()) {
     try {
       const owned = await window.TaranApi.select(window.TaranConfig.tables.providers, {

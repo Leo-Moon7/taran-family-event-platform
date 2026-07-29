@@ -2,6 +2,8 @@
 body > footer { margin-top: var(--space-12); padding: var(--space-8) var(--container-gutter); border-top: 1px solid var(--color-border); background: var(--color-surface); }
 body > footer > * { width: min(100%, var(--content-max)); margin-inline: auto; }
 body > footer .footer-links { display: flex; flex-wrap: wrap; gap: var(--space-4); margin-top: var(--space-3); font-size: var(--font-size-14); }
+body > footer .footer-brand { gap: .45rem; }
+.blog-card-meta { display: flex; flex-wrap: wrap; gap: .35rem .75rem; color: var(--color-text-muted); font-size: var(--font-size-14); }
 .eyebrow, .mini-label, .step-label { color: var(--color-accent-700); font-size: var(--font-size-14); font-weight: var(--font-weight-bold); letter-spacing: .04em; }
 .text-link, .text-button { display: inline-flex; min-height: 44px; align-items: center; color: var(--color-brand-800); font-weight: var(--font-weight-semibold); }
 .button-primary { color: #fff; background: var(--color-brand-800); }
@@ -31,6 +33,8 @@ body > footer .footer-links { display: flex; flex-wrap: wrap; gap: var(--space-4
 .account-info dd { margin: 0; font-weight: var(--font-weight-semibold); }
 .account-tool-links, .saved-list { display: grid; gap: var(--space-2); margin-block: var(--space-4); }
 .account-tool-links a, .saved-list a { display: flex; min-height: 56px; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-md); }
+.account-compare-link { border-color: rgb(13 63 49 / 24%) !important; background: var(--color-bg-subtle); }
+.account-compare-link b { color: var(--color-brand-900); font-size: var(--font-size-18); }
 .account-actions { display: flex; gap: var(--space-2); margin-top: var(--space-5); }
 .account-card--wide { grid-column: 1 / -1; }
 .account-inquiry-list { display: grid; gap: var(--space-3); }
