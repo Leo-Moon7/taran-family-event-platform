@@ -4,6 +4,7 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+const currentFile = fileURLToPath(import.meta.url);
 const ignoredDirectories = new Set([
   ".git",
   ".netlify",
@@ -31,14 +32,72 @@ function fail(message) {
   failures.push(message);
 }
 
+function text(value) {
+  if (value === undefined || value === null) return "";
+  return Buffer.isBuffer(value) ? value.toString("utf8").trim() : String(value).trim();
+}
+
+export function assessSyntaxCheckResult(file, result = {}) {
+  const stderr = text(result.stderr);
+  const stdout = text(result.stdout);
+
+  if (result.error) {
+    const errorCode = text(result.error.code) || "UNKNOWN";
+    const details = [
+      text(result.error.message),
+      stderr && `stderr: ${stderr}`,
+      stdout && `stdout: ${stdout}`
+    ].filter(Boolean);
+
+    return {
+      ok: false,
+      spawnFailed: true,
+      message:
+        `JavaScript 문법 검사 실행 실패: ${file} [error code: ${errorCode}]\n` +
+        (details.join("\n") || "stderr/stdout 없음")
+    };
+  }
+
+  if (result.status === 0) {
+    return { ok: true, spawnFailed: false, message: "" };
+  }
+
+  const status = result.status === undefined || result.status === null
+    ? "unknown"
+    : String(result.status);
+  const signal = text(result.signal);
+  const output = stderr || stdout ||
+    `stderr/stdout 없음 (exit code: ${status}${signal ? `, signal: ${signal}` : ""})`;
+
+  return {
+    ok: false,
+    spawnFailed: false,
+    message: `JavaScript 문법 오류: ${file}\n${output}`
+  };
+}
+
+const isDirectExecution =
+  Boolean(process.argv[1]) && path.resolve(process.argv[1]) === path.resolve(currentFile);
+
+if (isDirectExecution) {
 const files = walk(root);
 const scripts = files.filter(file => /\.(?:js|mjs)$/i.test(file));
 const htmlFiles = files.filter(file => /\.html$/i.test(file));
 const cssFiles = files.filter(file => /\.css$/i.test(file));
 
 for (const file of scripts) {
-  const result = spawnSync(process.execPath, ["--check", file], { encoding: "utf8" });
-  if (result.status !== 0) fail(`JavaScript 문법 오류: ${relative(file)}\n${result.stderr.trim()}`);
+  let result;
+  try {
+    result = spawnSync(process.execPath, ["--check", file], { encoding: "utf8" });
+  } catch (error) {
+    result = { error, status: null };
+  }
+
+  const assessment = assessSyntaxCheckResult(relative(file), result);
+  if (!assessment.ok) {
+    fail(assessment.message);
+    if (assessment.spawnFailed) break;
+  }
 }
 
 for (const file of htmlFiles) {
@@ -143,3 +202,4 @@ if (failures.length) {
 }
 
 console.log(`검사 통과: JavaScript ${scripts.length}개, HTML ${htmlFiles.length}개, 보안 규칙 및 운영 파일`);
+}
