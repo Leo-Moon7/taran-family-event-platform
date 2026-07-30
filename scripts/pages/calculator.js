@@ -538,7 +538,7 @@
     completeStatus.hidden = false;
     resultPanel.classList.add("is-complete");
     window.TaranAnalytics?.track("calculator_completed", "calculator.html", { eventType: state.event, guests: state.guests, space: state.space, spaceDetails: state.spaceDetails, services: state.services }).catch(() => {});
-    resultPanel.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
+    resultPanel.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
     resultPanel.focus({ preventScroll: true });
   });
   prev.addEventListener("click", () => { state.step = Math.max(1, state.step - 1); showStep(); });

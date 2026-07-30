@@ -527,3 +527,33 @@
   .calculator-page .calculator-breakdown div { display: grid; grid-template-columns: minmax(0, 1fr); }
   .calculator-page .calculator-breakdown strong { text-align: left; }
 }
+
+/* FE-033 — keep the result after the full input flow on every viewport. */
+.calculator-page .calculator-layout {
+  width: min(100% - 2rem, 64rem);
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(1.25rem, 3vw, 2rem);
+}
+
+.calculator-page .calculator-result {
+  position: static;
+  width: 100%;
+  scroll-margin-top: calc(var(--header-height) + 1rem);
+}
+
+@media (min-width: 48.01rem) {
+  .calculator-page .calculator-range-summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .calculator-page .calculator-range-summary > div {
+    grid-template-columns: 1fr;
+    align-content: center;
+    min-height: 7rem;
+  }
+
+  .calculator-page .calculator-range-summary strong {
+    margin-top: .35rem;
+    text-align: left;
+  }
+}

@@ -125,6 +125,10 @@ const coralContrast = coral ? contrastRatio(coral, "#ffffff") : 0;
 expect(coralContrast >= 4.5, `계산기 코랄/흰색 대비가 4.5:1 미만입니다: ${coralContrast.toFixed(2)}:1`);
 expect(Boolean(coralHover) && relativeLuminance(coralHover) < relativeLuminance(coral), "hover/focus 코랄이 기본색보다 어둡고 구분되지 않습니다.");
 expect(/button--primary:focus-visible[\s\S]*?var\(--tool-coral-hover\)/.test(styles), "주 행동 focus 상태에 더 어두운 코랄이 적용되지 않았습니다.");
+expect(/\.calculator-page \.calculator-layout\s*\{[\s\S]*?grid-template-columns:\s*minmax\(0,\s*1fr\)/.test(styles), "계산 결과가 입력 영역 아래 단일 열에 배치되지 않았습니다.");
+expect(/\.calculator-page \.calculator-result\s*\{[\s\S]*?position:\s*static[\s\S]*?scroll-margin-top:/.test(styles), "하단 결과 영역의 고정 해제 또는 상단 여백이 없습니다.");
+expect(/resultPanel\.scrollIntoView\(\{[\s\S]*?block:\s*"start"/.test(script), "결과 확인 후 결과 상단으로 이동하지 않습니다.");
+expect(/resultPanel\.focus\(\{\s*preventScroll:\s*true\s*\}\)/.test(script), "결과 이동 후 키보드 초점 유지가 없습니다.");
 
 if (failures.length) {
   console.error(`\nFE-028 계산기 상세 상태 전이 검사 실패 ${failures.length}건\n`);
