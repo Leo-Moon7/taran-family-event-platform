@@ -19,8 +19,12 @@ const eventSandbox = { window: {}, console };
 vm.createContext(eventSandbox);
 vm.runInContext(read("scripts/core/event-types.js"), eventSandbox);
 const events = eventSandbox.window.SonpumEventTypes.items;
-assert(events.length === 8, "행사 분류가 8개가 아닙니다.");
-assert(events.some(({ id }) => id === "meeting") && events.some(({ id }) => id === "smallWedding"), "상견례와 스몰웨딩이 분리되지 않았습니다.");
+const currentEventIds = ["kids", "parents", "meeting", "anniversary", "other"];
+assert(events.length === currentEventIds.length, "행사 분류가 승인된 5개가 아닙니다.");
+assert(
+  currentEventIds.every((id) => events.some((event) => event.id === id)),
+  "승인된 돌잔치·부모님·결혼 준비·기념일·기타 가족행사 분류가 완전하지 않습니다.",
+);
 
 const storage = read("scripts/core/storage.js");
 assert(storage.includes("sonpum-haebang-storage-migration-v1"), "스토리지 1회 마이그레이션 표식이 없습니다.");
