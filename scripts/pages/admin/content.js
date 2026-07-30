@@ -36,7 +36,7 @@
         .forEach(value => row.append(element("td", value)));
       const manage = document.createElement("td");
       const link = element("a", "글 보기");
-      link.href = `../article.html?slug=${encodeURIComponent(post.slug || "")}`;
+      link.href = `../articles/${encodeURIComponent(post.slug || "")}.html`;
       manage.append(link);
       if (online) {
         const button = element("button", "수정", "admin-text-button");

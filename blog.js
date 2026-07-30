@@ -28,8 +28,13 @@
       .replace(/"/g, "&quot;");
   }
 
+  function formatDate(value) {
+    const match = String(value || "").match(/^(\d{4})[.-](\d{2})[.-](\d{2})$/);
+    return match ? `${match[1]}.${match[2]}.${match[3]}` : String(value || "");
+  }
+
   function postHref(post) {
-    return `article.html?slug=${encodeURIComponent(post.slug)}`;
+    return `articles/${encodeURIComponent(post.slug)}.html`;
   }
 
   function renderTags(tags) {
@@ -101,7 +106,7 @@
     return `
       <aside class="article-guide-box article-sources" aria-label="이 글의 참고 자료">
         <strong>참고 자료와 검토 범위</strong>
-        ${post.reviewedAt ? `<p>검토일 ${escapeHtml(post.reviewedAt)} · ${escapeHtml(post.reviewScope || "")}</p>` : ""}
+        ${post.reviewedAt ? `<p>검토일 ${escapeHtml(formatDate(post.reviewedAt))} · ${escapeHtml(post.reviewScope || "")}</p>` : ""}
         <ul>
           ${sources.map((source) => `
             <li>
@@ -133,7 +138,7 @@
             <span class="blog-category-label">${escapeHtml(first.category)}</span>
             <h3>${escapeHtml(first.title)}</h3>
             <p>${escapeHtml(first.excerpt)}</p>
-            <div class="blog-card-meta"><span>${escapeHtml(first.date)}</span><span>읽는 시간 ${escapeHtml(first.readTime)}</span><span>초보 부모 추천</span></div>
+            <div class="blog-card-meta"><span>${escapeHtml(formatDate(first.date))}</span><span>읽는 시간 ${escapeHtml(first.readTime)}</span><span>초보 부모 추천</span></div>
             <strong>글 읽기 →</strong>
           </div>
         </a>
@@ -157,7 +162,7 @@
             <span>${escapeHtml(post.category)}</span>
             <h3>${escapeHtml(post.title)}</h3>
             <p>${escapeHtml(post.excerpt)}</p>
-            <div class="blog-card-meta compact"><span>${escapeHtml(post.date)}</span><span>${escapeHtml(post.readTime)}</span></div>
+            <div class="blog-card-meta compact"><span>${escapeHtml(formatDate(post.date))}</span><span>${escapeHtml(post.readTime)}</span></div>
             <em>자세히 보기 →</em>
           </a>
         </article>
@@ -211,10 +216,10 @@
     articleRoot.innerHTML = `
       <a class="text-link" href="articles.html">← 준비백과 목록</a>
       <header class="blog-article-header">
-        <p class="eyebrow">${escapeHtml(post.category)} · taran 준비백과</p>
+        <p class="eyebrow">${escapeHtml(post.category)} · 손품해방 준비백과</p>
         <h1>${escapeHtml(post.title)}</h1>
         <p>${escapeHtml(post.excerpt)}</p>
-        <div class="blog-card-meta"><span>게시일 ${escapeHtml(post.date)}</span><span>검토일 ${escapeHtml(post.reviewedAt)}</span><span>읽는 시간 ${escapeHtml(post.readTime)}</span></div>
+        <div class="blog-card-meta"><span>게시일 ${escapeHtml(formatDate(post.date))}</span><span>검토일 ${escapeHtml(formatDate(post.reviewedAt))}</span><span>읽는 시간 ${escapeHtml(post.readTime)}</span></div>
       </header>
       <figure class="article-hero-photo">
         <img src="${escapeHtml(post.image)}" alt="${escapeHtml(post.alt)}">

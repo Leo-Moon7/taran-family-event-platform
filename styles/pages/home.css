@@ -68,7 +68,7 @@
   --home-forest: #214b3e;
   --home-forest-deep: #18392f;
   --home-sage: #dfe9dc;
-  --home-coral: #e77c61;
+  --home-coral: #a9463d;
   --home-coral-soft: #f8ddd1;
   --home-ink: #1d332c;
   --home-muted: #6d746f;
@@ -96,7 +96,7 @@
 }
 .sonpum-haebang-home .home-hero {
   position: relative;
-  padding-block: clamp(2.75rem, 6.5vw, 6.75rem);
+  padding-block: clamp(2.5rem, 5vw, 4.75rem);
   background:
     radial-gradient(circle at 12% 8%, rgb(231 124 97 / 13%), transparent 32%),
     linear-gradient(135deg, var(--home-paper) 0%, #fff8ee 58%, #edf2e9 100%);
@@ -168,7 +168,7 @@
 .sonpum-haebang-home .home-hero__quick-links span { display: grid; width: 1.75rem; height: 1.75rem; place-items: center; border-radius: 50%; background: var(--home-coral-soft); }
 .sonpum-haebang-home .home-hero__visual {
   position: relative;
-  min-height: clamp(25rem, 44vw, 36rem);
+  min-height: clamp(22rem, 36vw, 30rem);
   margin: 0;
   overflow: hidden;
   border-radius: 8rem 2rem 8rem 2rem;
@@ -187,7 +187,7 @@
   font-size: .85rem;
   line-height: 1.5;
 }
-.sonpum-haebang-home .home-section { padding-block: clamp(4rem, 8vw, 7.5rem); }
+.sonpum-haebang-home .home-section { padding-block: clamp(3.25rem, 6vw, 5.5rem); }
 .sonpum-haebang-home .home-section__header {
   display: flex;
   align-items: end;
@@ -537,7 +537,7 @@
 .sonpum-haebang-home .home-checklist__preview li small { display: block; }
 .sonpum-haebang-home .home-checklist__preview li small { margin-top: .25rem; color: var(--home-muted); }
 
-.sonpum-haebang-home .home-discovery { background: #fff; }
+.sonpum-haebang-home .home-discovery { padding-top: 0; background: #fff; }
 .sonpum-haebang-home .home-discovery__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
 .sonpum-haebang-home .home-discovery__grid > section { padding: clamp(1.5rem, 4vw, 3rem); border-radius: 2rem; background: var(--home-paper); }
 .sonpum-haebang-home .home-discovery__grid > section:nth-child(2) { background: #f8e2d7; }
@@ -599,7 +599,15 @@
   .sonpum-haebang-home .home-register__actions { width: 100%; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 48rem) {
-  .sonpum-haebang-home .home-journey { grid-template-columns: 1fr; }
+  .sonpum-haebang-home .home-journey { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .sonpum-haebang-home .home-journey li { align-items: center; flex-direction: column; text-align: center; }
+  .sonpum-haebang-home .home-hero__visual {
+    min-height: 0;
+    height: 14rem;
+    border-radius: 1.5rem;
+    box-shadow: none;
+  }
+  .sonpum-haebang-home .home-hero__visual figcaption { display: none; }
   .sonpum-haebang-home .home-feature__visual { min-height: 21rem; border-radius: 1.5rem 4rem 1.5rem 1.5rem; }
   .sonpum-haebang-home .home-provider-empty { padding: 1.5rem; border-radius: 1.5rem; }
   .sonpum-haebang-home .home-provider-empty__actions { display: grid; }
@@ -610,6 +618,26 @@
   .sonpum-haebang-home .home-register__actions { grid-template-columns: 1fr; }
 }
 @media (max-width: 38rem) {
+  .sonpum-haebang-home .home-hero__visual {
+    min-height: 0;
+    height: 10rem;
+    border-radius: 1.25rem;
+    box-shadow: none;
+  }
+  .sonpum-haebang-home .home-hero__visual figcaption { display: none; }
+  .sonpum-haebang-home .home-journey { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .sonpum-haebang-home .home-journey li {
+    min-height: 4rem;
+    align-items: center;
+    justify-content: center;
+    gap: .35rem;
+    flex-direction: column;
+    padding: .5rem .25rem;
+    text-align: center;
+  }
+  .sonpum-haebang-home .home-journey li > span { width: 1.7rem; height: 1.7rem; }
+  .sonpum-haebang-home .home-journey small { display: none; }
+  .sonpum-haebang-home .home-journey strong { font-size: .76rem; }
   .sonpum-haebang-home .home-checklist__preview-head { align-items: start; flex-direction: column; }
   .sonpum-haebang-home .home-checklist__preview li { grid-template-columns: 3.75rem 1fr; padding-inline: 1rem; }
   .sonpum-haebang-home .home-link-chips { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
