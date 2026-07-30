@@ -1,8 +1,8 @@
 (function () {
   "use strict";
 
-  const emptySpaceDetails = () => ({ cuisine: "", mealBudget: "", useMode: "" });
-  const state = { step: 1, event: "", eventDetail: "", region: "", district: "", date: "", guests: 0, space: "", spaceDetails: emptySpaceDetails(), services: [], completed: false };
+  const emptySpaceDetails = () => ({ cuisine: "", mealBudget: "", useMode: "", venueFeeMin: "", venueFeeMax: "" });
+  const state = { step: 1, event: "", eventDetail: "", region: "", district: "", date: "", guests: 0, mealGuests: 0, mealGuestsManual: false, space: "", spaceDetails: emptySpaceDetails(), services: [], completed: false };
   const profiles = {
     kids: { title: "돌잔치·백일", guide: "초대할 가족을 떠올려 대략적인 예상 인원을 입력해 주세요.", spaces: ["restaurant", "hotel", "partyroom", "home"], services: ["dolTable", "photo", "childOutfit", "parentOutfit", "gift", "growthVideo", "host"] },
     parents: { title: "환갑·칠순·팔순", guide: "어르신 이동 동선과 주차를 고려해 대략적인 예상 인원을 입력해 주세요.", spaces: ["restaurant", "hotel", "partyroom", "home"], services: ["ceremonyTable", "banner", "photoVideo", "cake", "gift", "transport", "performance"] },
@@ -100,6 +100,20 @@
     anniversary: "기념일·생신에는 식사 흐름을 해치지 않는 기록과 장식 중심으로 골라 보세요.",
     other: "행사 목적에 꼭 필요한 항목부터 선택하고 포함 여부를 업체에 다시 확인해 주세요."
   };
+  const contractChecksByEvent = {
+    kids: ["아기 의자·수유실·기저귀 교환 공간과 유모차 동선을 확인하세요.", "돌상·스냅·성장 영상 업체의 설치 시간과 반입 가능 시간을 함께 확인하세요."],
+    parents: ["어르신이 이동하기 쉬운 엘리베이터·화장실·주차 동선을 확인하세요.", "행사 순서와 마이크·화면 사용이 공간 이용 시간에 포함되는지 확인하세요."],
+    meeting: ["양가 대화를 위한 독립 공간과 옆 테이블 소음 차단 여부를 확인하세요.", "꽃·선물·의상 보관과 식사 전후 대기 공간을 확인하세요."],
+    anniversary: ["케이크·꽃·외부 촬영의 반입 가능 여부와 추가비를 확인하세요.", "기념 촬영 시간과 식사 제공 시간을 함께 맞출 수 있는지 확인하세요."],
+    other: ["행사 성격에 필요한 좌석 배치와 별도 공간 사용 가능 여부를 확인하세요.", "외부 물품 반입·준비·정리 시간이 대관 시간에 포함되는지 확인하세요."]
+  };
+  const contractChecksBySpace = {
+    restaurant: ["프라이빗 룸 최소 주문 금액과 룸 이용료 포함 여부를 확인하세요.", "주류·케이크·답례품 등 외부 물품 반입 가능 여부를 확인하세요.", "무료 주차 시간과 지원 차량 수를 확인하세요."],
+    hotel: ["최소 보증 인원과 최종 인원 확정 기한을 확인하세요.", "부가세·봉사료·음향·대기실이 견적에 포함되는지 확인하세요.", "주차 지원 범위와 행사 전후 이용 시간을 확인하세요."],
+    partyroom: ["대관 시간에 준비·정리 시간이 포함되는지 확인하세요.", "취사·케이터링·외부 장식 반입과 폐기물 처리 조건을 확인하세요.", "테이블·의자·빔·음향 장비의 실제 제공 수량을 확인하세요."],
+    home: ["출장비·설치비·철수비와 계단·주차 추가비를 확인하세요.", "음식 보관·배식·설거지와 행사 후 정리 범위를 확인하세요.", "가구 이동과 장식 설치가 가능한 벽·공간을 미리 확인하세요."],
+    garden: ["우천·폭염·한파 시 대체 공간과 취소 기준을 확인하세요.", "전기·조명·음향·화장실과 이동 동선을 확인하세요.", "행사 시간 제한과 야외 소음 기준을 확인하세요."]
+  };
   const serviceRanges = {
     dolTable: [350000, 1200000], photo: [300000, 900000], childOutfit: [80000, 300000], parentOutfit: [150000, 600000], gift: [150000, 700000], growthVideo: [100000, 450000], host: [150000, 450000],
     ceremonyTable: [300000, 1000000], banner: [100000, 400000], photoVideo: [450000, 1500000], cake: [70000, 300000], transport: [250000, 1200000], performance: [300000, 1500000],
@@ -156,16 +170,32 @@
     return Number.isInteger(count) && count >= 1 && count <= 500 ? count : 0;
   }
 
+  function guestCountsComplete() {
+    return Boolean(state.guests && state.mealGuests && state.mealGuests <= state.guests);
+  }
+
+  function venueFeeRangeState() {
+    const minText = String(state.spaceDetails.venueFeeMin ?? "").trim();
+    const maxText = String(state.spaceDetails.venueFeeMax ?? "").trim();
+    if (!minText && !maxText) return { hasValue: false, valid: true, range: null };
+    const min = Number(minText);
+    const max = Number(maxText);
+    const valid = minText !== "" && maxText !== "" && Number.isFinite(min) && Number.isFinite(max) && min >= 0 && max >= min && max <= 10000;
+    return { hasValue: true, valid, range: valid ? [min * 10000, max * 10000] : null };
+  }
+
   function spaceDetailsComplete() {
     if (!state.space) return false;
-    if (state.space === "restaurant") return Boolean(state.spaceDetails.cuisine && state.spaceDetails.mealBudget);
-    return Boolean(state.spaceDetails.useMode && state.spaceDetails.mealBudget);
+    const requiredComplete = state.space === "restaurant"
+      ? Boolean(state.spaceDetails.cuisine && state.spaceDetails.mealBudget)
+      : Boolean(state.spaceDetails.useMode && state.spaceDetails.mealBudget);
+    return requiredComplete && venueFeeRangeState().valid;
   }
 
   function updateNextState() {
     next.disabled = state.step === 1 ? !(state.event && state.eventDetail)
       : state.step === 2 ? !state.region
-        : state.step === 3 ? !state.guests
+        : state.step === 3 ? !guestCountsComplete()
           : state.step === 4 ? !spaceDetailsComplete()
             : false;
   }
@@ -184,7 +214,27 @@
     input.setAttribute("aria-invalid", String(invalid));
     input.setCustomValidity(invalid ? "1명부터 500명 사이의 정수를 입력해 주세요." : "");
     error.hidden = !invalid;
+    document.getElementById("calculator-meal-guests").max = String(state.guests || 500);
+    if (!state.mealGuestsManual) {
+      state.mealGuests = state.guests;
+      document.getElementById("calculator-meal-guests").value = state.mealGuests || "";
+    }
+    commitMealGuestValue(showError && Boolean(state.guests), false);
     syncGuestShortcutState();
+    updateNextState();
+    calculate();
+  }
+
+  function commitMealGuestValue(showError, markManual = true) {
+    const input = document.getElementById("calculator-meal-guests");
+    const error = document.getElementById("calculator-meal-guests-error");
+    if (markManual) state.mealGuestsManual = true;
+    state.mealGuests = exactGuestCount(input.value);
+    const invalid = !state.mealGuests || state.mealGuests > state.guests;
+    const shouldShow = invalid && (showError || input.value.trim() !== "");
+    input.setAttribute("aria-invalid", String(shouldShow));
+    input.setCustomValidity(shouldShow ? "식사 인원은 1명 이상이며 전체 참석 인원을 넘을 수 없습니다." : "");
+    error.hidden = !shouldShow;
     updateNextState();
     calculate();
   }
@@ -305,6 +355,65 @@
     return fieldset;
   }
 
+  function venueFeeGroup() {
+    const fieldset = document.createElement("fieldset");
+    fieldset.className = "calculator-detail-group calculator-venue-fee";
+    const legend = document.createElement("legend");
+    legend.textContent = "알고 있는 공간·룸 이용료 (선택)";
+    const hint = document.createElement("p");
+    hint.className = "calculator-detail-hint";
+    hint.id = "calculator-venue-fee-hint";
+    hint.textContent = "이미 받은 안내가 있을 때만 최소·최대 금액을 입력하세요. 비우면 공간 유형의 넓은 임시 범위를 사용합니다.";
+    const fields = document.createElement("div");
+    fields.className = "calculator-venue-fee__fields";
+    const inputConfig = [
+      ["venueFeeMin", "최소", "calculator-venue-fee-min"],
+      ["venueFeeMax", "최대", "calculator-venue-fee-max"]
+    ];
+    inputConfig.forEach(([key, labelText, id]) => {
+      const label = document.createElement("label");
+      label.setAttribute("for", id);
+      const labelSpan = document.createElement("span");
+      labelSpan.textContent = labelText;
+      const inputWrap = document.createElement("span");
+      inputWrap.className = "calculator-venue-fee__input";
+      const input = document.createElement("input");
+      input.className = "input";
+      input.id = id;
+      input.type = "number";
+      input.min = "0";
+      input.max = "10000";
+      input.step = "10";
+      input.inputMode = "numeric";
+      input.value = state.spaceDetails[key];
+      input.setAttribute("aria-describedby", `${hint.id} calculator-venue-fee-error`);
+      const unit = document.createElement("span");
+      unit.textContent = "만원";
+      unit.setAttribute("aria-hidden", "true");
+      inputWrap.append(input, unit);
+      label.append(labelSpan, inputWrap);
+      fields.append(label);
+      input.addEventListener("input", () => {
+        invalidateCompletion();
+        state.spaceDetails[key] = input.value;
+        const feeState = venueFeeRangeState();
+        const error = document.getElementById("calculator-venue-fee-error");
+        fields.querySelectorAll("input").forEach((candidate) => candidate.setAttribute("aria-invalid", String(!feeState.valid)));
+        error.hidden = feeState.valid;
+        updateNextState();
+        calculate();
+      });
+    });
+    const error = document.createElement("p");
+    error.className = "calculator-field-error";
+    error.id = "calculator-venue-fee-error";
+    error.role = "status";
+    error.textContent = "최소·최대 금액을 모두 입력하고 최대 금액을 최소 금액 이상으로 적어 주세요.";
+    error.hidden = true;
+    fieldset.append(legend, hint, fields, error);
+    return fieldset;
+  }
+
   function renderEventDetails() {
     const container = document.getElementById("calculator-event-details");
     const options = eventDetailOptions[state.event] || [];
@@ -358,7 +467,7 @@
           detailGroup("이용 방식 (필수)", "공간 이용에 포함할 범위를 하나 선택해 주세요.", "useMode", useModeOptions[state.space] || []),
           detailGroup("원하는 1인 식비 (필수)", "선택한 범위를 예상 인원에 한 번만 곱해 식사 계획 금액으로 반영합니다.", "mealBudget", mealBudgetOptions)
         ];
-    container.replaceChildren(heading, required, ...groups);
+    container.replaceChildren(heading, required, ...groups, venueFeeGroup());
     container.hidden = false;
   }
 
@@ -396,16 +505,27 @@
       : state.event === "parents" ? "어르신 동선, 주차, 독립 공간을 함께 확인하세요." : "행사 방식에 가장 가까운 공간을 선택하세요.";
   }
 
-  function showStep() {
+  function showStep(moveIntoView = false) {
     steps.forEach((section) => { section.hidden = Number(section.dataset.step) !== state.step; });
     document.getElementById("calculator-step-label").textContent = `${state.step} / 5`;
     document.getElementById("calculator-progress-bar").style.width = `${state.step * 20}%`;
     prev.hidden = state.step === 1;
     next.textContent = state.step === 5 ? "결과 확인하기" : "다음";
     updateNextState();
+    if (moveIntoView) {
+      steps.find((section) => Number(section.dataset.step) === state.step)?.scrollIntoView({
+        behavior: "auto",
+        block: "start"
+      });
+    }
   }
 
   function format(value) { return `${Math.round(value / 10000).toLocaleString("ko-KR")}만 원`; }
+
+  function formatPerPerson(value) {
+    const amount = value / 10000;
+    return `약 ${amount.toLocaleString("ko-KR", { maximumFractionDigits: 1 })}만 원`;
+  }
 
   function clearResult() {
     document.getElementById("calculator-min").textContent = "선택 전";
@@ -416,16 +536,23 @@
     document.getElementById("calculator-data-basis").textContent = "손품해방의 준비 계획용 가정이며, 확인된 시세·전국 표본·실제 견적이 아닙니다.";
     document.getElementById("calculator-selection-summary").replaceChildren();
     document.getElementById("calculator-breakdown").replaceChildren();
+    document.getElementById("calculator-per-person").textContent = "선택 전";
+    document.getElementById("calculator-guest-impact").textContent = "선택 전";
+    document.getElementById("calculator-fixed-share").textContent = "선택 전";
+    document.getElementById("calculator-cost-driver").textContent = "선택 전";
+    document.getElementById("calculator-contract-checks").replaceChildren();
     document.getElementById("calculator-filter-note").textContent = "";
     resultLinks.hidden = true;
   }
 
-  function renderSelectionSummary(eventDetail, cuisine, mealBudget, useMode) {
+  function renderSelectionSummary(eventDetail, cuisine, mealBudget, useMode, venueFee) {
+    const feeDescription = venueFee.range ? `직접 입력 · ${format(venueFee.range[0])}~${format(venueFee.range[1])}` : "직접 입력 없음 · 임시 범위 사용";
     const rows = [
       ["세부 행사", `${profiles[state.event].title} · ${eventDetail.title}`],
-      ["예상 인원", `${state.guests.toLocaleString("ko-KR")}명`],
+      ["참석 / 식사", `${state.guests.toLocaleString("ko-KR")}명 / ${state.mealGuests.toLocaleString("ko-KR")}명`],
       ["공간", `${spaceOptions[state.space].title}${state.space === "restaurant" ? ` · ${cuisine.title}` : ` · ${useMode.title}`}`],
-      ["1인 식비", mealBudget.title]
+      ["1인 식비", mealBudget.title],
+      ["공간 이용료", feeDescription]
     ];
     document.getElementById("calculator-selection-summary").replaceChildren(...rows.flatMap(([term, description]) => {
       const dt = document.createElement("dt"); dt.textContent = term;
@@ -434,8 +561,40 @@
     }));
   }
 
+  function renderPlanningAnalysis(items, typical, mealRange, fixedTypical, venueFee) {
+    const perPerson = state.guests ? typical / state.guests : 0;
+    const guestImpact = [mealRange[0] * 10, mealRange[1] * 10];
+    const fixedShare = typical ? Math.round((fixedTypical / typical) * 100) : 0;
+    const driver = [...items].sort((a, b) => b.typical - a.typical)[0];
+    document.getElementById("calculator-per-person").textContent = formatPerPerson(perPerson);
+    document.getElementById("calculator-guest-impact").textContent = `약 ${format(guestImpact[0])}~${format(guestImpact[1])}`;
+    document.getElementById("calculator-fixed-share").textContent = `약 ${fixedShare}%`;
+    document.getElementById("calculator-cost-driver").textContent = driver?.label || "선택 전";
+
+    const checks = [];
+    if (state.date) {
+      const day = new Date(`${state.date}T12:00:00`).getDay();
+      checks.push(`${state.date}은 ${day === 0 || day === 6 ? "주말" : "평일"}입니다. 해당 날짜의 최소 보증 인원·추가 조건을 다시 확인하세요.`);
+    } else {
+      checks.push("희망 날짜가 정해지면 평일·주말, 성수기, 최소 보증 인원 조건을 다시 확인하세요.");
+    }
+    if (state.mealGuests < state.guests) {
+      checks.push(`전체 참석 ${state.guests}명 중 식사 ${state.mealGuests}명으로 계산했습니다. 어린이 식대와 무료 인원 기준을 확인하세요.`);
+    }
+    checks.push(venueFee.range
+      ? `공간·룸 이용료는 직접 입력한 ${format(venueFee.range[0])}~${format(venueFee.range[1])}을 사용했습니다. 포함 항목을 견적서와 대조하세요.`
+      : "공간·룸 이용료를 입력하지 않아 넓은 임시 범위를 사용했습니다. 실제 견적의 대관료·룸 비용을 확인하세요.");
+    checks.push(...(contractChecksByEvent[state.event] || contractChecksByEvent.other).slice(0, 1));
+    checks.push(...(contractChecksBySpace[state.space] || []).slice(0, 2));
+    document.getElementById("calculator-contract-checks").replaceChildren(...checks.slice(0, 6).map((text) => {
+      const item = document.createElement("li");
+      item.textContent = text;
+      return item;
+    }));
+  }
+
   function calculate() {
-    if (!state.event || !state.eventDetail || !state.guests || !spaceDetailsComplete()) {
+    if (!state.event || !state.eventDetail || !guestCountsComplete() || !spaceDetailsComplete()) {
       clearResult();
       return null;
     }
@@ -449,38 +608,43 @@
       return null;
     }
     const mealRange = mealBudget.range;
-    let min = mealRange[0] * guests;
-    let high = mealRange[1] * guests;
+    const venueFee = venueFeeRangeState();
     const mealLabel = state.space === "restaurant"
       ? `식사 · ${cuisine.title} · 1인 ${mealBudget.title}`
       : `식사 · 1인 ${mealBudget.title}`;
-    const items = [[mealLabel, mealRange[0] * guests, mealRange[1] * guests]];
+    const items = [];
+    const addItem = (label, low, high, kind) => items.push({ label, low, high, typical: low + (high - low) * 0.55, kind });
+    addItem(mealLabel, mealRange[0] * state.mealGuests, mealRange[1] * state.mealGuests, "variable");
     if (state.space && spaceRanges[state.space]) {
-      const spaceRange = [
+      const fallbackSpaceRange = [
         spaceRanges[state.space][0] + (useMode?.range[0] || 0),
         spaceRanges[state.space][1] + (useMode?.range[1] || 0)
       ];
-      min += spaceRange[0]; high += spaceRange[1];
-      items.push([`장소 · ${spaceOptions[state.space].title}${useMode ? ` · ${useMode.title}` : ""}`, ...spaceRange]);
+      const spaceRange = venueFee.range || fallbackSpaceRange;
+      addItem(`장소 · ${spaceOptions[state.space].title}${useMode ? ` · ${useMode.title}` : ""}${venueFee.range ? " · 직접 입력" : " · 임시 범위"}`, spaceRange[0], spaceRange[1], "fixed");
     }
     state.services.forEach((service) => {
-      min += serviceRanges[service][0]; high += serviceRanges[service][1];
-      items.push([serviceOptions[service].title, ...serviceRanges[service]]);
+      addItem(serviceOptions[service].title, serviceRanges[service][0], serviceRanges[service][1], "fixed");
     });
-    const typical = Math.round((min + (high - min) * 0.55) / 10000) * 10000;
+    const min = items.reduce((sum, item) => sum + item.low, 0);
+    const high = items.reduce((sum, item) => sum + item.high, 0);
+    const typical = Math.round(items.reduce((sum, item) => sum + item.typical, 0) / 10000) * 10000;
+    const fixedTypical = items.filter((item) => item.kind === "fixed").reduce((sum, item) => sum + item.typical, 0);
     document.getElementById("calculator-min").textContent = format(min);
     document.getElementById("calculator-typical").textContent = format(typical);
     document.getElementById("calculator-high").textContent = format(high);
     document.getElementById("calculator-total").textContent = `약 ${format(min)}~${format(high)}`;
-    document.getElementById("calculator-result-note").textContent = `${state.region ? `${state.region} · ` : ""}${eventDetail.title} · 예상 인원 ${guests.toLocaleString("ko-KR")}명 기준으로 선택한 식비·공간 이용 방식과 준비 항목을 합산했습니다.`;
-    document.getElementById("calculator-data-basis").textContent = "손품해방의 준비 계획용 가정이며, 산정 기준과 검토일이 확정된 시세·전국 표본·실제 견적이 아닙니다.";
-    renderSelectionSummary(eventDetail, cuisine, mealBudget, useMode);
-    document.getElementById("calculator-breakdown").replaceChildren(...items.map(([name, low, upper]) => {
+    document.getElementById("calculator-result-note").textContent = `${state.region ? `${state.region} · ` : ""}${eventDetail.title} · 전체 참석 ${guests.toLocaleString("ko-KR")}명, 식사 ${state.mealGuests.toLocaleString("ko-KR")}명 기준으로 계산했습니다.`;
+    document.getElementById("calculator-data-basis").textContent = `식비는 식사 인원 ${state.mealGuests.toLocaleString("ko-KR")}명에 선택한 1인 범위를 곱했습니다. 공간비는 ${venueFee.range ? "직접 입력한 범위" : "공간 유형의 넓은 임시 범위"}를 사용했으며, 나머지는 준비 계획용 가정입니다.`;
+    renderSelectionSummary(eventDetail, cuisine, mealBudget, useMode, venueFee);
+    document.getElementById("calculator-breakdown").replaceChildren(...items.map(({ label: name, low, high: upper, kind }) => {
       const row = document.createElement("div");
+      row.dataset.costType = kind;
       const label = document.createElement("span"); label.textContent = name;
       const value = document.createElement("strong"); value.textContent = `${format(low)}~${format(upper)}`;
       row.append(label, value); return row;
     }));
+    renderPlanningAnalysis(items, typical, mealRange, fixedTypical, venueFee);
     const guestsFilter = guestFilterValue(guests);
     const budgetFilter = budgetFilterValue(typical);
     const searchContext = {
@@ -502,7 +666,7 @@
     document.getElementById("calculator-filter-note").textContent = `업체 검색에는 인원 ‘${guestFilterLabel(guestsFilter)}’, 예산 ‘${budgetFilterLabel(budgetFilter)}’ 필터가 적용됩니다.`;
     resultLinks.hidden = !state.completed;
     window.TaranSearchContext?.save?.(searchContext);
-    return { min, typical, high, guestsFilter, budgetFilter };
+    return { min, typical, high, guestsFilter, budgetFilter, mealGuests: state.mealGuests, fixedTypical };
   }
 
   document.querySelectorAll('[data-step="1"] [data-single-options] button').forEach((button) => button.addEventListener("click", () => {
@@ -525,6 +689,11 @@
     commitGuestValue(false);
   });
   document.getElementById("calculator-guests").addEventListener("blur", () => commitGuestValue(true));
+  document.getElementById("calculator-meal-guests").addEventListener("input", () => {
+    invalidateCompletion();
+    commitMealGuestValue(false);
+  });
+  document.getElementById("calculator-meal-guests").addEventListener("blur", () => commitMealGuestValue(true));
   document.querySelectorAll("#calculator-guest-shortcuts button").forEach((button) => button.addEventListener("click", () => {
     invalidateCompletion();
     document.getElementById("calculator-guests").value = button.dataset.value;
@@ -532,7 +701,7 @@
   }));
   document.getElementById("calculator-form").addEventListener("submit", (event) => event.preventDefault());
   next.addEventListener("click", () => {
-    if (state.step < 5) { state.step += 1; showStep(); return; }
+    if (state.step < 5) { state.step += 1; showStep(true); return; }
     state.completed = true;
     calculate();
     completeStatus.hidden = false;
@@ -541,7 +710,7 @@
     resultPanel.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
     resultPanel.focus({ preventScroll: true });
   });
-  prev.addEventListener("click", () => { state.step = Math.max(1, state.step - 1); showStep(); });
+  prev.addEventListener("click", () => { state.step = Math.max(1, state.step - 1); showStep(true); });
   document.getElementById("calculator-region").addEventListener("change", (event) => { invalidateCompletion(); state.region = event.target.value; next.disabled = !state.region; calculate(); });
   document.getElementById("calculator-district").addEventListener("change", (event) => { invalidateCompletion(); state.district = event.target.value; calculate(); });
   document.getElementById("calculator-date").addEventListener("change", (event) => { invalidateCompletion(); state.date = event.target.value; calculate(); });
@@ -573,7 +742,7 @@
     }
     const detail = selectedEventDetail();
     const mealBudget = selectedOption(mealBudgetOptions, state.spaceDetails.mealBudget);
-    const text = `${state.region || "지역 미정"} · ${detail.title} · 예상 인원 ${state.guests}명 · 1인 식비 ${mealBudget.title} · 준비 계획용 ${document.getElementById("calculator-total").textContent}`;
+    const text = `${state.region || "지역 미정"} · ${detail.title} · 참석 ${state.guests}명 · 식사 ${state.mealGuests}명 · 1인 식비 ${mealBudget.title} · 준비 계획용 ${document.getElementById("calculator-total").textContent}`;
     try {
       if (navigator.share) await navigator.share({ title: "손품해방 가족행사 준비 비용 범위", text, url: location.href });
       else { await navigator.clipboard.writeText(`${text}\n${location.href}`); window.TaranToast?.show?.("계산 결과 링크를 복사했습니다."); }
@@ -585,6 +754,8 @@
   state.district = initial.district || "";
   state.date = initial.date || "";
   state.guests = 0;
+  state.mealGuests = 0;
+  state.mealGuestsManual = false;
   window.SonpumRegions?.setupSelects?.(document.getElementById("calculator-region"), document.getElementById("calculator-district"), { province: state.region, district: state.district });
   document.getElementById("calculator-date").value = state.date;
   document.querySelectorAll('[data-step="1"] button').forEach((button) => {
@@ -592,6 +763,7 @@
     setButtonSelected(button, active);
   });
   document.getElementById("calculator-guests").value = "";
+  document.getElementById("calculator-meal-guests").value = "";
   syncGuestShortcutState();
   renderEventDetails();
   renderDynamicOptions();

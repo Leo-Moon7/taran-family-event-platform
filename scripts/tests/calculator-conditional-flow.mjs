@@ -40,7 +40,7 @@ const mealBudgetOptions = initializer("mealBudgetOptions", "array");
 const useModeOptions = initializer("useModeOptions", "object");
 const spaceServiceRules = initializer("spaceServiceRules", "object");
 
-expect((html.match(/class="calculator-step" data-step="[1-5]"/g) || []).length === 5, "기존 5단계 흐름이 유지되지 않았습니다.");
+expect((html.match(/class="calculator-step(?: [^"]+)?" data-step="[1-5]"/g) || []).length === 5, "기존 5단계 흐름이 유지되지 않았습니다.");
 expect((html.match(/data-step="1"[\s\S]*?data-value="(?:kids|parents|meeting|anniversary|other)"/g) || []).length >= 1, "승인된 행사 선택 영역이 없습니다.");
 for (const event of ["kids", "parents", "meeting", "anniversary", "other"]) {
   expect(Boolean(profiles[event]), `행사 프로필 누락: ${event}`);
@@ -54,12 +54,16 @@ expect(/spaceDetails:\s*emptySpaceDetails\(\)/.test(script), "state.spaceDetails
 
 expect(/id="calculator-guests"[^>]*type="number"[^>]*min="1"[^>]*max="500"[^>]*step="1"/.test(html), "예상 인원 1~500 입력이 없습니다.");
 expect((html.match(/<strong>(?:10|20|30|50|100)명<\/strong>/g) || []).length === 5, "인원 바로가기 표시가 올바르지 않습니다.");
-expect(/아직 확정되지 않았다면 가장 가까운 인원을 선택해 주세요\./.test(html), "예상 인원 안내가 대략적인 선택임을 설명하지 않습니다.");
+expect(/아직 확정되지 않았다면 가장 가까운 (?:전체 참석 )?인원을 선택해 주세요\./.test(html), "예상 인원 안내가 대략적인 선택임을 설명하지 않습니다.");
 expect(!/정확한 예상 인원|정확히 (?:10|20|30|50|100)명/.test(html), "사용자 화면에 확정 인원처럼 보이는 표현이 남아 있습니다.");
 expect(!/10명 이하|11~30명|31~50명|51~80명|81명 이상/.test(html), "인원 구간 상한 버튼이 남아 있습니다.");
 expect(/function exactGuestCount\(value\)[\s\S]*?Number\.isInteger\(count\)[\s\S]*?count >= 1 && count <= 500/.test(script), "예상 인원 숫자 경계 검증이 없습니다.");
 expect(/state\.guests = exactGuestCount\(input\.value\)/.test(script) && /aria-invalid/.test(script) && /setCustomValidity/.test(script), "예상 인원 상태·ARIA 오류 연결이 없습니다.");
 expect(/state\.guests = 0;/.test(script) && !/state\.guests = Number\(initial\.guests\)/.test(script), "검색 인원 구간값을 예상 인원으로 자동 사용하고 있습니다.");
+expect(/id="calculator-meal-guests"[^>]*type="number"[^>]*min="1"[^>]*max="500"/.test(html), "식사 예상 인원 입력이 없습니다.");
+expect(/mealGuests:\s*0/.test(script) && /function guestCountsComplete\(\)/.test(script), "전체 참석 인원과 식사 인원 상태가 분리되지 않았습니다.");
+expect(/state\.step === 3 \? !guestCountsComplete\(\)/.test(script), "식사 인원 검증이 3단계 다음 버튼에 연결되지 않았습니다.");
+expect(/mealRange\[0\] \* state\.mealGuests/.test(script) && /mealRange\[1\] \* state\.mealGuests/.test(script), "식비가 전체 참석 인원이 아닌 식사 인원에 연결되지 않았습니다.");
 
 const cuisineValues = cuisineOptions.map(({ value }) => value);
 for (const cuisine of ["korean", "fineDining", "chinese", "buffet", "general"]) expect(cuisineValues.includes(cuisine), `프라이빗 룸 음식 유형 누락: ${cuisine}`);
@@ -95,9 +99,13 @@ expect(/state\.step === 4 \? !spaceDetailsComplete\(\)/.test(script), "4단계 �
 expect(/const mealRange = mealBudget\.range/.test(script) && !/profile\.meal/.test(script), "모든 공간에서 선택한 1인 식비가 계산에 반영되지 않았습니다.");
 expect(/useMode\?\.range\[0\]/.test(script) && /useMode\?\.range\[1\]/.test(script), "선택한 이용 방식이 계산에 반영되지 않았습니다.");
 expect(/1인 \$\{mealBudget\.title\}/.test(script) && /\$\{useMode\.title\}/.test(script), "식비·이용 방식의 한국어 계산 내역이 없습니다.");
-expect(/renderSelectionSummary\(eventDetail, cuisine, mealBudget, useMode\)/.test(script), "결과 요약에 세부 행사·공간·식비가 연결되지 않았습니다.");
-for (const label of ["세부 행사", "예상 인원", "공간", "1인 식비"]) expect(script.includes(`"${label}"`), `결과 한국어 요약 누락: ${label}`);
+expect(/renderSelectionSummary\(eventDetail, cuisine, mealBudget, useMode, venueFee\)/.test(script), "결과 요약에 세부 행사·공간·식비가 연결되지 않았습니다.");
+for (const label of ["세부 행사", "참석 / 식사", "공간", "1인 식비", "공간 이용료"]) expect(script.includes(`"${label}"`), `결과 한국어 요약 누락: ${label}`);
 expect(/TaranStorage\.set\("calculator-state", JSON\.stringify\(\{ \.\.\.state, \.\.\.result \}\)\)/.test(script), "calculator-state 저장 계약 또는 spaceDetails 저장이 유지되지 않았습니다.");
+expect(/venueFeeMin:\s*""/.test(script) && /venueFeeMax:\s*""/.test(script) && /function venueFeeRangeState\(\)/.test(script), "직접 입력 공간·룸 이용료 상태가 없습니다.");
+expect(/venueFee\.range \|\| fallbackSpaceRange/.test(script), "직접 입력한 공간·룸 이용료가 임시 범위를 대체하지 않습니다.");
+expect(html.includes('id="calculator-per-person"') && html.includes('id="calculator-guest-impact"') && html.includes('id="calculator-fixed-share"') && html.includes('id="calculator-cost-driver"'), "실사용 계획 분석 지표가 없습니다.");
+expect(/function renderPlanningAnalysis\(/.test(script) && /contractChecksByEvent/.test(script) && /contractChecksBySpace/.test(script), "비용 영향 또는 계약 전 확인 로직이 없습니다.");
 
 const searchContext = script.match(/const searchContext = \{([\s\S]*?)\n    \};/)?.[1] || "";
 expect(/event: state\.event/.test(searchContext) && /source: "calculator"/.test(searchContext), "기존 TaranSearchContext 검색 계약이 없습니다.");
@@ -129,11 +137,15 @@ expect(/\.calculator-page \.calculator-layout\s*\{[\s\S]*?grid-template-columns:
 expect(/\.calculator-page \.calculator-result\s*\{[\s\S]*?position:\s*static[\s\S]*?scroll-margin-top:/.test(styles), "하단 결과 영역의 고정 해제 또는 상단 여백이 없습니다.");
 expect(/resultPanel\.scrollIntoView\(\{[\s\S]*?block:\s*"start"/.test(script), "결과 확인 후 결과 상단으로 이동하지 않습니다.");
 expect(/resultPanel\.focus\(\{\s*preventScroll:\s*true\s*\}\)/.test(script), "결과 이동 후 키보드 초점 유지가 없습니다.");
+expect((html.match(/calculator-step calculator-step--split/g) || []).length >= 3, "세부 선택 단계의 좌우 작업공간 구조가 없습니다.");
+expect(/@media \(min-width: 70rem\)[\s\S]*?calculator-step--split:not\(\[hidden\]\)[\s\S]*?grid-template-columns:/.test(styles), "PC 우측 세부 패널 배치 규칙이 없습니다.");
+expect(/calculator-step__aside[\s\S]*?position:\s*sticky/.test(styles), "PC 세부 선택 패널의 화면 내 유지 규칙이 없습니다.");
+expect(/function showStep\(moveIntoView = false\)[\s\S]*?scrollIntoView\(\{[\s\S]*?behavior:\s*"auto"[\s\S]*?block:\s*"start"/.test(script), "단계 변경 후 현재 선택 화면 상단으로 이동하지 않습니다.");
 
 if (failures.length) {
-  console.error(`\nFE-028 계산기 상세 상태 전이 검사 실패 ${failures.length}건\n`);
+  console.error(`\nFE-034 계산기 계획 작업공간 검사 실패 ${failures.length}건\n`);
   failures.forEach((message, index) => console.error(`${index + 1}. ${message}`));
   process.exit(1);
 }
 
-console.log(`FE-028 계산기 상세 상태 전이 검사 통과: 5개 세부 행사 분류, 예상 인원 1~500명, 5개 공간 식비, 코랄/흰색 ${coralContrast.toFixed(2)}:1, 저장·검색 계약`);
+console.log(`FE-034 계산기 계획 작업공간 검사 통과: 5개 행사 분류, 참석·식사 인원, 우측 세부 패널, 직접 공간비, 계획 분석, 코랄/흰색 ${coralContrast.toFixed(2)}:1`);

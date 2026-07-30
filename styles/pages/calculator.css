@@ -557,3 +557,230 @@
     text-align: left;
   }
 }
+
+/* FE-034 — side-by-side detail workspace and planning analysis */
+.calculator-page .calculator-step__primary > p {
+  margin-bottom: var(--space-5);
+  color: var(--tool-muted);
+  line-height: 1.7;
+}
+
+.calculator-page .calculator-step {
+  scroll-margin-top: calc(var(--header-height) + 1rem);
+}
+
+.calculator-page .calculator-attendance-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.calculator-page .calculator-attendance-grid .calculator-guests-entry {
+  max-width: none;
+  margin-bottom: 0;
+}
+
+.calculator-page .calculator-venue-fee__fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .75rem;
+}
+
+.calculator-page .calculator-venue-fee__fields label {
+  display: grid;
+  gap: .4rem;
+  min-width: 0;
+  color: var(--tool-forest-deep);
+  font-size: .82rem;
+  font-weight: 800;
+}
+
+.calculator-page .calculator-venue-fee__input {
+  position: relative;
+  display: block;
+}
+
+.calculator-page .calculator-venue-fee__input .input {
+  min-height: 3rem;
+  padding-right: 3.5rem;
+  color: var(--tool-forest-deep);
+  font-weight: 750;
+}
+
+.calculator-page .calculator-venue-fee__input > span {
+  position: absolute;
+  top: 50%;
+  right: .8rem;
+  color: #59635e;
+  font-size: .78rem;
+  transform: translateY(-50%);
+}
+
+.calculator-page .calculator-venue-fee__input .input[aria-invalid="true"] {
+  border-color: #a8251c;
+}
+
+.calculator-page .calculator-planning-analysis {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgb(255 255 255 / 24%);
+}
+
+.calculator-page .calculator-planning-analysis h2 {
+  margin: 0 0 .9rem;
+  color: #fff;
+  font-size: 1.15rem;
+  line-height: 1.4;
+}
+
+.calculator-page .calculator-analysis-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .65rem;
+}
+
+.calculator-page .calculator-analysis-grid article {
+  display: grid;
+  align-content: start;
+  gap: .3rem;
+  min-width: 0;
+  padding: .85rem;
+  border: 1px solid rgb(255 255 255 / 17%);
+  border-radius: .85rem;
+  background: rgb(255 255 255 / 7%);
+}
+
+.calculator-page .calculator-analysis-grid small,
+.calculator-page .calculator-analysis-grid span {
+  color: rgb(255 255 255 / 72%);
+  font-size: .76rem;
+  line-height: 1.45;
+}
+
+.calculator-page .calculator-analysis-grid strong {
+  color: #fff;
+  font-size: 1rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.calculator-page .calculator-contract-checks {
+  margin-top: .8rem;
+  padding: 1rem;
+  border-radius: .9rem;
+  color: var(--tool-forest-deep);
+  background: #fff8f2;
+}
+
+.calculator-page .calculator-contract-checks h3 {
+  margin: 0;
+  color: var(--tool-forest-deep);
+  font-size: .98rem;
+  line-height: 1.45;
+}
+
+.calculator-page .calculator-contract-checks ul {
+  display: grid;
+  gap: .55rem;
+  margin: .75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.calculator-page .calculator-contract-checks li {
+  position: relative;
+  padding-left: 1.2rem;
+  color: #344a42;
+  font-size: .82rem;
+  line-height: 1.55;
+}
+
+.calculator-page .calculator-contract-checks li::before {
+  position: absolute;
+  top: .08rem;
+  left: 0;
+  color: var(--tool-coral-hover);
+  font-weight: 850;
+  content: "✓";
+}
+
+@media (min-width: 70rem) {
+  .calculator-page .calculator-layout {
+    width: min(100% - 2rem, 75rem);
+  }
+
+  .calculator-page .calculator-step--split:not([hidden]) {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(23rem, .95fr);
+    align-items: start;
+    gap: clamp(1.25rem, 3vw, 2.25rem);
+  }
+
+  .calculator-page .calculator-step__aside {
+    position: sticky;
+    top: calc(var(--header-height) + 1rem);
+    max-height: calc(100vh - var(--header-height) - 2rem);
+    margin-top: 0;
+  }
+
+  .calculator-page .calculator-step__aside.calculator-conditional,
+  .calculator-page .calculator-step__aside.calculator-guest-shortcuts {
+    padding: 1rem;
+  }
+
+  .calculator-page .calculator-step__aside .calculator-required-note {
+    margin-bottom: .85rem;
+  }
+
+  .calculator-page .calculator-step__aside .calculator-detail-group + .calculator-detail-group {
+    margin-top: 1rem;
+    padding-top: 1rem;
+  }
+
+  .calculator-page .calculator-step__aside .calculator-detail-hint {
+    margin-bottom: .55rem;
+  }
+
+  .calculator-page .calculator-step__aside .calculator-detail-options button {
+    min-height: 3.8rem;
+    padding: .55rem;
+  }
+
+  .calculator-page .calculator-step__aside .calculator-option-state {
+    margin-top: .22rem;
+    font-size: .7rem;
+  }
+
+  .calculator-page .calculator-step__aside .calculator-detail-options {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .5rem;
+  }
+
+  .calculator-page .calculator-step__aside .calculator-detail-options button span {
+    font-size: .72rem;
+    line-height: 1.35;
+  }
+
+  .calculator-page .calculator-step__aside .calculator-detail-options button strong {
+    font-size: .88rem;
+    line-height: 1.3;
+  }
+}
+
+@media (max-width: 69.99rem) {
+  .calculator-page .calculator-step__aside {
+    margin-top: 1.25rem;
+  }
+}
+
+@media (max-width: 40rem) {
+  .calculator-page .calculator-attendance-grid,
+  .calculator-page .calculator-venue-fee__fields,
+  .calculator-page .calculator-analysis-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .calculator-page .calculator-attendance-grid {
+    gap: 1.25rem;
+  }
+}
