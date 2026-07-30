@@ -1,0 +1,247 @@
+/*
+ * FE-031 — shared visual language for the main service subpages.
+ * This file loads after page-level CSS so the same hierarchy is preserved
+ * without changing each page's functional layout or shared design tokens.
+ */
+.subpage-tone .subpage-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding-inline: 0;
+  padding-block: clamp(2.5rem, 4vw, 3.25rem);
+  border: 0;
+  border-bottom: 1px solid rgb(19 70 55 / 12%);
+  border-radius: 0;
+  background:
+    radial-gradient(circle at 82% 20%, rgb(224 95 78 / 14%), transparent 25rem),
+    radial-gradient(circle at 72% 115%, rgb(50 106 82 / 16%), transparent 30rem),
+    linear-gradient(112deg, #f4eee4 0%, #fffaf3 52%, #edf2e9 100%);
+  color: #123f34;
+}
+
+.subpage-tone .subpage-hero::after {
+  position: absolute;
+  z-index: -1;
+  top: auto;
+  left: auto;
+  right: clamp(1.5rem, 7vw, 7rem);
+  bottom: -7.5rem;
+  width: 18rem;
+  height: 18rem;
+  border: 1px solid rgb(19 70 55 / 9%);
+  border-radius: 50%;
+  content: "";
+}
+
+.subpage-tone .subpage-hero__inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(17rem, .75fr);
+  gap: clamp(2rem, 4vw, 4rem);
+  align-items: center;
+  min-height: clamp(13rem, 15vw, 15rem);
+}
+
+.subpage-tone .subpage-hero__copy {
+  display: block;
+  min-width: 0;
+  margin-top: 0;
+}
+
+.subpage-tone .subpage-hero .eyebrow,
+.subpage-tone .subpage-hero .directory-heading__eyebrow {
+  margin: 0 0 .85rem;
+  color: #c95749;
+  font-size: .875rem;
+  font-weight: 800;
+  letter-spacing: .055em;
+  line-height: 1.45;
+}
+
+.subpage-tone .subpage-hero h1,
+.subpage-tone .auth-intro h1 {
+  margin: 0 0 1.15rem;
+  max-width: 17ch;
+  color: #123f34;
+  font-family: var(--font-family-display);
+  font-size: clamp(2.4rem, 3.8vw, 3.25rem);
+  font-weight: 750;
+  letter-spacing: -.045em;
+  line-height: 1.08;
+  text-shadow: none;
+}
+
+.subpage-tone .subpage-hero__copy > p:last-of-type,
+.subpage-tone .subpage-hero__copy > p:not(.eyebrow):not(.directory-heading__eyebrow) {
+  max-width: 43rem;
+  margin: 0;
+  color: #4e625b;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.72;
+}
+
+.subpage-tone .subpage-hero__features,
+.subpage-tone .subpage-hero__aside {
+  display: grid;
+  gap: .7rem;
+  margin: 0;
+  padding: 1.15rem;
+  border: 1px solid rgb(19 70 55 / 13%);
+  border-radius: 1.25rem;
+  background: rgb(255 255 255 / 72%);
+  box-shadow: 0 1rem 2.5rem rgb(19 70 55 / 8%);
+  backdrop-filter: blur(.6rem);
+}
+
+.subpage-tone .subpage-hero__features li {
+  display: grid;
+  grid-template-columns: 6.5rem minmax(0, 1fr);
+  gap: .8rem;
+  align-items: center;
+  min-height: 3.3rem;
+  padding: .75rem .9rem;
+  border: 0;
+  border-radius: .8rem;
+  background: rgb(255 255 255 / 58%);
+}
+
+.subpage-tone .subpage-hero__features li strong,
+.subpage-tone .subpage-hero__features li span {
+  color: #123f34;
+  font-size: .9rem;
+  line-height: 1.45;
+}
+
+.subpage-tone .subpage-hero__features li span {
+  color: #61716b;
+}
+
+.subpage-tone .subpage-hero__aside,
+.subpage-tone .subpage-hero__aside span,
+.subpage-tone .subpage-hero__aside strong,
+.subpage-tone .subpage-hero__aside p {
+  color: #123f34;
+}
+
+.subpage-tone .subpage-hero__aside span {
+  color: #c95749;
+}
+
+.subpage-tone .subpage-hero__aside p {
+  color: #61716b;
+}
+
+.subpage-tone .subpage-hero__copy .button {
+  margin-top: 1.35rem;
+}
+
+.subpage-tone .subpage-hero__copy .button + .button {
+  margin-left: .45rem;
+}
+
+.subpage-tone .article-jump-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .55rem;
+  margin-top: 1.4rem;
+}
+
+.subpage-tone .article-jump-list a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: .65rem .95rem;
+  border: 1px solid rgb(19 70 55 / 20%);
+  border-radius: .75rem;
+  background: rgb(255 255 255 / 60%);
+  color: #123f34;
+  font-size: .9rem;
+  font-weight: 700;
+}
+
+.subpage-tone .article-jump-list a:last-child {
+  border-color: #123f34;
+  background: #123f34;
+  color: #fff;
+}
+
+.subpage-tone .article-hub-page {
+  width: 100%;
+  padding-top: 0;
+}
+
+.subpage-tone .article-hub-page > :not(.subpage-hero) {
+  width: min(100% - 2rem, var(--content-max));
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.subpage-tone .auth-intro .eyebrow {
+  color: #c95749;
+  font-size: .875rem;
+  font-weight: 800;
+  letter-spacing: .055em;
+}
+
+.subpage-tone .auth-intro > p:last-child {
+  color: #4e625b;
+  font-size: 1rem;
+  line-height: 1.72;
+}
+
+@media (max-width: 56rem) {
+  .subpage-tone .subpage-hero__inner {
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+    min-height: 0;
+  }
+
+  .subpage-tone .subpage-hero__features,
+  .subpage-tone .subpage-hero__aside {
+    max-width: 42rem;
+  }
+
+  .subpage-tone .subpage-hero .subpage-hero__features {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
+    padding: .8rem;
+  }
+
+  .subpage-tone .subpage-hero .subpage-hero__features li {
+    grid-template-columns: 1fr;
+    align-content: center;
+    min-height: 5.25rem;
+  }
+}
+
+@media (max-width: 40rem) {
+  .subpage-tone .subpage-hero {
+    padding-block: 2rem;
+  }
+
+  .subpage-tone .subpage-hero::after {
+    right: -6rem;
+    bottom: -9rem;
+  }
+
+  .subpage-tone .subpage-hero h1,
+  .subpage-tone .auth-intro h1 {
+    font-size: clamp(2.1rem, 8vw, 2.65rem);
+    letter-spacing: -.04em;
+  }
+
+  .subpage-tone .subpage-hero .subpage-hero__features {
+    display: none;
+  }
+
+  .subpage-tone .subpage-hero__copy .button {
+    width: 100%;
+  }
+
+  .subpage-tone .subpage-hero__copy .button + .button {
+    margin-left: 0;
+  }
+}
