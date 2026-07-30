@@ -16,6 +16,7 @@
   from = "/vendor-dashboard.html"
   to = "/admin/providers.html"
   status = 301
+  force = true
 
 [[redirects]]
   from = "/venue.html"
