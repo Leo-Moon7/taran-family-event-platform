@@ -184,6 +184,9 @@ check("reference menu price and contact layout", () => {
 
 check("clipboard feedback and accessibility", () => {
   assert.match(copyFunction, /await navigator\.clipboard\.writeText\(message\);/u, "clipboard write must complete before success feedback");
+  assert.match(copyFunction, /document\.createElement\("textarea"\)/u, "clipboard permission failure needs a text-area fallback");
+  assert.match(copyFunction, /document\.execCommand\?\.\("copy"\) === true/u, "clipboard fallback must verify the legacy copy result");
+  assert.match(copyFunction, /fallback\.remove\(\);/u, "clipboard fallback must remove its temporary field");
   assert.match(copyFunction, /button\.textContent = "복사되었습니다";/u, "copy button needs immediate success text");
   assert.match(copyFunction, /window\.setTimeout\(\(\) => \{\s*button\.textContent = "문의 내용 복사하기";\s*\}, 2000\);/u, "copy button must restore after 2 seconds");
   assert.match(copyFunction, /복사하지 못했습니다/u, "clipboard failure feedback missing");

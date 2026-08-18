@@ -521,8 +521,29 @@
     const status = $("#provider-copy-status");
     const button = $("#provider-copy-questions");
     try {
-      if (!navigator.clipboard?.writeText) throw new Error("clipboard unavailable");
-      await navigator.clipboard.writeText(message);
+      let copied = false;
+      if (navigator.clipboard?.writeText) {
+        try {
+          await navigator.clipboard.writeText(message);
+          copied = true;
+        } catch (_clipboardError) {
+          copied = false;
+        }
+      }
+      if (!copied) {
+        const fallback = document.createElement("textarea");
+        fallback.value = message;
+        fallback.setAttribute("readonly", "");
+        fallback.style.position = "fixed";
+        fallback.style.opacity = "0";
+        fallback.style.pointerEvents = "none";
+        document.body.append(fallback);
+        fallback.select();
+        fallback.setSelectionRange(0, fallback.value.length);
+        copied = document.execCommand?.("copy") === true;
+        fallback.remove();
+      }
+      if (!copied) throw new Error("clipboard unavailable");
       status.textContent = "문의 내용이 복사되었습니다. 공식 채널에 붙여넣어 사용해 주세요.";
       button.textContent = "복사되었습니다";
       window.clearTimeout(copyFeedbackTimer);
