@@ -1,10 +1,10 @@
 # 활성 작업
 
-2026-08-18 OPS-042는 GitHub 인증과 비공개 저장소 push 권한을 재확인하고, 검수본을 `agent/customer-provider-seven-preview` 별도 브랜치와 draft PR로 보존하는 격리 조립을 진행 중이다. `main`·Netlify production·운영 DB는 변경하지 않는다.
+2026-08-18 OPS-042는 GitHub 인증과 비공개 저장소 push 권한을 재확인하고, 검수본을 `agent/customer-provider-seven-preview` 별도 브랜치와 draft PR #1로 보존했다. `main`·Netlify production·운영 DB는 변경하지 않았다. 현재 실행 중인 코드 작업은 없다.
 
 | 작업 ID | 담당 | 수정 범위 | 충돌 가능성 | 상태 |
 | --- | --- | --- | --- | --- |
-| OPS-042 | 총괄 PM·품질 | exact snapshot·별도 branch·draft PR | 없음 | IN_PROGRESS |
+| 없음 | - | - | - | IDLE |
 
 2026-08-18 BE-036·FE-042·QA-055·OPS-041은 총괄 PM `PASS`·`DONE`이다. 공식 근거를 확인한 서라벌한정식 서초 본점과 눈부신일상 강남점 2곳을 추가해 고객형 profile 7곳·장소/식사 4·스냅/영상 3·가격 2·업체 문의 5 계약을 통과했다. 고유 noindex draft `6a839ca595c8db1c752d5efd`의 HTTP·3 viewport·신규 상세 2곳도 통과했다. 현재 활성 작업은 없으며 GitHub main·Netlify production·운영 DB는 변경하지 않았다.
 

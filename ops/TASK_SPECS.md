@@ -23,7 +23,7 @@
 위험요소: 혼합 변경 과다 포함, main 자동 배포, 인증 만료, 누락된 의존 파일로 preview 재현 실패
 롤백 방법: draft PR을 닫고 별도 브랜치를 삭제한다. main·production은 영향을 받지 않는다.
 사용자 승인 필요 여부: 별도 브랜치·draft PR은 승인됨. main 병합·production 배포는 별도 승인.
-현재 상태: IN_PROGRESS (격리 clone에서 exact snapshot 조립·검증 중)
+현재 상태: DONE (총괄 PM PASS, commit fde185c, draft PR #1, main·production·DB 불변)
 ```
 
 ## BE-036
