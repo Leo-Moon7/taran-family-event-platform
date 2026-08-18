@@ -19,15 +19,17 @@ const eventSandbox = { window: {}, console };
 vm.createContext(eventSandbox);
 vm.runInContext(read("scripts/core/event-types.js"), eventSandbox);
 const events = eventSandbox.window.SonpumEventTypes.items;
-assert(events.length === 8, "행사 분류가 8개가 아닙니다.");
-assert(events.some(({ id }) => id === "meeting") && events.some(({ id }) => id === "smallWedding"), "상견례와 스몰웨딩이 분리되지 않았습니다.");
+assert(events.length === 5, "공개 행사 분류가 5개가 아닙니다.");
+assert(events.some(({ id }) => id === "meeting") && events.some(({ id }) => id === "other"), "결혼 준비 또는 기타 가족행사 통합 분류가 없습니다.");
+assert(eventSandbox.window.SonpumEventTypes.normalize("smallWedding") === "meeting", "스몰웨딩이 결혼 준비로 통합되지 않았습니다.");
+assert(eventSandbox.window.SonpumEventTypes.normalize("memorial") === "other", "추모 가족행사가 기타 가족행사로 통합되지 않았습니다.");
 
 const storage = read("scripts/core/storage.js");
 assert(storage.includes("sonpum-haebang-storage-migration-v1"), "스토리지 1회 마이그레이션 표식이 없습니다.");
 assert(/taran|memoa|nopoom/i.test(storage), "이전 저장 키 이관 대상이 없습니다.");
 
 const home = read("index.html");
-["home-search", "verification", "recommended-providers", "calculator-preview", "how-it-works", "guides", "provider-join"].forEach(id => {
+["home-search", "verification", "recommended-providers", "how-it-works", "guides", "provider-join"].forEach(id => {
   assert(home.includes(`id="${id}"`), `홈 필수 영역 #${id}가 없습니다.`);
 });
 assert((home.includes('value="서울특별시"') || home.includes('selected>서울특별시')) && home.includes('value="kids" selected'), "홈 기본 검색값이 서울·돌잔치가 아닙니다.");
@@ -35,11 +37,9 @@ assert((home.includes('value="서울특별시"') || home.includes('selected>서�
 const venuesHtml = read("venues.html");
 const venuesJs = read("scripts/pages/venues.js");
 assert(!/후기순|평점순|rating-desc|review-desc/.test(venuesHtml + venuesJs), "후기·평점 정렬이 공개 목록에 남아 있습니다.");
-assert(venuesJs.includes("hasPublishedReviewOrRating(item)"), "후기와 평점이 모두 없는 업체를 숨기는 기준이 없습니다.");
-["recommended", "match", "recent", "price", "minimum-guarantee", "capacity", "response"].forEach(value => {
-  assert(venuesHtml.includes(`value="${value}`) || venuesJs.includes(`"${value}"`), `정렬 기준 ${value}가 없습니다.`);
-});
-assert(venuesJs.includes("score += 25") && venuesJs.includes("score += 15") && venuesJs.includes("Math.min(8") && venuesJs.includes("score += 7") && venuesJs.includes("score += 10"), "검색 점수 기준이 반영되지 않았습니다.");
+assert(venuesJs.includes("customerProviderProfiles") && venuesJs.includes('displayGate === "customer_ready"'), "고객 공개 profile gate가 없습니다.");
+assert(venuesJs.includes("createEmptyState") && venuesJs.includes("categoryTabs"), "업체 빈 결과 또는 분야 탭 처리가 없습니다.");
+assert(venuesHtml.includes('data-category-tab="all"') && venuesHtml.includes('data-category-tab="돌잔치 장소·식사"') && venuesHtml.includes('data-category-tab="돌사진·스튜디오"'), "현행 업체 분야 탭이 없습니다.");
 
 const inquiry = read("inquiry.html");
 const partner = read("partner.html");

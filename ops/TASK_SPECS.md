@@ -2,6 +2,30 @@
 
 모든 제품 작업은 아래 카드의 허용 경로를 따른다. 2026-07-24 기준 QA-018은 1차 보고서 사실관계 보완 후 총괄 PM·독립 검수 `PASS`로 `DONE`이다. FE-014도 `DONE`이며 QA-016·QA-017은 CHG-A 테스트 정본 소유권이 정해질 때까지 `BLOCKED`다.
 
+## QA-056
+
+```text
+작업 ID: QA-056
+작업명: GitHub 자동 검사 구계약 현행화
+담당 전문 에이전트: 품질·보안
+현재 문제: draft PR #1의 validate 단계는 통과하지만 과거 marketplace/redesign 검사 기준이 승인된 7곳 UI·5개 행사 분류와 달라 GitHub Actions가 실패한다.
+사업적 목적: 제품을 과거 화면으로 되돌리지 않고 현행 승인 계약을 정확히 검사해 PR 상태를 신뢰할 수 있게 한다.
+근거 문서: OPS-042, QA-055, FE-041, FE-042, GitHub Actions run 32089835000, 사용자 2026-08-18 승인
+선행 작업: OPS-042 DONE, QA-056 사용자 승인 완료
+수정 허용 경로: scripts/tests/marketplace-flow.mjs, scripts/tests/sonpum-redesign.mjs, ops 운영 상태·QA-056 보고서
+수정 금지 경로: 제품 HTML·CSS·페이지 JS·데이터, API·DB·migration·환경변수·package/lock, main, production
+공유 계약: 현재 7곳·분야 4/3·가격 2/문의 5, 공개 헤더, 5개 행사 분류를 제품 사실 기준으로 유지한다.
+구현 범위: 실패한 구계약 기대값을 현행 동작 계약으로 교체하고 npm test·build·dist·GitHub Actions를 재검증한다.
+구현하지 않을 범위: 제품 기능 추가, 과거 스켈레톤·페이지네이션 복원, 커뮤니티 삭제, main 병합, production 배포
+완료 조건: 테스트 파일만 최소 수정, npm test·build·test:dist·GitHub Actions PASS, 제품 diff 0
+검증 방법: 실패 로그 대조, node test 개별·npm test·build·dist, git diff, 원격 PR check
+실행할 테스트: marketplace-flow, sonpum-redesign, customer-provider-profiles, customer-provider-copy-anchor, npm test, build, test:dist
+위험요소: 검사를 약화해 실제 회귀를 놓치거나 승인 범위 밖 제품 변경을 유도할 수 있음
+롤백 방법: QA-056 테스트 commit을 revert하고 제품 snapshot commit을 유지한다.
+사용자 승인 필요 여부: 승인 완료. main 병합·production은 별도 승인.
+현재 상태: IN_PROGRESS
+```
+
 ## OPS-042
 
 ```text
