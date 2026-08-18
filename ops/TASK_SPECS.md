@@ -23,7 +23,7 @@
 위험요소: 검사를 약화해 실제 회귀를 놓치거나 승인 범위 밖 제품 변경을 유도할 수 있음
 롤백 방법: QA-056 테스트 commit을 revert하고 제품 snapshot commit을 유지한다.
 사용자 승인 필요 여부: 승인 완료. main 병합·production은 별도 승인.
-현재 상태: IN_PROGRESS
+현재 상태: DONE (총괄 PM PASS, 테스트 2개만 수정, GitHub Actions run 32090510878 PASS, 제품 diff 0)
 ```
 
 ## OPS-042

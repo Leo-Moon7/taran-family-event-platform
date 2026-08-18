@@ -160,6 +160,6 @@
 | FE-019 | 업체 등록 심사·문의 동의 client 계약 연결 | 디자인·프런트엔드 | DONE | BE-015 DONE | commit `8096618`, CHG-A~C 비접촉·운영 미배포 |
 | OPS-024 | 새 Supabase bootstrap 문서 정합화 | 총괄 PM/백엔드·데이터 | DONE | commit `e8510ca` | 001~014 순서·재실행·Edge/runtime 게이트 정합화 |
 | BIZ-006 | 유효 문의·응답 기반 수익 실험 결정안 | 사업·서비스 기획 | BLOCKED | inquiry_ready·역할 E2E·실제 문의 표본 | 구독/광고/유효 리드 중 1개 제한 실험과 가격·환불·세금·계약 승인안 |
-| QA-056 | GitHub marketplace 구계약 4건 현행화 | 품질·보안 | APPROVAL_REQUIRED | OPS-042 DONE·R-128 | 실패 로그를 현행 승인 UI와 대조해 테스트만 최소 수정하고 제품 회귀 없이 GitHub Actions PASS 확인 |
+| QA-056 | GitHub marketplace·redesign 구계약 현행화 | 품질·보안 | DONE | OPS-042 DONE·R-128 | 테스트 2개 최소 수정, 로컬 전체 검사와 GitHub Actions run 32090510878 PASS, 제품 diff 0 |
 
 예약·결제·유료 노출·추천·대규모 수집은 문의·응답 실증 전 후보 상태를 유지한다.
