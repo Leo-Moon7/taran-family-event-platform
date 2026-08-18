@@ -30,7 +30,7 @@
 수정 허용 경로: 관련 테스트와 QA 보고서
 수정 금지 경로: 운영 DB·production·환경변수
 완료 조건: 구문·profile·UI·validate·build·dist·390/768/1440 검수 PASS, 신규 P0/P1 0
-현재 상태: IN_PROGRESS
+현재 상태: DONE (PASS_WITH_LIMITATION)
 ```
 
 모든 제품 작업은 아래 카드의 허용 경로를 따른다. 2026-07-24 기준 QA-018은 1차 보고서 사실관계 보완 후 총괄 PM·독립 검수 `PASS`로 `DONE`이다. FE-014도 `DONE`이며 QA-016·QA-017은 CHG-A 테스트 정본 소유권이 정해질 때까지 `BLOCKED`다.
