@@ -8,7 +8,7 @@
   const sourceType = String(params.get("sourceType") || "").trim().slice(0, 120);
   const observedAt = String(params.get("observedAt") || "").trim().slice(0, 20);
   const sourceUrlValue = String(params.get("sourceUrl") || "").trim();
-  const isCandidateCorrection = type === "information-error" && /^NVR-DOL-\d{3}$/.test(providerId) && Boolean(providerName);
+  const isProviderCorrection = type === "information-error" && /^NVR-DOL-\d{3}$/.test(providerId) && Boolean(providerName);
 
   function safeHttpUrl(value) {
     try {
@@ -19,7 +19,7 @@
 
   const typeSelect = document.querySelector("#contact-type");
   if (typeSelect && [...typeSelect.options].some((option) => option.value === type)) typeSelect.value = type;
-  if (!isCandidateCorrection) return;
+  if (!isProviderCorrection) return;
 
   const context = document.querySelector("#contact-provider-context");
   const providerIdInput = document.querySelector("#contact-provider-id");
@@ -32,18 +32,18 @@
   context.hidden = false;
   providerIdInput.value = providerId;
   providerNameInput.value = providerName;
-  source.textContent = [sourceType || "NAVER 지역검색 API 관측", observedAt ? `관측일 ${observedAt}` : ""].filter(Boolean).join(" · ");
+  source.textContent = [sourceType ? `정보 출처: ${sourceType}` : "업체 상세 페이지 정보", observedAt ? `정보 업데이트 ${observedAt}` : ""].filter(Boolean).join(" · ");
   relatedPage.value = new URL(`provider.html?id=${encodeURIComponent(providerId)}`, window.location.href).href;
   if (!message.value) {
     message.value = [
-      `[정보 확인 전 후보 수정 제안]`,
+      `[업체 정보 수정 제안]`,
       `업체 ID: ${providerId}`,
       `업체명: ${providerName}`,
-      `관측 출처: ${sourceType || "NAVER 지역검색 API 관측"}`,
-      `관측일: ${observedAt || "확인 전"}`,
-      sourceUrl ? `검색 결과 확인 링크: ${sourceUrl}` : "",
+      observedAt ? `정보 업데이트: ${observedAt}` : "",
+      sourceUrl ? `현재 확인한 페이지: ${sourceUrl}` : "",
       "",
       "수정이 필요한 항목:",
+      "정확한 정보:",
       "확인 가능한 공개 출처:",
       "요청 내용:"
     ].filter((line) => line !== "").join("\n");
