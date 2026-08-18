@@ -370,7 +370,9 @@
   function render() {
     const template = window.TaranChecklistTemplates.getTemplate(eventSelect.value);
     const state = currentState();
-    document.getElementById("checklist-title").textContent = `${template.label} 준비 순서`;
+    document.getElementById("checklist-title").textContent = template.label === "결혼 준비"
+      ? "결혼 준비 순서"
+      : `${template.label} 준비 순서`;
     memoInput.value = state.memo.value;
     const stages = template.stages.map((stage, index) => stageSection({ ...stage, index: index + 1 }, stage.tasks, state));
     const custom = customTasks(state);

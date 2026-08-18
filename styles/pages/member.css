@@ -4,7 +4,7 @@ body > footer > * { width: min(100%, var(--content-max)); margin-inline: auto; }
 body > footer .footer-links { display: flex; flex-wrap: wrap; gap: var(--space-4); margin-top: var(--space-3); font-size: var(--font-size-14); }
 body > footer .footer-brand { gap: .45rem; }
 .blog-card-meta { display: flex; flex-wrap: wrap; gap: .35rem .75rem; color: var(--color-text-muted); font-size: var(--font-size-14); }
-.eyebrow, .mini-label, .step-label { color: var(--color-accent-800); font-size: var(--font-size-14); font-weight: var(--font-weight-bold); letter-spacing: .04em; }
+.eyebrow, .mini-label, .step-label { color: var(--color-accent-700); font-size: var(--font-size-14); font-weight: var(--font-weight-bold); letter-spacing: .04em; }
 .text-link, .text-button { display: inline-flex; min-height: 44px; align-items: center; color: var(--color-brand-800); font-weight: var(--font-weight-semibold); }
 .button-primary { color: #fff; background: var(--color-brand-800); }
 .button-quiet, .button-secondary { color: var(--color-brand-900); border-color: var(--color-border-strong); background: var(--color-surface); }
@@ -97,7 +97,7 @@ body > footer .footer-brand { gap: .45rem; }
 .blog-article { max-width: 48rem; margin-inline: auto; }
 .blog-article > p, .blog-article > ul, .blog-article-content p, .blog-article-content li { color: #171411; font-size: var(--font-size-18); line-height: 1.9; }
 .article-conversion { display: grid; gap: var(--space-3); margin-top: var(--space-8); padding: var(--space-6); border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-bg-subtle); }
-.article-conversion > span { color: var(--color-accent-800); font-size: var(--font-size-14); font-weight: var(--font-weight-bold); }
+.article-conversion > span { color: var(--color-accent-700); font-size: var(--font-size-14); font-weight: var(--font-weight-bold); }
 .article-conversion > strong { color: var(--color-text); font-size: clamp(1.25rem, 3vw, 1.75rem); line-height: 1.4; }
 .article-conversion .button { width: max-content; }
 

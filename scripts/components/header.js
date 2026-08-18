@@ -25,7 +25,7 @@
   ]);
 
   function isCurrentPage(href) {
-    return page === href || (href === "login.html" && page === "account.html");
+    return page === href;
   }
 
   function createNavigationLink({ href, label }, className = "") {
@@ -40,13 +40,7 @@
   function normalizeDesktopNavigation() {
     if (!navigation) return;
     const links = PUBLIC_NAV_ITEMS.map((item) => createNavigationLink(item));
-    const authLink = createNavigationLink(
-      { href: page === "account.html" ? "account.html" : "login.html", label: page === "account.html" ? "내 정보" : "로그인" },
-      "site-nav__auth"
-    );
-    authLink.dataset.authLink = "";
-    if (page === "account.html" || page === "login.html") authLink.setAttribute("aria-current", "page");
-    navigation.replaceChildren(...links, authLink);
+    navigation.replaceChildren(...links);
   }
 
   function appendMobileNavigation() {
@@ -54,12 +48,8 @@
     const mobile = document.createElement("nav");
     mobile.className = "mobile-bottom-nav";
     mobile.setAttribute("aria-label", "모바일 주요 메뉴");
-    [...MOBILE_NAV_ITEMS, { href: "login.html", label: "로그인", icon: "●", auth: true }].forEach(({ href, label, icon, auth }) => {
+    MOBILE_NAV_ITEMS.forEach(({ href, label, icon }) => {
       const link = createNavigationLink({ href, label });
-      if (auth) {
-        link.dataset.mobileAuthLink = "";
-        if (page === "account.html" || page === "login.html") link.setAttribute("aria-current", "page");
-      }
       const symbol = document.createElement("span");
       symbol.setAttribute("aria-hidden", "true");
       symbol.textContent = icon;
@@ -127,17 +117,6 @@
 
   window.matchMedia("(min-width: 64.01rem)").addEventListener?.("change", event => {
     if (event.matches) closeNavigation();
-  });
-
-  Promise.resolve(window.TaranAuth?.ready).then(account => {
-    header.querySelectorAll("[data-auth-link]").forEach((link) => {
-      link.textContent = account ? "내 정보" : "로그인";
-      link.href = account ? "account.html" : "login.html";
-    });
-    document.querySelectorAll("[data-mobile-auth-link]").forEach((link) => {
-      link.href = account ? "account.html" : "login.html";
-      link.querySelector("strong").textContent = account ? "내 정보" : "로그인";
-    });
   });
 
   appendMobileNavigation();

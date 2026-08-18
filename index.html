@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="행사·지역·인원을 선택해 가족행사 업체 정보를 찾고, 예산 계산기·체크리스트·준비백과를 바로 이용하세요.">
-  <meta name="theme-color" content="#fff8f1">
+  <meta name="theme-color" content="#0d3f31">
   <title>손품해방 | 가족행사 업체 찾기와 준비 도구</title>
   <link rel="stylesheet" href="styles/tokens.css">
   <link rel="stylesheet" href="styles/reset.css">
@@ -50,73 +50,82 @@
 
   <main>
     <section class="home-hero" id="finder" aria-labelledby="home-title">
-      <div class="container home-hero__grid">
-        <div class="home-hero__content">
-          <div class="home-hero__copy">
-            <p class="home-kicker">지역·행사별 업체 찾기</p>
-            <h1 id="home-title">어떤 가족행사를<br>준비하세요?</h1>
-            <p>전국 가족행사 업체 정보를 확인하고 있어요. 지역과 행사 종류를 선택해 조건에 맞는 업체를 찾아보세요.</p>
+      <div class="container">
+        <p class="home-availability"><span aria-hidden="true"></span>서울 돌잔치 업체를 우선 확인하고 있어요</p>
+        <div class="home-hero__grid">
+          <div class="home-hero__content">
+            <div class="home-hero__copy">
+              <p class="home-kicker">가족행사 준비를 한곳에서</p>
+              <h1 id="home-title">필요한 정보부터<br>비용과 일정까지</h1>
+              <p>전국 가족행사를 준비하는 플랫폼입니다. 현재는 서울 돌잔치 업체를 먼저 검수하고 있으며, 다른 지역과 행사는 준비 상태를 안내합니다.</p>
+            </div>
+
+            <form class="home-search" id="home-search" action="venues.html" method="get">
+              <div class="field">
+                <label class="field__label" for="home-event">행사 종류</label>
+                <select class="select" id="home-event" name="event">
+                  <option value="kids" selected>돌잔치·백일</option>
+                  <option value="parents">환갑·칠순·팔순</option>
+                  <option value="meeting">결혼 준비</option>
+                  <option value="anniversary">기념일·생신</option>
+                  <option value="other">기타 가족행사</option>
+                </select>
+              </div>
+              <div class="field">
+                <label class="field__label" for="home-region">지역</label>
+                <select class="select" id="home-region" name="province">
+                  <option value="all">전국</option>
+                  <option value="서울특별시" selected>서울특별시</option>
+                  <option value="부산광역시">부산광역시</option>
+                  <option value="대구광역시">대구광역시</option>
+                  <option value="인천광역시">인천광역시</option>
+                  <option value="광주광역시">광주광역시</option>
+                  <option value="대전광역시">대전광역시</option>
+                  <option value="울산광역시">울산광역시</option>
+                  <option value="세종특별자치시">세종특별자치시</option>
+                  <option value="경기도">경기도</option>
+                  <option value="강원특별자치도">강원특별자치도</option>
+                  <option value="충청북도">충청북도</option>
+                  <option value="충청남도">충청남도</option>
+                  <option value="전북특별자치도">전북특별자치도</option>
+                  <option value="전라남도">전라남도</option>
+                  <option value="경상북도">경상북도</option>
+                  <option value="경상남도">경상남도</option>
+                  <option value="제주특별자치도">제주특별자치도</option>
+                </select>
+              </div>
+              <div class="field">
+                <label class="field__label" for="home-guests">예상 인원</label>
+                <select class="select" id="home-guests" name="guests">
+                  <option value="" selected>인원 미정</option>
+                  <option value="10">10명 이하</option>
+                  <option value="30">30명 이하</option>
+                  <option value="50">50명 이하</option>
+                  <option value="100">100명 이하</option>
+                  <option value="101">100명 초과</option>
+                </select>
+              </div>
+              <button class="button button--secondary" type="submit">업체 확인하기</button>
+            </form>
+
+            <div class="home-hero__actions" aria-label="바로 사용할 수 있는 준비 도구">
+              <a class="button button--primary" href="calculator.html" data-calculator-cta>비용 계산하기</a>
+              <a class="button button--secondary" href="checklist.html" data-checklist-cta>체크리스트 만들기</a>
+              <small>두 도구는 로그인 없이 바로 시작할 수 있어요.</small>
+            </div>
           </div>
 
-          <form class="home-search" id="home-search" action="venues.html" method="get">
-            <div class="field">
-              <label class="field__label" for="home-event">행사 종류</label>
-              <select class="select" id="home-event" name="event">
-                <option value="kids" selected>돌잔치·백일</option>
-                <option value="parents">환갑·칠순·팔순</option>
-                <option value="meeting">결혼 준비</option>
-                <option value="anniversary">기념일·생신</option>
-                <option value="other">기타 가족행사</option>
-              </select>
-            </div>
-            <div class="field">
-              <label class="field__label" for="home-region">지역</label>
-              <select class="select" id="home-region" name="province">
-                <option value="all">전국</option>
-                <option value="서울특별시" selected>서울특별시</option>
-                <option value="부산광역시">부산광역시</option>
-                <option value="대구광역시">대구광역시</option>
-                <option value="인천광역시">인천광역시</option>
-                <option value="광주광역시">광주광역시</option>
-                <option value="대전광역시">대전광역시</option>
-                <option value="울산광역시">울산광역시</option>
-                <option value="세종특별자치시">세종특별자치시</option>
-                <option value="경기도">경기도</option>
-                <option value="강원특별자치도">강원특별자치도</option>
-                <option value="충청북도">충청북도</option>
-                <option value="충청남도">충청남도</option>
-                <option value="전북특별자치도">전북특별자치도</option>
-                <option value="전라남도">전라남도</option>
-                <option value="경상북도">경상북도</option>
-                <option value="경상남도">경상남도</option>
-                <option value="제주특별자치도">제주특별자치도</option>
-              </select>
-            </div>
-            <div class="field">
-              <label class="field__label" for="home-guests">예상 인원</label>
-              <select class="select" id="home-guests" name="guests">
-                <option value="" selected>인원 미정</option>
-                <option value="10">10명 이하</option>
-                <option value="30">30명 이하</option>
-                <option value="50">50명 이하</option>
-                <option value="100">100명 이하</option>
-                <option value="101">100명 초과</option>
-              </select>
-            </div>
-            <button class="button button--primary" type="submit">조건에 맞는 업체 찾기</button>
-          </form>
-
-          <ol class="home-journey" id="how-it-works" aria-label="손품해방 이용 흐름">
-            <li><span>1</span><p><strong>업체 선택</strong><small>조건에 맞는 후보를 골라요</small></p></li>
-            <li><span>2</span><p><strong>최대 3곳 비교</strong><small>같은 항목으로 나란히 봐요</small></p></li>
-            <li><span>3</span><p><strong>한 번에 견적 문의</strong><small>문의 가능한 업체에 조건을 보내요</small></p></li>
-          </ol>
+          <figure class="home-hero__visual">
+            <img id="home-hero-image" src="assets/images/home-family-hero-v2.webp" alt="아기와 부모, 조부모가 함께 돌잔치를 준비하는 따뜻한 가족 모습">
+            <figcaption>가족행사에 필요한 정보와 준비 도구를 한곳에 모았습니다.</figcaption>
+          </figure>
         </div>
 
-        <figure class="home-hero__visual">
-          <img id="home-hero-image" src="assets/images/venue-hotel.webp" alt="돌잔치와 백일 행사를 준비할 수 있는 가족행사 공간">
-          <figcaption>문의 수신이 확인된 업체만 같은 조건으로 문의할 수 있어요.</figcaption>
-        </figure>
+        <ol class="home-journey" id="how-it-works" aria-label="업체 비교와 문의 이용 흐름">
+          <li><span>1</span><p><strong>조건 확인</strong><small>행사·지역·인원을 정해요</small></p></li>
+          <li><span>2</span><p><strong>최대 3곳 비교</strong><small>확인된 항목을 나란히 봐요</small></p></li>
+          <li><span>3</span><p><strong>한 번에 견적 문의</strong><small>문의 가능한 업체에만 보내요</small></p></li>
+        </ol>
       </div>
     </section>
 
@@ -124,58 +133,28 @@
       <div class="container">
         <div class="home-section__header">
           <div>
-            <p class="home-kicker">행사별 빠른 시작</p>
+            <p class="home-kicker">행사와 지역으로 시작</p>
             <h2 id="event-shortcuts-title">준비할 행사를 골라보세요</h2>
           </div>
-          <p>비슷한 준비 과정을 5개 행사 분류로 모아 더 빠르게 시작할 수 있어요.</p>
+          <p>서울 돌잔치를 우선 확인하며, 그 밖의 조건은 준비 중 상태와 알림 방법을 안내합니다.</p>
         </div>
         <nav class="event-shortcuts" aria-label="행사 유형 바로가기">
-          <a href="venues.html?event=kids" data-event-shortcut>
-            <img src="assets/images/venue-hotel.webp" alt="">
-            <span><strong>돌잔치·백일</strong><small>첫 생일과 아이 행사</small></span>
-          </a>
-          <a href="venues.html?event=parents" data-event-shortcut>
-            <img src="assets/images/venue-hanjeongsik.webp" alt="">
-            <span><strong>환갑·칠순·팔순</strong><small>부모님을 위한 가족 모임</small></span>
-          </a>
-          <a href="venues.html?event=meeting" data-event-shortcut>
-            <img src="assets/images/venue-garden.webp" alt="">
-            <span><strong>결혼 준비</strong><small>상견례·약혼·소규모 예식</small></span>
-          </a>
-          <a href="venues.html?event=anniversary" data-event-shortcut>
-            <img src="assets/images/venue-partyroom.webp" alt="">
-            <span><strong>기념일·생신</strong><small>생일과 결혼기념일</small></span>
-          </a>
-          <a href="venues.html?event=other" data-event-shortcut>
-            <img src="assets/images/venue-hanjeongsik.webp" alt="">
-            <span><strong>기타 가족행사</strong><small>가족모임·추모·그 밖의 행사</small></span>
-          </a>
+          <a href="venues.html?event=kids" data-event-shortcut><img src="assets/images/home-family-kids.webp" alt=""><span><strong>돌잔치·백일</strong><small>첫 생일과 아이 행사</small></span></a>
+          <a href="venues.html?event=parents" data-event-shortcut><img src="assets/images/home-family-parents.webp" alt=""><span><strong>환갑·칠순·팔순</strong><small>부모님을 위한 가족 모임</small></span></a>
+          <a href="venues.html?event=meeting" data-event-shortcut><img src="assets/images/home-family-meeting.webp" alt=""><span><strong>결혼 준비</strong><small>상견례·약혼·소규모 예식</small></span></a>
+          <a href="venues.html?event=anniversary" data-event-shortcut><img src="assets/images/home-family-anniversary.webp" alt=""><span><strong>기념일·생신</strong><small>생일과 결혼기념일</small></span></a>
+          <a href="venues.html?event=other" data-event-shortcut><img src="assets/images/home-family-other.webp" alt=""><span><strong>기타 가족행사</strong><small>가족모임·추모·그 밖의 행사</small></span></a>
         </nav>
-      </div>
-    </section>
-
-    <section class="home-section home-calculator" id="calculator-preview" aria-labelledby="calculator-preview-title">
-      <div class="container home-feature">
-        <div class="home-feature__copy">
-          <p class="home-kicker">준비 계획용 비용 계산기</p>
-          <h2 id="calculator-preview-title">내 가족행사 비용은<br>얼마나 필요할까요?</h2>
-          <p>행사 종류, 지역, 예상 인원과 준비 항목을 선택하면 장소·식사·촬영·의상·답례품 등의 예상 비용 범위를 확인할 수 있어요.</p>
-          <ul class="home-feature__points">
-            <li><span aria-hidden="true">01</span>행사별로 필요한 항목을 나눠 선택</li>
-            <li><span aria-hidden="true">02</span>예상 범위와 항목별 구성을 함께 확인</li>
-            <li><span aria-hidden="true">03</span>행사·지역·인원·예산 조건을 업체 검색으로 전달</li>
-          </ul>
-          <a class="button button--primary" href="calculator.html" data-calculator-cta>내 행사 비용 계산하기</a>
-          <small class="home-feature__note">로그인 없이 바로 계산할 수 있어요.</small>
+        <div class="home-region-shortcuts">
+          <strong>지역 바로가기</strong>
+          <nav class="home-link-chips" aria-label="지역별 업체 탐색">
+            <a href="venues.html?event=kids&amp;province=%EC%84%9C%EC%9A%B8%ED%8A%B9%EB%B3%84%EC%8B%9C" data-region-link="서울특별시">서울특별시</a>
+            <a href="venues.html?event=kids&amp;province=%EA%B2%BD%EA%B8%B0%EB%8F%84" data-region-link="경기도">경기도</a>
+            <a href="venues.html?event=kids&amp;province=%EC%9D%B8%EC%B2%9C%EA%B4%91%EC%97%AD%EC%8B%9C" data-region-link="인천광역시">인천광역시</a>
+            <a href="venues.html?event=kids&amp;province=%EB%B6%80%EC%82%B0%EA%B4%91%EC%97%AD%EC%8B%9C" data-region-link="부산광역시">부산광역시</a>
+            <a href="venues.html?event=kids" data-region-link="all">전국</a>
+          </nav>
         </div>
-        <figure class="home-feature__visual">
-          <img src="assets/images/editorial-checklist.webp" alt="메모와 계산표로 가족행사 비용을 정리하는 모습">
-          <figcaption>
-            <span>예산 결과 예시</span>
-            <strong>최저 · 일반 · 여유 범위</strong>
-            <small>실제 금액은 업체 조건과 날짜에 따라 달라집니다.</small>
-          </figcaption>
-        </figure>
       </div>
     </section>
 
@@ -183,81 +162,27 @@
       <div class="container">
         <div class="home-section__header">
           <div>
-            <p class="home-kicker">검증 가능한 업체 탐색</p>
-            <h2 id="recommended-providers-title">같은 기준으로 확인된 정보만<br>비교할 수 있게 준비합니다</h2>
+            <p class="home-kicker">업체 정보 확인 현황</p>
+            <h2 id="recommended-providers-title">서울 돌잔치 업체를<br>하나씩 확인하고 있어요</h2>
           </div>
-          <p>업체 수나 인기 순위, 확인되지 않은 가격을 임의로 채우지 않습니다.</p>
+          <p>업체 수나 인기 순위, 확인되지 않은 평점과 가격은 임의로 채우지 않습니다.</p>
         </div>
         <div class="home-provider-empty">
           <div class="home-provider-empty__copy">
             <span class="home-status-badge">공개 업체 준비 중</span>
-            <h3>현재 공개 기준을 통과한 업체가 아직 없습니다.</h3>
-            <p>조건에 맞는 업체가 검수되면 출처, 행사 가능 여부, 비교 조건과 최근 확인 상태를 함께 표시합니다. 지금은 검색 화면에서 같은 빈 상태와 확인 기준을 볼 수 있습니다.</p>
+            <h3>업체가 공개되기 전에도 준비를 시작할 수 있어요.</h3>
+            <p>비용 범위를 먼저 계산하거나 행사일까지의 준비 순서를 만들어보세요. 업체가 공개되면 출처, 가능한 행사, 비교 조건과 최근 확인일을 함께 표시합니다.</p>
             <div class="home-provider-empty__actions">
-              <a class="button button--primary" href="venues.html?event=kids&amp;province=%EC%84%9C%EC%9A%B8%ED%8A%B9%EB%B3%84%EC%8B%9C" data-search-cta>서울 돌잔치 업체 찾아보기</a>
-              <a class="button button--secondary" href="compare.html">비교함 확인하기</a>
+              <a class="button button--primary" href="calculator.html" data-calculator-cta>비용 계산하기</a>
+              <a class="button button--secondary" href="checklist.html" data-checklist-cta>체크리스트 만들기</a>
+              <a class="button button--text" href="contact.html?type=open-alert">업체 공개 알림 문의</a>
             </div>
           </div>
           <div class="home-verification-list" id="verification" aria-label="업체 정보 공개 전 확인 기준">
             <article><span aria-hidden="true">01</span><div><strong>출처와 지점</strong><p>재현 가능한 출처와 정확한 업체·지점을 확인합니다.</p></div></article>
             <article><span aria-hidden="true">02</span><div><strong>행사와 비교 조건</strong><p>행사 가능 여부와 인원·가격·시설의 적용 조건을 구분합니다.</p></div></article>
-            <article><span aria-hidden="true">03</span><div><strong>검수와 최근성</strong><p>승인된 항목만 표시하고 확인 시점이 지난 값은 다시 확인합니다.</p></div></article>
+            <article><span aria-hidden="true">03</span><div><strong>최근 확인일</strong><p>확인 시점이 지난 정보는 최근 상태를 다시 확인합니다.</p></div></article>
           </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="home-section home-checklist" id="checklist-preview" aria-labelledby="checklist-preview-title">
-      <div class="container home-checklist__grid">
-        <div class="home-checklist__copy">
-          <p class="home-kicker">행사 일정 체크리스트</p>
-          <h2 id="checklist-preview-title">행사일까지 남은 시간에 맞춰<br>할 일을 관리하세요</h2>
-          <p>행사 유형과 날짜를 고르면 권장 시점 순서로 일정을 확인할 수 있습니다. 완료 표시, 내 할 일과 메모는 기본적으로 이 기기에 저장됩니다.</p>
-          <a class="button button--primary" href="checklist.html" data-checklist-cta>내 체크리스트 만들기</a>
-        </div>
-        <div class="home-checklist__preview" aria-label="돌잔치·백일 체크리스트 미리보기">
-          <div class="home-checklist__preview-head">
-            <div><span>읽기 전용 미리보기</span><strong>돌잔치·백일 준비 순서</strong></div>
-            <small>행사 날짜 기준</small>
-          </div>
-          <ol>
-            <li><span class="home-checklist__mark is-done" aria-hidden="true">✓</span><span><strong>행사 날짜 정하기</strong><small>완료 예시</small></span></li>
-            <li><span class="home-checklist__mark is-done" aria-hidden="true">✓</span><span><strong>예상 인원 정리</strong><small>완료 예시</small></span></li>
-            <li><span class="home-checklist__mark" aria-hidden="true">□</span><span><strong>장소 후보 찾아보기</strong><small>업체 찾기로 연결</small></span></li>
-            <li><span class="home-checklist__mark" aria-hidden="true">□</span><span><strong>식사와 메뉴 확인</strong><small>업체별 조건 확인</small></span></li>
-            <li><span class="home-checklist__mark" aria-hidden="true">□</span><span><strong>답례품 준비</strong><small>행사별 일정 관리</small></span></li>
-            <li><span class="home-checklist__mark" aria-hidden="true">□</span><span><strong>세부 일정 정리</strong><small>내 메모와 할 일 추가</small></span></li>
-          </ol>
-        </div>
-      </div>
-    </section>
-
-    <section class="home-section home-discovery" id="region-condition-discovery" aria-labelledby="discovery-title">
-      <div class="container">
-        <h2 class="visually-hidden" id="discovery-title">행사별 빠른 시작의 지역·인원 조건</h2>
-        <div class="home-discovery__grid">
-          <section aria-labelledby="popular-regions-title">
-            <span class="home-discovery__label">지역</span>
-            <h3 id="popular-regions-title">어디에서 준비하세요?</h3>
-            <nav class="home-link-chips" aria-label="지역별 업체 탐색">
-              <a href="venues.html?event=kids&amp;province=%EC%84%9C%EC%9A%B8%ED%8A%B9%EB%B3%84%EC%8B%9C" data-region-link="서울특별시">서울특별시</a>
-              <a href="venues.html?event=kids&amp;province=%EA%B2%BD%EA%B8%B0%EB%8F%84" data-region-link="경기도">경기도</a>
-              <a href="venues.html?event=kids&amp;province=%EC%9D%B8%EC%B2%9C%EA%B4%91%EC%97%AD%EC%8B%9C" data-region-link="인천광역시">인천광역시</a>
-              <a href="venues.html?event=kids&amp;province=%EB%B6%80%EC%82%B0%EA%B4%91%EC%97%AD%EC%8B%9C" data-region-link="부산광역시">부산광역시</a>
-              <a href="venues.html?event=kids" data-region-link="all">전국</a>
-            </nav>
-          </section>
-          <section aria-labelledby="guest-conditions-title">
-            <span class="home-discovery__label">예상 인원</span>
-            <h3 id="guest-conditions-title">몇 분이 함께하나요?</h3>
-            <nav class="home-link-chips" aria-label="예상 인원별 업체 탐색">
-              <a href="venues.html?event=kids&amp;province=%EC%84%9C%EC%9A%B8%ED%8A%B9%EB%B3%84%EC%8B%9C&amp;guests=10" data-guests-link="10">10명 이하</a>
-              <a href="venues.html?event=kids&amp;province=%EC%84%9C%EC%9A%B8%ED%8A%B9%EB%B3%84%EC%8B%9C&amp;guests=30" data-guests-link="30">30명 이하</a>
-              <a href="venues.html?event=kids&amp;province=%EC%84%9C%EC%9A%B8%ED%8A%B9%EB%B3%84%EC%8B%9C&amp;guests=50" data-guests-link="50">50명 이하</a>
-              <a href="venues.html?event=kids&amp;province=%EC%84%9C%EC%9A%B8%ED%8A%B9%EB%B3%84%EC%8B%9C&amp;guests=100" data-guests-link="100">100명 이하</a>
-              <a href="venues.html?event=kids&amp;province=%EC%84%9C%EC%9A%B8%ED%8A%B9%EB%B3%84%EC%8B%9C&amp;guests=101" data-guests-link="101">100명 초과</a>
-            </nav>
-          </section>
         </div>
       </div>
     </section>
@@ -267,14 +192,14 @@
         <div class="home-section__header">
           <div>
             <p class="home-kicker">준비백과</p>
-            <h2 id="knowledge-title">계약 전 확인할 내용을<br>차분히 읽어보세요</h2>
+          <h2 id="knowledge-title">계약 전 확인할 내용을 읽어보세요</h2>
           </div>
           <a class="home-section__more" href="articles.html">준비백과 전체 보기 <span aria-hidden="true">→</span></a>
         </div>
         <div class="home-knowledge__grid">
-          <a href="articles/contract-questions.html"><small>계약</small><strong>돌잔치 장소 계약 전 꼭 물어볼 12가지</strong><span>질문 목록 보기 <b aria-hidden="true">→</b></span></a>
-          <a href="articles/budget-hidden-costs.html"><small>예산</small><strong>돌잔치 총예산 계산법: 식대부터 숨은 비용까지</strong><span>예산 항목 보기 <b aria-hidden="true">→</b></span></a>
-          <a href="articles/review-writing.html"><small>경험 공유</small><strong>다음 가족에게 도움 되는 행사 후기 쓰는 법</strong><span>작성 기준 보기 <b aria-hidden="true">→</b></span></a>
+          <a href="article.html?slug=contract-questions"><small>계약</small><strong>돌잔치 장소 계약 전 꼭 물어볼 12가지</strong><span>질문 목록 보기 <b aria-hidden="true">→</b></span></a>
+          <a href="article.html?slug=budget-hidden-costs"><small>예산</small><strong>돌잔치 총예산 계산법: 식대부터 숨은 비용까지</strong><span>예산 항목 보기 <b aria-hidden="true">→</b></span></a>
+          <a href="article.html?slug=review-writing"><small>경험 공유</small><strong>다음 가족에게 도움 되는 행사 후기 쓰는 법</strong><span>작성 기준 보기 <b aria-hidden="true">→</b></span></a>
         </div>
       </div>
     </section>
@@ -296,10 +221,13 @@
 
   <footer class="site-footer">
     <div class="container site-footer__inner">
-      <div><strong>손품해방</strong><small>SONPUM HAEBANG · 가족행사 찾기와 준비 도구</small></div>
+      <div>
+        <p class="site-footer__brandline"><strong>손품해방</strong><span aria-hidden="true">·</span><span>SONPUM HAEBANG</span></p>
+        <small>가족행사 정보와 준비 도구</small>
+      </div>
       <nav aria-label="하단 메뉴">
         <a href="articles.html">준비백과</a>
-        <a href="community.html">정보 나눔</a>
+        <a href="community.html">준비 Q&amp;A</a>
         <a href="privacy.html">개인정보처리방침</a>
         <a href="terms.html">이용약관</a>
         <a href="contact.html">문의</a>

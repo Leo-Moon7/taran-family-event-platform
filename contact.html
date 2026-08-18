@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="손품해방 문의, 업체 정보 오류 제보, 입점 문의 안내 페이지입니다.">
+  <meta name="description" content="손품해방 문의, 업체 정보 오류 제보, 업체 등록 문의 안내 페이지입니다.">
+  <meta name="robots" content="noindex,nofollow">
   <meta name="theme-color" content="#153c36">
   <title>문의 | 손품해방</title>
   <link rel="stylesheet" href="styles/tokens.css">
@@ -35,7 +36,7 @@
     <section class="policy-hero">
       <p class="eyebrow">Contact</p>
       <h1>문의와 정보 오류 제보</h1>
-      <p>업체 정보 오류 제보, 입점 문의, 광고·제휴 문의를 접수하기 위한 안내 페이지입니다. 필요한 내용을 남겨주시면 확인 후 순서대로 반영합니다.</p>
+      <p>업체 정보 오류 제보, 업체 등록 문의, 광고·제휴 문의를 접수하기 위한 안내 페이지입니다. 필요한 내용을 남겨주시면 확인 후 순서대로 반영합니다.</p>
     </section>
 
     <section class="policy-grid">
@@ -63,7 +64,7 @@
         <li>이용자 문의</li>
         <li>업체 정보 오류 제보</li>
         <li>개인정보 문의 담당 연락처</li>
-        <li>업체 입점·광고 문의</li>
+        <li>업체 등록·협업 문의</li>
       </ul>
     </section>
 
@@ -76,13 +77,27 @@
           <label>작성하지 마세요 <input name="bot-field"></label>
         </p>
 
+        <section class="policy-card" id="contact-provider-context" aria-labelledby="contact-provider-context-title" hidden>
+          <span>정보 확인 전 후보</span>
+          <h3 id="contact-provider-context-title">수정할 업체가 자동 입력되었습니다.</h3>
+          <p id="contact-provider-source"></p>
+          <div class="field">
+            <label class="field__label" for="contact-provider-id">업체 ID</label>
+            <input class="input" id="contact-provider-id" name="providerId" type="text" readonly>
+          </div>
+          <div class="field">
+            <label class="field__label" for="contact-provider-name">업체명</label>
+            <input class="input" id="contact-provider-name" name="providerName" type="text" readonly>
+          </div>
+        </section>
+
         <div class="field">
           <label class="field__label" for="contact-type">문의 유형</label>
           <select class="select" id="contact-type" name="inquiryType" required>
             <option value="">선택해 주세요</option>
             <option value="general">일반 문의</option>
             <option value="information-error">정보 오류</option>
-            <option value="provider-onboarding">업체 입점</option>
+            <option value="provider-onboarding">업체 등록</option>
             <option value="privacy-rights">개인정보 권리 요청</option>
           </select>
         </div>
@@ -119,11 +134,12 @@
   </main>
 
   <footer>
-    <a class="brand footer-brand" href="index.html"><span class="brand-mark">손</span><span>손품해방</span></a>
+    <a class="brand footer-brand" href="index.html"><span>손품해방</span><span aria-hidden="true">·</span><small>SONPUM HAEBANG</small></a>
     <p class="footer-links"><a href="about.html">서비스 소개</a><a href="articles.html">준비백과</a><a href="community.html">커뮤니티</a><a href="terms.html">이용약관</a><a href="privacy.html">개인정보처리방침</a><a href="editorial-policy.html">콘텐츠 원칙</a></p>
   </footer>
   <script src="content-config.js"></script><script src="scripts/core/config.js"></script><script src="scripts/core/api.js"></script><script src="scripts/core/auth.js"></script>
   <script src="ui.js?v=18"></script>
+  <script src="scripts/pages/contact.js"></script>
 </body>
 </html>
 

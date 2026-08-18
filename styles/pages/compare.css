@@ -27,7 +27,7 @@
   --compare-cream: #fffaf3;
   --compare-forest: #214b3e;
   --compare-forest-deep: #18392f;
-  --compare-coral: #a9463d;
+  --compare-coral: #e77c61;
   --compare-muted: #68716c;
   color: var(--compare-forest-deep);
   background: var(--compare-cream);
@@ -146,4 +146,74 @@
   .compare-page .compare-scroll-guide:not([hidden]) { display: flex; }
   .compare-page .compare-table-wrap { margin-inline: 0; border-radius: .75rem; box-shadow: none; }
   .compare-page .compare-table { min-width: 780px; }
+}
+
+/* FE-013 — latest comparison visual */
+.compare-page {
+  --compare-paper: #f2eee5;
+  --compare-cream: #fbf8f2;
+  --compare-forest: #123f32;
+  --compare-forest-deep: #0b3429;
+  --compare-coral: #f4513d;
+  --compare-muted: #59635e;
+}
+.compare-page .compare-hero {
+  position: relative;
+  overflow: hidden;
+  color: #fff;
+  background:
+    linear-gradient(90deg, rgb(8 43 33 / 96%) 0%, rgb(8 43 33 / 82%) 58%, rgb(8 43 33 / 42%) 100%),
+    url("../../assets/images/venue-hotel.webp") center 58% / cover no-repeat;
+}
+.compare-page .compare-hero__grid { min-height: 24rem; align-items: center; }
+.compare-page .compare-hero .eyebrow { color: #ffc0b2; }
+.compare-page .compare-hero h1 { color: #fff; text-shadow: 0 .4rem 1.8rem rgb(0 0 0 / 18%); }
+.compare-page .compare-hero p:last-child { color: rgb(255 255 255 / 74%); }
+.compare-page .compare-limit-card {
+  border: 1px solid rgb(255 255 255 / 18%);
+  background: rgb(255 255 255 / 11%);
+  box-shadow: none;
+  backdrop-filter: blur(12px);
+}
+.compare-page .compare-limit-card span { color: #ffc0b2; }
+.compare-page .compare-toolbar {
+  padding: 1.35rem;
+  border: 0;
+  background: #fffdfa;
+  box-shadow: 0 1rem 2.6rem rgb(13 63 49 / 8%);
+}
+.compare-page .compare-toolbar .button--primary {
+  border-color: var(--compare-coral);
+  background: var(--compare-coral);
+}
+.compare-page .compare-toolbar .button--primary:hover { background: #da3c2d; }
+.compare-page .compare-action-note { color: var(--compare-forest); background: #e9f0eb; }
+.compare-page .compare-table-wrap { border: 0; box-shadow: 0 1.2rem 3rem rgb(13 63 49 / 10%); }
+.compare-page .compare-table thead th,
+.compare-page .compare-table th:first-child { background: #e9f0eb; }
+.compare-page .empty-state {
+  border: 0;
+  background:
+    linear-gradient(rgb(255 253 250 / 93%), rgb(255 253 250 / 93%)),
+    url("../../assets/images/venue-garden.webp") center / cover no-repeat;
+  box-shadow: 0 1.2rem 3rem rgb(13 63 49 / 9%);
+}
+.compare-page .empty-state .button--primary {
+  border-color: var(--compare-coral);
+  background: var(--compare-coral);
+}
+@media (max-width: 40rem) {
+  .compare-page .compare-hero__grid { min-height: 0; }
+  .compare-page .compare-limit-card { border-radius: 1.1rem; }
+  .compare-page .compare-toolbar { border-radius: 1rem; }
+}
+
+/* FE-014 — show the comparison workspace above the fold */
+.compare-page .compare-hero { padding-block: clamp(2.25rem, 5vw, 3.75rem); }
+.compare-page .compare-hero__grid { min-height: 19rem; }
+.compare-page .compare-hero h1 { font-size: clamp(2.35rem, 4.8vw, 4rem); line-height: 1.02; }
+@media (max-width: 40rem) {
+  .compare-page .compare-hero { padding-block: 2rem; }
+  .compare-page .compare-hero__grid { min-height: 0; }
+  .compare-page .compare-hero h1 { font-size: clamp(2.2rem, 11vw, 3.25rem); }
 }

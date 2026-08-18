@@ -2996,7 +2996,7 @@ window.taran_BLOG_POSTS = [
  * public renderer must use only entries whose final status is "published".
  */
 (function applyPublicationReview() {
-  const reviewedAt = "2026.07.22";
+  const reviewedAt = "2026-07-22";
   const upgrades = {
     "contract-questions": {
       status: "published",

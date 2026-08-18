@@ -29,6 +29,21 @@ Thumbs.db
 !/backend/public_data_seed/evidence/15154916/official-swagger-contract.normalized.json
 !/backend/public_data_seed/evidence/15154916/SHA256SUMS
 
+!/backend/public_data_seed/evidence/15154918/
+/backend/public_data_seed/evidence/15154918/*
+!/backend/public_data_seed/evidence/15154918/official-contract.normalized.json
+!/backend/public_data_seed/evidence/15154918/SHA256SUMS
+
+!/backend/public_data_seed/evidence/15155252/
+/backend/public_data_seed/evidence/15155252/*
+!/backend/public_data_seed/evidence/15155252/official-contract.normalized.json
+!/backend/public_data_seed/evidence/15155252/SHA256SUMS
+
+!/backend/public_data_seed/evidence/15122367/
+/backend/public_data_seed/evidence/15122367/*
+!/backend/public_data_seed/evidence/15122367/official-contract.normalized.json
+!/backend/public_data_seed/evidence/15122367/SHA256SUMS
+
 # Keep local data, secrets, runtime outputs, and caches excluded.
 /backend/data/
 /backend/**/.env

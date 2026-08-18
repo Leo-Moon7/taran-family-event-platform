@@ -1,68 +1,140 @@
 <!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="가족행사 업체의 주소, 인원, 가격, 주차, 시설과 이용 후기를 확인하세요.">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="돌잔치 업체의 서비스, 상품 가격, 위치와 공식 연락 정보를 확인하세요.">
+  <meta name="robots" id="provider-robots" content="noindex,nofollow">
   <title>업체 상세 | 손품해방</title>
-  <link rel="stylesheet" href="styles/tokens.css"><link rel="stylesheet" href="styles/reset.css"><link rel="stylesheet" href="styles/base.css"><link rel="stylesheet" href="styles/layout.css">
-  <link rel="stylesheet" href="styles/components/header.css"><link rel="stylesheet" href="styles/components/button.css"><link rel="stylesheet" href="styles/components/form.css"><link rel="stylesheet" href="styles/components/card.css"><link rel="stylesheet" href="styles/components/badge.css"><link rel="stylesheet" href="styles/pages/provider.css">
-  <script src="scripts/core/brand.js"></script><script src="scripts/core/storage.js"></script><script src="scripts/core/service-scope.js"></script><script src="scripts/core/display-defaults.js"></script><script src="scripts/core/event-types.js"></script><script src="scripts/core/regions.js"></script>
+  <link rel="stylesheet" href="styles/tokens.css">
+  <link rel="stylesheet" href="styles/reset.css">
+  <link rel="stylesheet" href="styles/base.css">
+  <link rel="stylesheet" href="styles/layout.css">
+  <link rel="stylesheet" href="styles/components/header.css">
+  <link rel="stylesheet" href="styles/components/button.css">
+  <link rel="stylesheet" href="styles/components/form.css">
+  <link rel="stylesheet" href="styles/components/card.css">
+  <link rel="stylesheet" href="styles/components/badge.css">
+  <link rel="stylesheet" href="styles/pages/provider.css">
+  <script src="scripts/core/brand.js"></script>
+  <script src="scripts/core/storage.js"></script>
+  <script src="scripts/core/service-scope.js"></script>
+  <script src="scripts/core/display-defaults.js"></script>
+  <script src="scripts/core/event-types.js"></script>
+  <script src="scripts/core/regions.js"></script>
 </head>
 <body>
   <header class="site-header" data-site-header>
     <div class="site-header__inner">
       <a class="brand" href="index.html" aria-label="손품해방 홈"><span class="brand__name"><span>손품해방</span><small>SONPUM HAEBANG</small></span></a>
       <button class="site-header__toggle" type="button" aria-controls="site-navigation" aria-expanded="false" data-menu-toggle><span class="visually-hidden">메뉴 열기</span>☰</button>
-      <nav class="site-nav" id="site-navigation" aria-label="주요 메뉴"><a href="venues.html">업체 찾기</a><a href="compare.html">비교함 <span class="nav-count" data-compare-count hidden></span></a><a href="calculator.html">비용 계산기</a><a href="checklist.html">준비 체크리스트</a><a href="articles.html">준비 가이드</a><a href="provider-register.html">업체 등록</a><a class="site-nav__auth" href="login.html" data-auth-link>로그인</a></nav>
+      <nav class="site-nav" id="site-navigation" aria-label="주요 메뉴">
+        <a href="venues.html">업체 찾기</a>
+        <a href="compare.html">비교함 <span class="nav-count" data-compare-count hidden></span></a>
+        <div class="nav-menu"><button type="button" aria-haspopup="true" aria-expanded="false" data-nav-menu-button>준비 도구</button><div class="nav-menu__panel"><a href="calculator.html"><strong>비용 계산기</strong><span>예상 비용 범위 확인</span></a><a href="checklist.html"><strong>준비 체크리스트</strong><span>행사일 기준 할 일</span></a></div></div>
+        <a href="articles.html">준비백과</a>
+        <a href="provider-register.html">업체 등록</a>
+      </nav>
     </div>
   </header>
+
   <main class="provider-page container" id="main-content">
     <a class="provider-back" href="venues.html">← 업체 목록</a>
     <div id="provider-content">
-      <section class="provider-hero">
-        <div class="provider-hero__visual"><img id="provider-image" src="assets/images/venue-partyroom.webp" alt=""><span id="provider-image-note">업체 유형 참고 이미지</span></div>
+      <section class="provider-hero" aria-labelledby="provider-name">
+        <figure class="provider-hero__visual">
+          <img id="provider-image" alt="" hidden>
+          <p class="provider-hero__empty" id="provider-image-empty">등록된 사진이 없습니다</p>
+          <figcaption id="provider-image-note" hidden>분야 참고 이미지</figcaption>
+        </figure>
         <div class="provider-hero__content">
-          <div class="provider-status-line"><span class="badge" id="provider-status">기본 정보</span><span id="provider-date"></span></div>
-          <p class="eyebrow" id="provider-category">업체 정보</p><h1 id="provider-name">업체 정보를 불러오는 중입니다.</h1><p class="provider-address" id="provider-address"></p>
+          <div class="provider-status-line" id="provider-status-line" hidden><span class="badge" id="provider-status">기본 정보</span><span id="provider-date"></span></div>
+          <p class="eyebrow" id="provider-category">업체 정보</p>
+          <h1 id="provider-name">업체 정보를 불러오는 중입니다.</h1>
+          <p class="provider-address" id="provider-address"></p>
+          <p class="provider-introduction" id="provider-introduction" hidden></p>
+          <dl class="provider-hero__facts" id="provider-hero-facts" hidden></dl>
           <div class="provider-tags" id="provider-tags"></div>
-          <div class="provider-actions"><a class="button button--primary" id="provider-inquiry-link" href="inquiry.html">견적 문의하기</a><button class="button button--secondary" type="button" id="provider-compare">비교함에 담기</button><button class="button button--secondary" type="button" id="provider-save">관심 업체 저장</button><a class="button button--secondary" id="provider-phone" href="#" hidden>전화 문의</a><a class="button button--text" id="provider-official" href="#" target="_blank" rel="noopener noreferrer nofollow" hidden>공식 채널 보기</a></div>
-          <a class="provider-claim" id="provider-claim" href="claim.html">이 업체의 담당자이신가요? 정보 관리 권한 요청</a>
+          <div class="provider-actions" id="provider-actions" hidden>
+            <a class="button button--primary" id="provider-inquiry-link" href="inquiry.html" hidden>견적 문의하기</a>
+            <button class="button button--secondary" type="button" id="provider-compare" hidden>비교함에 담기</button>
+            <button class="button button--secondary" type="button" id="provider-save" hidden>관심 업체 저장</button>
+            <a class="button button--secondary" id="provider-phone" href="#" hidden>전화 문의</a>
+            <a class="button button--secondary" id="provider-official" href="#" target="_blank" rel="noopener noreferrer" hidden>공식 홈페이지에서 확인</a>
+          </div>
+          <a class="provider-claim" id="provider-claim" href="claim.html" hidden>이 업체의 담당자이신가요? 정보 관리 권한 요청</a>
         </div>
       </section>
-      <nav class="provider-anchor-nav" aria-label="상세 정보"><a href="#summary">핵심 조건</a><a href="#pricing">가격·상품</a><a href="#facilities">공간·시설</a><a href="#reviews">이용 후기</a><a href="#policy">취소·환불</a><a href="#location">위치</a><a id="provider-change-nav" href="#provider-change" hidden>정보 수정</a></nav>
-      <section class="provider-section" id="summary"><div class="section-header"><div class="section-header__copy"><h2>예약 전 핵심 조건</h2><p>공개된 정보만 표시하며, 표시되지 않은 조건은 문의할 때 확인할 수 있습니다.</p></div></div><dl class="provider-facts" id="provider-summary"></dl></section>
-      <section class="provider-section" id="pricing" hidden><div class="section-header"><div class="section-header__copy"><h2>가격과 상품 구성</h2></div></div><dl class="provider-facts" id="provider-pricing"></dl></section>
-      <section class="provider-section" id="facilities" hidden><div class="section-header"><div class="section-header__copy"><h2>공간과 편의시설</h2></div></div><dl class="provider-facts" id="provider-facilities"></dl></section>
-      <section class="provider-section" id="reviews"><div class="section-header"><div class="section-header__copy"><h2>이용 후기</h2><p>손품해방 이용 후기와 외부 원문을 구분해서 확인하세요.</p></div><div class="provider-rating" id="provider-rating" hidden></div></div>
-        <div class="review-tabs" role="tablist"><button class="is-active" type="button" data-review-tab="internal" aria-selected="true">손품해방 후기 <span id="internal-count">0</span></button><button type="button" data-review-tab="external" aria-selected="false">외부 후기 <span id="external-count">0</span></button></div>
-        <div class="review-panel" id="internal-reviews"></div><div class="review-panel" id="external-reviews" hidden></div>
-        <p class="review-login-note" id="review-login-note" hidden></p>
-        <details class="review-form-wrap" id="review-form-wrap"><summary>손품해방 후기 작성하기</summary><form id="review-form" class="review-form"><div class="field"><label class="field__label" for="review-rating">평점</label><select class="select" id="review-rating" name="rating" required><option value="">선택</option><option value="5">5점</option><option value="4">4점</option><option value="3">3점</option><option value="2">2점</option><option value="1">1점</option></select></div><div class="field"><label class="field__label" for="review-name">표시 이름</label><input class="input" id="review-name" name="name" maxlength="20" required></div><div class="field field--wide"><label class="field__label" for="review-content">이용 경험</label><textarea class="textarea" id="review-content" name="content" rows="4" minlength="10" maxlength="500" required></textarea></div><button class="button button--primary" type="submit">후기 등록</button><p data-review-status role="status"></p></form></details>
-      </section>
-      <section class="provider-section" id="policy" hidden><div class="section-header"><div class="section-header__copy"><h2>취소·환불 조건</h2></div></div><div id="provider-policy"></div></section>
-      <section class="provider-section" id="location"><div class="section-header"><div class="section-header__copy"><h2>위치</h2></div></div><p id="provider-location"></p><a class="button button--secondary" id="provider-map" href="#" target="_blank" rel="noopener noreferrer">지도에서 보기</a></section>
-      <section class="provider-section" id="provider-change" hidden>
-        <div class="section-header"><div class="section-header__copy"><p class="eyebrow">업체 담당자용</p><h2>업체 정보 수정 요청</h2><p>관리 권한이 승인된 업체 담당자만 요청할 수 있습니다. 요청 내용은 관리자 확인 전에는 공개 정보에 반영되지 않습니다.</p></div></div>
-        <div class="review-empty" id="provider-change-pending" role="status" hidden><strong>수정 요청을 확인하고 있습니다.</strong><p id="provider-change-pending-date"></p><button class="button button--secondary button--sm" id="provider-change-withdraw" type="button">요청 취소</button></div>
-        <form class="review-form" id="provider-change-form">
-          <div class="field"><label class="field__label" for="provider-change-name">업체명</label><input class="input" id="provider-change-name" name="name" maxlength="120" required></div>
-          <div class="field"><label class="field__label" for="provider-change-address">주소</label><input class="input" id="provider-change-address" name="address" maxlength="250" required></div>
-          <div class="field"><label class="field__label" for="provider-change-phone">대표 전화</label><input class="input" id="provider-change-phone" name="phone" inputmode="tel" maxlength="30"></div>
-          <div class="field"><label class="field__label" for="provider-change-website">공식 웹사이트</label><input class="input" id="provider-change-website" name="website" type="url" maxlength="500"></div>
-          <div class="field"><label class="field__label" for="provider-change-guests">최대 이용 인원</label><input class="input" id="provider-change-guests" name="maximumGuests" type="number" min="1" max="100000"></div>
-          <div class="field"><label class="field__label" for="provider-change-parking">주차 가능 대수</label><input class="input" id="provider-change-parking" name="parkingCount" type="number" min="0" max="100000"></div>
-          <label class="field field--wide"><span class="field__label">확인</span><span><input name="consent" type="checkbox" required> 입력한 정보를 관리자 검수용으로 제출하는 데 동의합니다.</span></label>
-          <button class="button button--secondary" type="submit">수정 요청 보내기</button>
-          <p class="field--wide" data-provider-change-status role="status"></p>
-        </form>
-      </section>
+
+      <nav class="provider-anchor-nav" id="provider-anchor-nav" aria-label="상세 정보" hidden></nav>
+
+      <div id="provider-customer-sections" hidden>
+        <section class="provider-section provider-customer-section" id="provider-products" aria-labelledby="provider-products-title">
+          <div class="section-header"><div class="section-header__copy"><p class="eyebrow">공식 안내 기준</p><h2 id="provider-products-title">가격 안내</h2><p id="provider-products-description">가격 정보를 확인하고 있습니다.</p></div></div>
+          <div class="provider-product-list" id="provider-product-list"></div>
+          <p class="provider-price-empty" id="provider-price-empty" hidden>등록된 단위 가격이 없습니다. 행사 전체 예상 비용은 업체에 문의해 주세요.</p>
+        </section>
+
+        <section class="provider-section provider-customer-section" id="provider-before-use" aria-labelledby="provider-before-use-title">
+          <div class="section-header"><div class="section-header__copy"><p class="eyebrow">예약 전에</p><h2 id="provider-before-use-title">이용 전 확인사항</h2><p>원하는 일정과 상품 조건은 공식 채널을 통해 최신 내용을 확인해 주세요.</p></div></div>
+          <div class="provider-contact-checklist" aria-labelledby="provider-contact-checklist-title">
+            <h3 id="provider-contact-checklist-title">문의 전 확인하면 좋은 내용</h3>
+            <ul id="provider-contact-questions"></ul>
+            <button class="button button--secondary" id="provider-copy-questions" type="button">문의 내용 복사하기</button>
+            <p class="provider-copy-status" id="provider-copy-status" role="status" aria-live="polite"></p>
+          </div>
+        </section>
+
+        <section class="provider-section provider-customer-section" id="provider-contact" aria-labelledby="provider-contact-title">
+          <div class="section-header"><div class="section-header__copy"><p class="eyebrow">직접 확인하기</p><h2 id="provider-contact-title">위치 및 연락처</h2></div></div>
+          <dl class="provider-facts provider-customer-facts" id="provider-contact-facts"></dl>
+          <nav class="provider-official-links" id="provider-official-links" aria-label="업체 공식 홈페이지"></nav>
+        </section>
+
+        <aside class="provider-information-note" aria-labelledby="provider-information-note-title">
+          <h2 id="provider-information-note-title">정보 안내</h2>
+          <p>업체가 공개한 정보와 검색 정보를 바탕으로 정리했으며, 실제 가격과 서비스는 변경될 수 있습니다. 예약 전 업체에 최신 정보를 확인해 주세요.</p>
+          <p id="provider-information-updated"></p>
+          <nav aria-label="업체 정보 관리">
+            <a id="provider-correction" href="contact.html">정보 수정 제안</a>
+            <a id="provider-customer-claim" href="claim.html">업체 페이지 관리 권한 신청</a>
+          </nav>
+        </aside>
+      </div>
+
+      <div id="provider-legacy-sections">
+        <section class="provider-section" id="summary" hidden><div class="section-header"><div class="section-header__copy"><h2>예약 전 핵심 조건</h2><p>공개된 정보만 표시하며, 표시되지 않은 조건은 문의할 때 확인할 수 있습니다.</p></div></div><dl class="provider-facts" id="provider-summary"></dl></section>
+        <section class="provider-section" id="pricing" hidden><div class="section-header"><div class="section-header__copy"><h2>가격과 상품 구성</h2></div></div><dl class="provider-facts" id="provider-pricing"></dl></section>
+        <section class="provider-section" id="facilities" hidden><div class="section-header"><div class="section-header__copy"><h2>공간과 편의시설</h2></div></div><dl class="provider-facts" id="provider-facilities"></dl></section>
+        <section class="provider-section" id="reviews" hidden><div class="section-header"><div class="section-header__copy"><h2>이용 후기</h2><p>손품해방 이용 후기와 외부 원문을 구분해서 확인하세요.</p></div><div class="provider-rating" id="provider-rating" hidden></div></div>
+          <div class="review-tabs" role="tablist"><button class="is-active" type="button" data-review-tab="internal" aria-selected="true">손품해방 후기 <span id="internal-count">0</span></button><button type="button" data-review-tab="external" aria-selected="false">외부 후기 <span id="external-count">0</span></button></div>
+          <div class="review-panel" id="internal-reviews"></div><div class="review-panel" id="external-reviews" hidden></div>
+          <p class="review-login-note" id="review-login-note" hidden></p>
+          <details class="review-form-wrap" id="review-form-wrap"><summary>손품해방 후기 작성하기</summary><form id="review-form" class="review-form"><div class="field"><label class="field__label" for="review-rating">평점</label><select class="select" id="review-rating" name="rating" required><option value="">선택</option><option value="5">5점</option><option value="4">4점</option><option value="3">3점</option><option value="2">2점</option><option value="1">1점</option></select></div><div class="field"><label class="field__label" for="review-name">표시 이름</label><input class="input" id="review-name" name="name" maxlength="20" required></div><div class="field field--wide"><label class="field__label" for="review-content">이용 경험</label><textarea class="textarea" id="review-content" name="content" rows="4" minlength="10" maxlength="500" required></textarea></div><button class="button button--primary" type="submit">후기 등록</button><p data-review-status role="status"></p></form></details>
+        </section>
+        <section class="provider-section" id="policy" hidden><div class="section-header"><div class="section-header__copy"><h2>취소·환불 조건</h2></div></div><div id="provider-policy"></div></section>
+        <section class="provider-section" id="location" hidden><div class="section-header"><div class="section-header__copy"><h2>위치</h2></div></div><p id="provider-location"></p><a class="button button--secondary" id="provider-map" href="#" target="_blank" rel="noopener noreferrer">지도에서 보기</a></section>
+      </div>
     </div>
+
     <div class="empty-state" id="provider-not-found" hidden><h2 role="heading" aria-level="1">업체 정보를 찾을 수 없습니다.</h2><a class="button button--primary" href="venues.html">업체 목록 보기</a></div>
   </main>
-  <footer class="site-footer"><div class="container site-footer__inner"><div><strong>손품해방</strong><small>SONPUM HAEBANG · 가족행사 장소 비교와 견적 문의</small></div><nav aria-label="정책 메뉴"><a href="privacy.html">개인정보처리방침</a><a href="terms.html">이용약관</a><a href="contact.html">문의</a></nav></div></footer>
+
+  <footer class="site-footer"><div class="container site-footer__inner"><div><strong>손품해방</strong><small>SONPUM HAEBANG · 가족행사 업체 정보와 준비 도구</small></div><nav aria-label="정책 메뉴"><a href="privacy.html">개인정보처리방침</a><a href="terms.html">이용약관</a><a href="contact.html">문의</a></nav></div></footer>
   <div class="toast-region" aria-live="polite" data-toast-region></div>
+
+  <script src="scripts/data/customer-provider-profiles.js?v=1"></script>
   <script src="data.js?v=19"></script>
-  <script src="content-config.js"></script><script src="scripts/core/config.js"></script><script src="scripts/core/api.js"></script><script src="scripts/core/auth.js"></script><script src="scripts/core/analytics.js"></script>
-  <script src="scripts/core/provider-status.js"></script><script src="scripts/core/provider-placeholder.js"></script><script src="scripts/core/compare-store.js"></script><script src="scripts/components/header.js"></script><script src="scripts/components/toast.js"></script><script src="scripts/pages/provider.js"></script>
+  <script src="content-config.js"></script>
+  <script src="scripts/core/config.js"></script>
+  <script src="scripts/core/api.js"></script>
+  <script src="scripts/core/auth.js"></script>
+  <script src="scripts/core/analytics.js"></script>
+  <script src="scripts/core/provider-status.js"></script>
+  <script src="scripts/core/provider-placeholder.js"></script>
+  <script src="scripts/core/compare-store.js"></script>
+  <script src="scripts/components/header.js"></script>
+  <script src="scripts/components/toast.js"></script>
+  <script src="scripts/pages/provider.js"></script>
 </body>
 </html>

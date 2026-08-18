@@ -31,11 +31,11 @@
 [[headers]]
   for = "/*"
   [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
     X-Content-Type-Options = "nosniff"
     X-Frame-Options = "DENY"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "camera=(), microphone=(), geolocation=()"
-    X-Robots-Tag = "noindex, nofollow"
     Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co; font-src 'self' data:; frame-ancestors 'none'; form-action 'self'; base-uri 'self'"
 
 [[headers]]

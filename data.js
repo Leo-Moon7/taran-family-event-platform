@@ -453,8 +453,9 @@ window.publicDirectoryData = [
   ...window.publicProviderSamples.map(item => ({
     ...item,
     detailUrl: `provider.html?id=${encodeURIComponent(item.id)}`
-  }))
-].filter(item => item.publicationStatus === "published");
+  })),
+  ...(window.unverifiedProviderCandidates || []).filter(item => item?.unverifiedCandidate === true)
+].filter(item => item?.unverifiedCandidate === true || item.publicationStatus === "published");
 
 window.crawlReviewSchema = {
   commonFields: [

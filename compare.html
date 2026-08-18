@@ -7,10 +7,10 @@
   <meta name="description" content="선택한 가족행사 업체를 인원, 가격, 주차와 이용 조건으로 한눈에 비교하세요.">
   <title>업체 비교함 | 손품해방</title>
   <link rel="stylesheet" href="styles/tokens.css"><link rel="stylesheet" href="styles/reset.css"><link rel="stylesheet" href="styles/base.css"><link rel="stylesheet" href="styles/layout.css">
-  <link rel="stylesheet" href="styles/components/header.css"><link rel="stylesheet" href="styles/components/button.css"><link rel="stylesheet" href="styles/components/card.css"><link rel="stylesheet" href="styles/components/badge.css"><link rel="stylesheet" href="styles/pages/compare.css"><link rel="stylesheet" href="styles/components/subpage-hero.css">
+  <link rel="stylesheet" href="styles/components/header.css"><link rel="stylesheet" href="styles/components/button.css"><link rel="stylesheet" href="styles/components/card.css"><link rel="stylesheet" href="styles/components/badge.css"><link rel="stylesheet" href="styles/pages/compare.css">
   <script src="scripts/core/brand.js"></script><script src="scripts/core/storage.js"></script><script src="scripts/core/service-scope.js"></script><script src="scripts/core/display-defaults.js"></script><script src="scripts/core/event-types.js"></script>
 </head>
-<body class="compare-page subpage-tone">
+<body class="compare-page">
   <header class="site-header" data-site-header>
     <div class="site-header__inner">
       <a class="brand" href="index.html" aria-label="손품해방 홈"><span class="brand__name"><span>손품해방</span><small>SONPUM HAEBANG</small></span></a>
@@ -34,7 +34,7 @@
     </section>
   </main>
   <main id="compare-content" hidden>
-    <section class="compare-hero subpage-hero"><div class="container compare-hero__grid subpage-hero__inner"><div class="subpage-hero__copy"><p class="eyebrow">업체 비교함</p><h1>선택한 업체를<br>같은 기준으로 비교하세요.</h1><p>최대 3곳의 인원, 가격, 주차와 이용 조건을 나란히 확인합니다. 정보가 없거나 다시 확인해야 하는 값은 추정하지 않습니다.</p></div><div class="compare-limit-card subpage-hero__aside"><span>비교 기준</span><strong>최대 3곳</strong><p>같은 행사 조건을 확인하고, 문의 수신이 확인된 업체에만 견적 문의를 보냅니다.</p></div></div></section>
+    <section class="compare-hero"><div class="container compare-hero__grid"><div><p class="eyebrow">업체 비교함</p><h1>선택한 업체를<br>같은 기준으로 비교하세요.</h1><p>최대 3곳의 인원, 가격, 주차와 이용 조건을 나란히 확인합니다. 정보가 없거나 다시 확인해야 하는 값은 추정하지 않습니다.</p></div><div class="compare-limit-card"><span>비교 기준</span><strong>최대 3곳</strong><p>같은 행사 조건을 확인하고, 문의 수신이 확인된 업체에만 견적 문의를 보냅니다.</p></div></div></section>
     <section class="page-section">
       <div class="container">
         <div class="compare-toolbar"><div><p class="eyebrow">내 비교함</p><p id="compare-summary" aria-live="polite">비교할 업체를 불러오는 중입니다.</p></div><div><button class="button button--text" id="compare-clear" type="button" hidden>비교함 비우기</button><a class="button button--secondary" id="compare-add-link" href="venues.html">업체 더 찾기</a><a class="button button--primary" id="compare-inquiry-link" href="inquiry.html" hidden>같은 조건으로 견적 문의</a></div></div>

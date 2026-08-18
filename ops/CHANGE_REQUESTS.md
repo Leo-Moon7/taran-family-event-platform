@@ -12,7 +12,7 @@
 
 - 요청 작업: FE-002
 - 대상 후보: `scripts/pages/venues.js`, 관련 전용 테스트
-- 상태: APPROVAL_REQUIRED
+- 상태: IMPLEMENTED_IN_DRAFT
 - 선행: D-01~D-03, QA-002, CHG-B 정리
 - 제외: API 페이징, 디자인 전면 개편, 크롤러, 예약·결제
 
@@ -32,6 +32,8 @@
 - 선행: D-13
 - 검증: 무추적 HTTP 301·Location, 브라우저 최종 URL, 관리자 로그인 안내, 신규 콘솔 오류 없음
 - 통제: `_redirects`, 레거시 HTML·JS, 관리자 코드, 다른 라우팅은 수정하지 않는다.
+- QA-018 재현: 현재 고유 draft에서 비로그인 레거시 화면·권한 확인 안내가 200으로 표시되고 `vendor-dashboard.js`의 `undefined.id` 오류가 발생한다. 편집 폼은 hidden이며 무단 편집·운영 데이터 노출은 확인되지 않았다.
+- OPS-007 결과: draft `6a62c78790a1d9262eab53d3`에서 301과 `Location: /admin/providers.html`, 관리자 로그인 안내, 3개 뷰포트 가로 넘침 0, 레거시 script·콘솔 오류 0을 확인했다. production 적용은 D-30 대기다.
 
 ## CR-005 — NAVER 검색 파생 데이터 공개 번들 격리
 
@@ -68,3 +70,118 @@
 - 현재 결과: 비교·신뢰 정책, 공공 원천 레지스트리, 업체 등록·소유권·검수 SOP는 `ops/reports/PM-2026-07-22-prep-policy-review.md`에서 통합 PASS. 제품 구현은 아직 시작하지 않는다.
 
 첫 실행 QA-002와 MKT-001은 공통 변경 요청이 없다.
+
+## CR-008 — 전국 다분야 업체 후보 수집·공개 구조
+
+- 요청 출처: 사용자 D-34
+- 상태: SPEC_READY
+- 목적: 서울 돌잔치 20곳 제한을 전국 가족행사 관련 업체 후보 확보로 확대
+- 선행: BIZ-007·QA-022·BE-008 DONE. 다음 BE-009·OPS-016, 이후 QA-023
+- 변경 가능 후보: source registry, 로컬 수집 workspace, 후속 staging schema/API, 관리자 검수, 공개 projection
+- 현재 금지: 실제 대량 다운로드·운영 DB import·전면 공개·업체 연락·가격·평점·후기·사진 생성
+- 통제: 데이터셋·지역·분야별 단일 소유 카드와 QA 검수 없이 공통 DB·API·라우팅을 변경하지 않는다.
+
+## CR-009 — NAVER API·기존 수집자료 보조 분석 재검토
+
+- 요청 출처: 사용자 2026-07-24 최신 요청
+- 상태: CLOSED_NOT_ADOPTED
+- 기존 기준: D-15는 NAVER 블로그·플레이스·지역검색을 사업 데이터 원천으로 사용하지 않음
+- 최종 결정: 사용자가 NAVER 문의를 하지 않기로 결정해 후보 발견·관련성·중복·검수 우선순위·AI 분석을 포함한 보조 활용 경로를 채택하지 않음
+- 금지 유지: 블로그 본문·사진·후기수·평점·가격·추천·행사 가능 확정·공개 assertion 자동 승계
+- 후속: QA-027·BIZ-008·BE-011·QA-030 실행 취소. 공공데이터·업체 직접 등록·고객 제안·관리자 검수만 진행
+- 기존 자료: D-27 전 격리 보존. metadata-only 감사가 필요하면 별도 승인하며 재사용·공개 목적으로 열람하지 않음
+
+## CR-010 — 공공데이터 안전 도구·증거 exact Git allowlist
+
+- 요청 출처: R-67, OPS-018 독립 reviewer `PASS`
+- 상태: DONE_LOCAL
+- 단일 소유 작업: OPS-019
+- 공통 변경 대상: `.gitignore`
+- 목적: 검수 완료된 `backend/public_data_seed` 도구·합성 fixture·공식 정규화 증거 9개만 향후 Git 추적 후보로 열고 나머지 `backend/**`는 계속 차단
+- 허용: OPS-018 exact 9-file negation과 단계별 재차단 규칙
+- 금지: `backend/data/**`, workspace, temp, cache, DB, 원본, 비밀, 미검수 신규 파일, backend 내용 수정, git add·commit·push
+- 검증: allow 9 not ignored, deny 10 ignored, non-ignored untracked exact 9, 일반 파일·비-reparse·1 MiB 이상·고신뢰 비밀 형식 0, QA-023·seed 회귀
+- 완료 결과: allow 9/9, deny 10/10, exact non-ignored untracked 9, 비밀·대용량·reparse 0, QA-023 31/31·11/11과 seed 14/14 통과, 독립 reviewer PASS
+- 외부 반영: 로컬 구현·독립 검수까지만 완료. Git index와 GitHub 반영은 D-36 승인 전 금지
+
+## CR-011 — 고객 견적 기여·열람 v2 데이터 경계
+
+- 요청 출처: BIZ-009, QA-032, BE-017, QA-033, BE-018
+- 상태: IMPLEMENTED_E2E_PASS_GIT_PRESERVATION_PENDING
+- 목적: 고객 견적 원본, 구조화 견적, 공개 projection, 상세 열람권, 업체 이의, 삭제를 분리
+- P0 기존 충돌: 평문 `taran_provider_claims.business_number`, generic `taran_contributions.data/file_paths`, 포인트 승인 RPC, 공개 provider base table, 직접 provider update, 기존 evidence role/delete
+- 구현 원칙: additive v2, 기존 객체 재사용 금지, 승인+projection+grant 원자성, case JIT·MFA·safe preview·30/90일·tombstone
+- 선행: D-38 승인 완료, OPS-023·QA-020·QA-003 PASS, BE-019 `b969191` + `97a5dfb`, QA-041 SQL 역할 및 QA-042 실제 Auth/JWT/PostgREST/TOTP AAL2 PASS
+- 금지: 운영 DB, 실제 견적·개인정보, 기존 행 migration·삭제, 제품 공개, 외부 전송
+- 후속: QA-042 하네스·BE-027 exact Git 보존 → 설치 문서 015·016 반영 → 개인정보/법률·scanner/preview 확인 → FE/관리자 UI 단일 소유 → 별도 운영 승인
+
+## CR-012 — BE-016 신규 공식 근거 exact GitHub 보존
+
+- 요청 출처: OPS-026·OPS-027, R-83
+- 상태: DONE
+- 대상: `.gitignore`와 신규 evidence exact 6개
+- 허용: 별도 안전 작업 공간, exact 7-file commit, `codex/ops-028-be016-evidence` push
+- 금지: 다른 dirty 변경, 운영 문서, 제품, DB, 원본, PR, main, 배포
+- 검증: staged/commit exact set, UTF-8 JSON 3/3, SHA 3/3, 비밀·실제 API·업체 레코드 0, deny 유지
+- 완료: `codex/ops-028-be016-evidence`, commit `9cdfb6c`, 원격 push. PR·main·배포 0
+
+## CR-013 — QA-003 공개 projection·검수 workflow 수정 2차
+
+- 요청 출처: QA-003 1차 실제 재현, BE-014 PASS, R-72~R-81
+- 상태: REVISION_REQUIRED_AFTER_QA035
+- 단일 소유 작업: BE-015
+- 목적: DB 승인 업체와 브라우저 목록·상세·문의의 단절을 해소하고, 업체 수정 요청·관리자 검수·동의 payload·원자적 실패 표시를 격리 환경에서 완성
+- 허용: additive migration/RPC, 업체 수정 요청·관리자 검수 전용 파일, 공개 safe view adapter, inquiry consent payload, 합성 E2E
+- 금지: 운영 DB, 실제 업체·고객·견적·증빙, CHG-A~C, GitHub main, production, 기존 migration 수정
+- 선행: BE-014 DONE, QA-003 `REVISION_REQUIRED_AFTER_FIX_1`
+- 현재 결과: FE-020 목록·상세·수정 요청과 BE-020 후기 역할 계약은 PASS. QA-035에서 후기 성공 오표시, 관리자 profile 조회 실패, 공개 view Advisor 오류 2건, Storage 실제 API 미완료와 Auth 삭제 worker 부재를 확인했다.
+- 후속: FE-022 + BE-021 → BE-022 → QA-036 → QA-003 최종 판정
+
+## CR-014 — QA-035 후기·관리자 역할·공개 projection 보정
+
+- 요청 출처: QA-035 실제 격리 브라우저·Security Advisor
+- 상태: DONE_WITH_FOLLOWUP
+- 목적: 성공한 후기의 실패 오표시, 관리자 본인 역할 조회 실패, 공개 view 실행 권한 오류를 각각 최소 범위에서 제거
+- 병렬 허용: FE-022와 BE-021은 파일·API·DB 계약이 겹치지 않아 별도 worktree에서 병렬 가능
+- 순차 조건: BE-022는 BE-021 뒤 실행, QA-036은 FE-022·BE-021·BE-022와 Chrome 파일 권한 설정 뒤 실행
+- 금지: base table 전체 SELECT, 역할 승격 UI, 기존 migration 수정, 운영 DB, 실제 계정·증빙, main, production
+- 검증: 후기 성공/중복 UI, operations/content 본인 역할 1행·customer/타인 0, Advisor 오류 2→0, Storage 실제 API, 종료 잔존 0
+- 완료: FE-022·BE-021·BE-022·FE-023 `PASS`. QA-036에서 후기·역할·Storage·Advisor·업체 등록과 종료 잔존 0을 확인했다.
+
+## CR-015 — 관리자 업체 관리 큐 최소권한 연결
+
+- 요청 출처: QA-036 실제 operations 브라우저 재현, R-93
+- 상태: DONE_WITH_FOLLOWUP
+- 목적: base table 직접 SELECT를 다시 열지 않고 operations 관리자에게 업체·소유권·등록 검수 큐의 최소 열만 제공
+- 순차 작업: BE-023 → FE-024 → QA-037
+- 허용: 신규 additive RPC migration, 역할별 전용 테스트, `scripts/pages/admin/providers.js` 최소 연결, 전용 보고서
+- 금지: base table anon/auth SELECT, content/customer 권한 확대, 승인 정책 변경, 운영 DB, 실제 자료, main, production
+- 검증: owner/admin/operations allow, content/customer/anon deny, 금지 열 0, 큐별 실패 격리, 브라우저 실제 화면, 종료 합성 잔존 0
+- 완료: BE-023·FE-024 1차 구현 뒤 QA-037이 큐 단일 실패 도메인을 지적했다. 세 독립 RPC·세 독립 client 요청으로 1회 보완해 reviewer `PASS`를 받았다.
+- 후속: providers.js 직접 write와 dashboard.js·inquiries.js 잔여 direct read는 QA-038에서 별도 감사한다.
+
+## CR-016 — 관리자 업체 운영 동작·현황 최소권한 연결
+
+- 요청 출처: QA-038 읽기 전용 감사, R-94~R-96
+- 상태: DONE
+- 목적: operations 화면의 업체 저장·상태 변경·소유권 승인과 현황 지표를 base table browser 권한 없이 실제 작동하게 한다.
+- 순차 작업: BE-024 → FE-025 + FE-026 → QA-039
+- 허용: 신규 additive migration 012, 역할별 전용 테스트, 세 지정 관리자 client 파일의 direct access 최소 교체, 전용 보고서
+- 금지: base table anon/auth grant, 업체 ID 변경·삭제, 정책·지표 정의 확대, 운영 DB, 실제 자료, main, production
+- 검증: owner/admin/operations allow, content/customer/anon deny, 원자적 claim rollback, 금지 열 0, 실제 0건과 오류 구분, 브라우저 실제 동작, 종료 합성 잔존 0
+- 완료: BE-024 `593773a`, FE-025 `85d947a`·`ed191c6`, FE-026 `749bf42`를 결합해 QA-039 `PASS`. 신규 등록 오류는 범위 내 수정 1회 후 등록·공개·수정 PASS, claim 원자성·부분 실패 표시·역할 거부·cleanup PASS
+
+## CR-017 — Auth 삭제 tombstone·JWT drain·동시성 재설계
+
+- 요청 출처: BE-025 독립 reviewer 최종 판정, R-75·R-97·R-98
+- 상태: DONE_IN_ISOLATION
+- 승인: D-43
+- 단일 소유 작업: BE-026
+- 목적: Auth 삭제 뒤 만료 전 JWT의 DB·Storage 쓰기, `taran_inquiries.user_id=NULL` 우회, row/advisory lock 교착을 제거한다.
+- 허용: 신규 migration 014, 기존 BE-025 Edge Function·전용 테스트의 최소 수정, 신규 tombstone 테스트·전용 보고서
+- 금지: migrations/001~013 수정, 제품 UI, 패키지·잠금 파일, 운영 DB·실제 계정·실제 Storage, main, production, 스케줄 활성화
+- 계약: Auth FK 독립 단기 tombstone, 서버 강제 사용자 귀속, no-lock tombstone guard, `auth_deleted_at + 실제 최대 JWT TTL + buffer` 이전 최종 제거 금지, 비식별 완료 이력
+- 검증: 정적·상태 모델, 독립 reviewer, migration 최초·재적용, stale JWT·NULL 문의·Storage·2세션 교착·다른 사용자 불변·cleanup
+- 구현 결과: BE-026 commits `fe02b45`·`09701bb`, 수정 1회, 전용 테스트 38/38·독립 reviewer `PASS`
+- 검수 결과: QA-040이 migration 최초·재적용, stale JWT DB·Storage·Auth metadata, NULL 문의, 두 세션 cutover·old-snapshot 재시도, mark gap·JWT drain·비식별 이력·cleanup을 `PASS`
+- 선후관계: QA-003 최종 `PASS`; 운영 DB·Edge·스케줄·main·production은 별도 승인 대기

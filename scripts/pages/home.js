@@ -5,11 +5,11 @@
   const heroImage = document.querySelector("#home-hero-image");
   const initialContext = window.TaranSearchContext?.resolve?.() || { event: "kids", province: "서울특별시" };
   const heroImages = {
-    kids: ["assets/images/venue-hotel.webp", "돌잔치와 백일 행사를 준비할 수 있는 가족행사 공간"],
-    parents: ["assets/images/venue-hanjeongsik.webp", "환갑과 칠순, 팔순 가족모임을 위한 공간"],
-    meeting: ["assets/images/venue-garden.webp", "상견례와 소규모 예식을 준비할 수 있는 결혼 행사 공간"],
-    anniversary: ["assets/images/venue-partyroom.webp", "기념일과 생신을 위한 가족행사 공간"],
-    other: ["assets/images/venue-hanjeongsik.webp", "가족모임과 추모 등 다양한 가족행사를 위한 공간"]
+    kids: ["assets/images/home-family-hero-v2.webp", "아기와 부모, 조부모가 함께 돌잔치를 준비하는 따뜻한 가족 모습"],
+    parents: ["assets/images/home-family-parents.webp", "부모님의 생신을 함께 축하하는 가족 모습"],
+    meeting: ["assets/images/home-family-meeting.webp", "결혼을 준비하며 차분하게 이야기를 나누는 두 가족 모습"],
+    anniversary: ["assets/images/home-family-anniversary.webp", "꽃과 케이크를 두고 기념일을 축하하는 가족 모습"],
+    other: ["assets/images/home-family-other.webp", "여러 세대가 함께 식사하며 이야기를 나누는 가족 모습"]
   };
 
   function formContext(overrides = {}) {

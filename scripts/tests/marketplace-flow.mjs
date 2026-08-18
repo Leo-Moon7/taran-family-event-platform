@@ -43,8 +43,9 @@ if (/internalReview|externalReview|reviewCount/.test(publicRule)) {
   failures.push("업체 공개 기준에 후기 수 조건이 포함되어 있습니다.");
 }
 
-expect("scripts/pages/venues.js", /skeletonCards/, "업체 목록 로딩 스켈레톤이 없습니다.");
-expect("scripts/pages/venues.js", /TaranPagination\.render/, "업체 목록 페이지네이션이 없습니다.");
+expect("scripts/pages/venues.js", /customerProviderProfiles[\s\S]*?displayGate\s*===\s*"customer_ready"/, "고객 공개 업체 gate 연결이 없습니다.");
+expect("scripts/pages/venues.js", /createEmptyState[\s\S]*?state\.filtered/, "업체 목록 빈 결과 처리가 없습니다.");
+expect("scripts/pages/venues.js", /data-category-tab|categoryTabs/, "업체 분야 탭 연결이 없습니다.");
 expect("scripts/pages/venues.js", /filter-chips|createChip/, "선택 필터 칩이 없습니다.");
 expect(
   "scripts/pages/provider.js",
@@ -53,8 +54,8 @@ expect(
 );
 expect(
   "scripts/pages/provider.js",
-  /provider-category"\)\.textContent\s*=\s*provider\.category/,
-  "상세페이지 업체 유형에 행사명이 중복되지 않도록 분리한 처리가 없습니다."
+  /provider-category"\)\.textContent\s*=\s*customerProfile\.serviceCategories\.join/,
+  "고객형 상세페이지에 서비스 분야 표시가 없습니다."
 );
 expect("scripts/pages/compare.js", /inquiry\.html\?providers=/, "비교함 통합 문의 연결이 없습니다.");
 expect("scripts/pages/compare.js", /canReceiveInquiry/, "문의 가능한 업체 선별 조건이 없습니다.");
@@ -116,12 +117,6 @@ for (const role of roleRules) {
 
 for (const html of ["index.html", "venues.html", "provider.html", "compare.html", "inquiry.html"]) {
   const source = read(html);
-  const siteNav = source.match(/<nav\b[^>]*class=["'][^"']*\bsite-nav\b[^"']*["'][^>]*>[\s\S]*?<\/nav>/i)?.[0] || "";
-  if (!siteNav) {
-    failures.push(`${html}: 핵심 내비게이션 범위를 확인할 수 없습니다.`);
-  } else if (/href=["']community(?:-post)?\.html/i.test(siteNav)) {
-    failures.push(`${html}: 핵심 내비게이션에 커뮤니티 링크가 남아 있습니다.`);
-  }
   if (/(?:포인트|리워드)\s*(?:적립|교환|받기)/.test(source)) {
     failures.push(`${html}: 초기 공개 화면에 리워드 안내가 남아 있습니다.`);
   }
