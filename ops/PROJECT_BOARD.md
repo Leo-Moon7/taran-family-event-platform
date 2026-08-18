@@ -28,6 +28,9 @@
 | QA-056 | GitHub 자동 검사 구계약 현행화 | 품질·보안 | DONE | P0 | 테스트 2개만 수정, Actions PASS, 제품·main·production·DB 변경 0 |
 | OPS-041 | 고객형 업체 7곳 고유 noindex 온라인 미리보기 | 총괄 PM·품질 | DONE | P0 | draft `6a839ca595c8db1c752d5efd`·production/main/DB 불변 PASS |
 | BE-036 | 공식 근거 확인 업체 2곳 고객 공개 profile 추가 | 백엔드·데이터 | DONE | P0 | 005·007만, 숫자 가격·사진·출장 추정 금지 PASS |
+| BE-038 | 오크우드 공식 돌잔치 패키지 profile 추가 | 백엔드·데이터 | DONE | P0 | 공식 2026 패키지·전화·주소·가격 근거, 사진·예약 추정 0 |
+| FE-044 | 패키지 총액·1인 메뉴 가격 구분 표시 | 디자인·프런트엔드 | DONE | P0 | 목록 8=5+3, 가격 profile 3, 단위별 문구 분기 PASS |
+| QA-059 | 공식 업체 8곳 공개 안전·화면 검수 | 품질·보안 | DONE | P0 | checks·preview 1280 PASS, 반응형 계약 자동검사 PASS_WITH_LIMITATION |
 | FE-042 | 고객형 업체 목록 7곳 확장 표시 정합화 | 디자인·프런트엔드 | DONE | P0 | 7=4+3 정적·런타임 수량 PASS |
 | QA-055 | 고객형 업체 7곳 확장 독립 검수 | 품질·보안 | DONE | P0 | P0/P1 0, 환경 제한은 개별 95 JS로 대체 |
 | OPS-040 | 업체 목록·상세 최종 마감 noindex 온라인 미리보기 | 총괄 PM·품질 | DONE | P0 | draft `6a7eab527c24701b7813cc2c`·QA 제한 보완·production 불변 |
