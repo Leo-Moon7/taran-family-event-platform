@@ -46,6 +46,27 @@
 - QA-014: `ops/reports/QA-014-outreach-contact-suppression-decision-packet.md`만 수정 가능
 - OPS-011: `ops/reports/PM-2026-07-22-d23-d25-user-review.md`만 수정 가능
 - QA-015: `ops/reports/QA-015-d24-current-standard-alignment.md`만 수정 가능
+- QA-018: `ops/reports/QA-018-full-functional-audit.md`만 수정 가능
+- OPS-007: `ops/reports/OPS-007-vendor-dashboard-redirect.md`만 수정 가능
+- BIZ-005: `ops/reports/BIZ-005-operator-seeded-launch-model.md`만 수정 가능
+- FE-010: `scripts/components/header.js`, `ops/reports/FE-010-mobile-menu-state.md`
+- FE-015: `scripts/pages/checklist.js`, `ops/reports/FE-015-checklist-title.md`
+- FE-016: `login.html`, `ops/reports/FE-016-provider-registration-link.md`
+- OPS-012: `ops/DOMAIN_LAUNCH_CHECKLIST.md`, `ops/reports/OPS-012-pre-domain-launch-readiness.md`
+- BE-006: `ops/reports/BE-006-source-assertion-projection-contract.md`
+- BE-007: `backend/public_data_seed/seed_tool.py`, `backend/public_data_seed/test_seed_tool.py`, `backend/public_data_seed/README.md`, `ops/reports/BE-007-local-seed-tool.md`
+- QA-023: `backend/public_data_seed/source_registry_gate.py`, `backend/public_data_seed/source_registry_gate_fixtures.json`, `backend/public_data_seed/test_source_registry_gate.py`, `ops/reports/QA-023-public-source-synthetic-gate.md`
+- BE-013: `backend/public_data_seed/evidence/15154916/**`, `ops/reports/BE-013-15154916-official-contract-evidence.md`
+- OPS-018: `ops/reports/OPS-018-public-seed-git-tracking-boundary.md`
+- OPS-019: `.gitignore`, `ops/reports/OPS-019-public-seed-git-boundary-implementation.md`
+- QA-019: `ops/reports/QA-019-seed-safety-gate.md`
+- BE-014: `migrations/006_d31_security_baseline.sql`, `scripts/tests/d31-security-migration.mjs`, 전용 보고서
+- OPS-024: `README.md`, `migrations/README.md`, `SUPABASE-SETUP-GUIDE.md`, `OPEN-READINESS-CHECKLIST.md`, `BACKEND_AUDIT.md`, `ops/handoffs/OPS-024.md`, `ops/reports/OPS-024-supabase-bootstrap-docs.md`
+- BE-015: `migrations/007_provider_review_projection_flow.sql`, `scripts/tests/provider-review-projection-migration.mjs`, 전용 보고서
+- FE-019: `scripts/core/inquiry-flow.js`, `scripts/pages/admin/providers.js`, `scripts/tests/provider-review-client.mjs`, 전용 보고서
+- BE-020: `migrations/008_review_submission_flow.sql`, `scripts/tests/review-submission-migration.mjs`, 전용 보고서
+- FE-021: `scripts/pages/provider.js`, `scripts/pages/admin/providers.js`, `scripts/tests/review-submission-client.mjs`, 전용 보고서
+- QA-035: `ops/reports/QA-035-isolated-browser-security-e2e.md`, QA-003 결과 상태
 
 위 파일은 검수 통과한 `DONE` 산출물이다. 후속 작업은 수정하지 않고 읽기만 한다.
 
@@ -57,3 +78,19 @@
 - 두 작업은 같은 홈 파일을 공유하므로 동시에 실행하지 않는다.
 - FE-012는 FE-011 완료 뒤 `scripts/core/event-types.js`, `scripts/core/search-context.js`, `scripts/core/checklist-templates.js`, 홈·계산기·체크리스트 전용 파일과 지정 폼의 행사 선택 항목만 단일 소유한다. `venues.html`은 선택 옵션만 수정하며 CHG-B의 `scripts/pages/venues.js`·`provider.html`·`scripts/pages/provider.js`·`styles/components/filter.css`는 수정하지 않는다.
 - FE-012 중 제품 파일 쓰기는 frontend-design 한 작업만 수행하고, 품질 검수는 구현 완료 후 읽기 전용으로 실행한다.
+- FE-020은 D-41 승인에 따라 `provider.html`, `scripts/pages/provider.js`, `scripts/pages/venues.js`의 CHG-B 현재 변경을 기준 상태로 보존해 단일 소유한다. safe view·수정 요청 연결과 전용 테스트만 추가하며 `styles/components/filter.css`는 범위에서 제외한다.
+- FE-022는 FE-021 commit `ae12db2` 기준 별도 worktree에서 `scripts/pages/provider.js`, `scripts/tests/review-submission-client.mjs`, 전용 보고서만 단일 소유한다.
+- BE-021은 BE-020 commit `d698488` 기준 별도 worktree에서 신규 `migrations/009_admin_profile_self_access.sql`, 신규 전용 테스트와 보고서만 단일 소유한다.
+- BE-022는 BE-021 완료 뒤 신규 additive migration·전용 테스트의 exact 경로를 다시 지정한다. BE-021과 동시에 DB 계약을 수정하지 않는다.
+- QA-036은 제품·migration을 읽기만 하며 전용 결과 보고서와 QA-003 최종 상태만 수정한다.
+- FE-023은 `scripts/pages/provider-register.js`, `scripts/tests/provider-registration-consent.mjs`, 전용 보고서만 단일 소유한다.
+- BE-023은 신규 additive migration, 전용 DB 테스트, 전용 보고서만 소유하며 base table grant와 UI를 수정하지 않는다.
+- FE-024는 BE-023 PASS 뒤 `scripts/pages/admin/providers.js`, 전용 client 테스트, 전용 보고서만 단일 소유한다.
+- QA-037은 제품·migration을 읽기만 하며 전용 결과 보고서와 QA-003 판정만 수정한다.
+- QA-038은 제품·migration을 읽기만 하며 전용 감사 보고서와 후속 카드 경계만 총괄 PM에게 반환한다.
+- BE-024는 신규 `migrations/012_admin_provider_operations.sql`, 전용 migration 테스트와 전용 보고서만 소유하며 base grant와 UI를 수정하지 않는다.
+- FE-025는 BE-024 PASS 뒤 `scripts/pages/admin/providers.js`, 전용 client 테스트와 전용 보고서만 단일 소유한다.
+- FE-026은 BE-024 PASS 뒤 `scripts/pages/admin/dashboard.js`, `scripts/pages/admin/inquiries.js`, 전용 client 테스트와 전용 보고서만 단일 소유한다. FE-025와 파일이 겹치지 않아 병렬 가능하다.
+- QA-039는 제품·migration을 수정하지 않고 결합 worktree·격리 Supabase·전용 보고서만 사용한다.
+- BE-025는 D-42 승인 뒤 신규 `migrations/013_account_deletion_worker.sql`, 신규 `supabase/functions/finalize-account-deletion/**`, 신규 전용 테스트와 보고서만 단일 소유한다. 기존 migration·브라우저·운영 DB·실제 계정은 수정하지 않는다.
+- QA-040은 제품·migration을 읽기만 하며 격리 합성 Auth와 `ops/reports/QA-040-account-deletion-worker-e2e.md`만 사용한다.

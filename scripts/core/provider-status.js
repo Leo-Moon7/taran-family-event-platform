@@ -22,10 +22,18 @@
   }
 
   function getProviderIndustry(provider) {
-    return text(firstValue(provider, ["industry", "업종"]) || provider?.officialVerification?.category || provider?.category || provider?.subcategory);
+    return text(firstValue(provider, ["industry", "업종"]) || provider?.officialVerification?.category || provider?.category || provider?.subcategory || provider?.candidateField);
   }
 
   function getProviderStatus(provider) {
+    if (provider?.unverifiedCandidate === true) {
+      return {
+        key: "unverified",
+        label: text(provider.status) || "정보 확인 전",
+        description: "외부 검색에서 관측된 최소 후보 정보",
+        date: text(provider.observedAt)
+      };
+    }
     const ownerId = text(provider?.ownerUserId || provider?.owner_user_id);
     const explicit = text(provider?.profileStatus || provider?.profile_status).toLowerCase();
     const verification = text(provider?.officialVerification?.status).toLowerCase();
@@ -55,6 +63,14 @@
 
   function getProviderFreshness(provider) {
     const status = getProviderStatus(provider);
+    if (provider?.unverifiedCandidate === true) {
+      return {
+        state: "unverified",
+        label: status.date ? `NAVER API 관측일 ${status.date}` : "NAVER API 관측일 확인 전",
+        date: status.date,
+        ageDays: null
+      };
+    }
     const ageDays = getProviderAgeDays(provider);
     if (ageDays === null) return { state: "unknown", label: "확인일 미등록", date: status.date || "", ageDays: null };
     if (ageDays <= 90) return { state: "fresh", label: `정보 확인 ${status.date}`, date: status.date, ageDays };
@@ -64,16 +80,30 @@
   }
 
   function shouldShowVolatileFacts(provider) {
+    if (provider?.unverifiedCandidate === true) return false;
     const ageDays = getProviderAgeDays(provider);
     return ageDays === null || ageDays <= 120;
   }
 
   function isProviderPublic(provider) {
     if (!provider || text(provider.publicationStatus || provider.publication_status).toLowerCase() === "hidden") return false;
+    if (provider.unverifiedCandidate === true) {
+      return Boolean(
+        text(provider.id) &&
+        text(provider.name) &&
+        text(provider.candidateField) &&
+        getProviderAddress(provider) &&
+        text(provider.sourceType) &&
+        text(provider.sourceUrl) &&
+        text(provider.observedAt) &&
+        text(provider.status)
+      );
+    }
     return Boolean(text(provider.name) && (text(provider.region) || text(provider.area) || getProviderAddress(provider)) && getProviderIndustry(provider));
   }
 
   function canReceiveInquiry(provider) {
+    if (provider?.unverifiedCandidate === true) return false;
     return isProviderPublic(provider) && [
       provider?.inquiryEnabled,
       provider?.inquiry_enabled,
@@ -83,6 +113,9 @@
   }
 
   function getProviderFacts(provider) {
+    if (provider?.unverifiedCandidate === true) {
+      return { minGuests: 0, maxGuests: 0, guarantee: 0, adultMealMin: 0, adultMealMax: 0, rentalFee: 0, parking: 0 };
+    }
     const minGuests = numberFrom(firstValue(provider, ["minimumGuests", "minimum_guests", "minGuests", "minCapacity", "최소 수용인원"]));
     const maxGuests = numberFrom(firstValue(provider, ["maximumGuests", "maximum_guests", "maxGuests", "maxCapacity", "capacity", "최대 수용인원", "수용 인원"]));
     const guarantee = numberFrom(firstValue(provider, ["minimumGuarantee", "minimum_guarantee", "최소 보증 인원", "보증 인원"]));

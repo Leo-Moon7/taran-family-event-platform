@@ -17,6 +17,11 @@ small, .text-small { font-size: var(--font-size-14); }
 strong { font-weight: var(--font-weight-bold); }
 :focus-visible { outline: 3px solid var(--color-accent-500); outline-offset: 3px; }
 ::selection { color: var(--color-brand-900); background: var(--color-accent-100); }
+
+body { background-image: radial-gradient(circle at 8% 0%, rgb(255 255 255 / 70%), transparent 24rem); }
+h1, h2, h3, h4 { letter-spacing: -0.035em; }
+p { color: var(--color-text-muted); }
+a { text-underline-offset: .2em; }
 .visually-hidden {
   position: absolute !important;
   width: 1px !important;

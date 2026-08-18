@@ -44,10 +44,7 @@ function upgradeLegacyHeader(header) {
   nav.setAttribute("aria-label", "주요 메뉴");
   [
     ["venues.html", "업체 찾기"],
-    ["compare.html", "비교함"],
-    ["calculator.html", "비용 계산기"],
-    ["checklist.html", "준비 체크리스트"],
-    ["articles.html", "준비 가이드"]
+    ["compare.html", "비교함"]
   ].forEach(([href, label]) => {
     const link = createElement("a", "", label);
     link.href = href;
@@ -59,6 +56,30 @@ function upgradeLegacyHeader(header) {
     }
     nav.append(link);
   });
+  const toolMenu = createElement("div", "nav-menu");
+  const toolButton = createElement("button", "", "준비 도구");
+  toolButton.type = "button";
+  toolButton.dataset.navMenuButton = "";
+  toolButton.setAttribute("aria-haspopup", "true");
+  toolButton.setAttribute("aria-expanded", "false");
+  const toolPanel = createElement("div", "nav-menu__panel");
+  [
+    ["calculator.html", "비용 계산기", "예상 비용 범위 확인"],
+    ["checklist.html", "준비 체크리스트", "행사일 기준 일정 관리"]
+  ].forEach(([href, title, description]) => {
+    const link = createElement("a");
+    link.href = href;
+    link.append(createElement("strong", "", title), createElement("span", "", description));
+    toolPanel.append(link);
+  });
+  toolMenu.append(toolButton, toolPanel);
+  nav.append(toolMenu);
+  const articleLink = createElement("a", "", "준비백과");
+  articleLink.href = "articles.html";
+  nav.append(articleLink);
+  const providerLink = createElement("a", "", "업체 등록");
+  providerLink.href = "provider-register.html";
+  nav.append(providerLink);
   const authLink = createElement("a", "site-nav__auth", "로그인");
   authLink.href = "login.html";
   authLink.dataset.authLink = "";

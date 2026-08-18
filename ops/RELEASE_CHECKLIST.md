@@ -26,9 +26,19 @@
 - [x] `QA-044` 검증 하니스 오류 보고 보정과 독립 회귀 검증
 - [x] 검증 산출물을 GitHub 원격 분리 브랜치에 보존
 - [x] FE-028·FE-029·QA-045 최신 계산기·헤더 결과를 commit `b424156` 원격 exact 16파일로 보존
+- [x] OPS-033 로컬 통합 후보 HEAD `cdd0929`(제품 기준 `a66b510`), migration `001`~`016`, JavaScript 108개·직접 검사 26/26·build·dist·390/1440 브라우저 회귀
+- [x] QA-046 현행 5행사·공개 헤더 테스트 계약 정합화, 제품 diff 0
+- [x] QA-047 통합 후보 실제 격리 Auth·RLS·RPC와 cleanup 0
+- [x] D-46 승인 뒤 통합 후보 원격 `codex/ops-034-integrated-preview`=`cdd0929`·고유 Netlify draft `6a6aba4d5ef57d8288accfea`
+- [x] QA-048 최종 고유 draft 공개·비로그인 390·768·1440 회귀
+- [x] FE-031 핵심 세부 페이지 공통 히어로·폰트 규격 통합, commit `6a227a5`·고유 draft `6a6ad5c2311d65fe29d4076f` 온라인 18/18 PASS
+- [x] FE-032 페이지별 희미한 이미지·기능 히어로 축소·공통 헤더/푸터·검색 접근성·정적 준비백과 6개·canonical/OG/sitemap, commit `ce3a409`·고유 noindex draft `6a6ade53311d652a67d406fa` PASS
+- [x] FE-033 계산 결과를 전체 입력 흐름 아래에 배치하고 `결과 확인하기` 후 결과 상단 이동·초점 유지, commit `41f90e8`·고유 noindex draft `6a6ae305b9f8279eabcca42e` PASS
+- [x] FE-034 PC 우측 세부 선택·참석/식사 인원·직접 공간비·비용 영향·계약 확인 로직, commit `15cf755`·고유 noindex draft `6a6aea33214bb52650f7896c` PASS
+- [x] D-30 GitHub main·Netlify production 반영, 최종 HEAD `942891b`, deploy `6a6b08fdbf620b000895e2c1`, 핵심 경로·계산기·전역 noindex·레거시 관리자 301 PASS
 - [ ] 위 격리 결과의 운영 DB 적용 승인과 별도 migration 계획
 
-현재 `BE-014` 이후 보정과 FE·BE 보안 작업, migration `015`·`016`은 별도 브랜치와 격리 Supabase에서만 검증했다. 검증 커밋은 GitHub 원격 분리 브랜치에 보존했지만 `main`, 운영 Supabase, Netlify production에는 아직 반영하지 않는다.
+현재 `BE-014` 이후 보정과 FE·BE 보안 작업, migration `015`·`016` 파일은 D-30 통합본과 함께 GitHub main에 보존됐다. 다만 운영 Supabase에는 적용하지 않았고 실제 운영 DB·Storage·Edge·스케줄 상태는 불변이다.
 
 ## 사업·범위
 

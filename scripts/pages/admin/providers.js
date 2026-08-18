@@ -7,7 +7,6 @@
   const empty = document.querySelector("[data-admin-empty]");
   let source = [];
   let online = false;
-  let workspace = { providers: [], claims: [], registrations: [] };
   let page = 1;
   const pageSize = 30;
   const reviewTable = document.querySelector("[data-review-table]");
@@ -38,37 +37,13 @@
   ];
 
   function safeId(value) { return String(value || "").trim().toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-+|-+$/g, ""); }
-  async function refreshWorkspace() {
-    if (!online) return workspace;
-    const queues = [
-      { key: "providers", rpc: "taran_list_admin_providers", limit: 500 },
-      { key: "claims", rpc: "taran_list_admin_provider_claims", limit: 200 },
-      { key: "registrations", rpc: "taran_list_admin_provider_registrations", limit: 200 }
-    ];
-    const results = await Promise.allSettled(queues.map((queue) => (
-      window.TaranApi.rpc(queue.rpc, { p_limit: queue.limit })
-    )));
-    const next = { ...workspace };
-    results.forEach((result, index) => {
-      const queue = queues[index];
-      if (result.status === "fulfilled") {
-        next[queue.key] = Array.isArray(result.value) ? result.value : [];
-      } else {
-        next[queue.key] = [];
-        console.error(`${queue.key} 관리 목록을 불러오지 못했습니다.`, result.reason);
-      }
-    });
-    workspace = next;
-    return workspace;
-  }
-  function editorValues(item) {
-    const provider = item || {};
-    const rawEvents = provider.eventTypes || provider.events || [];
+  function editorValues(item = {}) {
+    const rawEvents = item.eventTypes || item.events || [];
     const eventTypes = rawEvents.map(value => window.SonpumEventTypes?.normalize(value, rawEvents) || value).filter(value => value !== "legacyWedding");
-    return { ...provider, eventTypes, status: provider.publicationStatus === "hidden" ? "archived" : provider.publicationStatus || "draft" };
+    return { ...item, eventTypes, status: item.publicationStatus === "hidden" ? "archived" : item.publicationStatus || "draft" };
   }
   async function save(values, originalId) {
-    const id = originalId || safeId(values.id);
+    const id = safeId(values.id);
     if (!id) throw new Error("업체 관리 번호를 영문으로 입력해 주세요.");
     const minGuests = values.minGuests ? Number(values.minGuests) : null;
     const maxGuests = values.maxGuests ? Number(values.maxGuests) : null;
@@ -79,31 +54,11 @@
       minGuests, maxGuests, price: values.price.trim(), phone: values.phone.trim(), website: values.website.trim(),
       informationCheckedAt: new Date().toISOString().slice(0, 10)
     };
-    try {
-      await window.TaranApi.rpc("taran_save_admin_provider", {
-        p_provider_id: id,
-        p_data: data,
-        p_status: values.status || "draft",
-        p_original_id: originalId || null
-      });
-    } catch (error) {
-      console.error("업체 정보를 저장하지 못했습니다.", error);
-      throw new Error("업체 정보를 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.");
-    }
-    await refreshWorkspace();
+    await window.TaranAdminData.upsert("providers", { id, data, status: values.status || "draft", updated_at: new Date().toISOString() }, "id");
+    if (originalId && originalId !== id) await window.TaranAdminData.remove("providers", { id: `eq.${originalId}` });
     await load();
   }
-  function edit(item) {
-    const editorFields = fields.map(field => (
-      field.name === "id" ? { ...field, readOnly: Boolean(item) } : field
-    ));
-    openEditor({
-      title: item ? "업체 정보 수정" : "업체 등록",
-      fields: editorFields,
-      initial: editorValues(item),
-      onSubmit: values => save(values, item?.id)
-    });
-  }
+  function edit(item) { openEditor({ title: item ? "업체 정보 수정" : "업체 등록", fields, initial: editorValues(item), onSubmit: values => save(values, item?.id) }); }
 
   function renderPagination(total) {
     const nav = document.querySelector("[data-admin-pagination]");
@@ -119,19 +74,12 @@
   }
   async function toggle(item, button) {
     button.disabled = true;
-    const status = item.publicationStatus === "published" ? "archived" : "published";
+    const status = item.publicationStatus === "hidden" ? "published" : "archived";
     try {
-      await window.TaranApi.rpc("taran_set_admin_provider_status", {
-        p_provider_id: item.id,
-        p_status: status
-      });
-      await refreshWorkspace();
-      await load();
-    } catch (error) {
-      console.error("업체 공개 상태를 변경하지 못했습니다.", error);
-      alert("업체 공개 상태를 변경하지 못했습니다. 잠시 후 다시 시도해 주세요.");
-      button.disabled = false;
-    }
+      await window.TaranAdminData.update("providers", { status }, { id: `eq.${item.id}` });
+      item.publicationStatus = status === "published" ? "published" : "hidden";
+      render();
+    } catch (error) { alert(error.message); }
   }
   function render() {
     const query = form?.elements.query.value.trim().toLowerCase() || "";
@@ -170,7 +118,7 @@
   }
   async function load() {
     if (online) {
-      const rows = workspace.providers;
+      const rows = await window.TaranAdminData.list("providers", { order: "updated_at.desc" });
       source = rows.map(row => ({ ...(row.data || {}), id: row.id, publicationStatus: row.status === "archived" ? "hidden" : row.status }));
     } else source = window.publicDirectoryData || [];
     render();
@@ -178,17 +126,14 @@
   async function moderateReview(id, status, button) {
     button.disabled = true;
     try {
-      await window.TaranApi.rpc("taran_moderate_review", {
-        p_review_id: id,
-        p_status: status
-      });
+      await window.TaranAdminData.update("reviews", { status, updated_at: new Date().toISOString() }, { id: `eq.${id}` });
       await loadReviews();
     } catch (error) { alert(error.message); button.disabled = false; }
   }
   async function loadReviews() {
     if (!online || !reviewTable || !reviewSection) return;
     reviewSection.hidden = false;
-    const rows = await window.TaranApi.rpc("taran_list_pending_reviews", { p_limit: 100 });
+    const rows = await window.TaranAdminData.list("reviews", { status: "eq.pending", order: "created_at.asc", limit: 100 });
     reviewTable.replaceChildren();
     rows.forEach(item => {
       const row = document.createElement("tr");
@@ -210,22 +155,25 @@
   async function moderateClaim(item, status, button) {
     button.disabled = true;
     try {
-      await window.TaranApi.rpc("taran_review_admin_provider_claim", {
-        p_claim_id: item.id,
-        p_status: status
-      });
-      await refreshWorkspace();
-      await Promise.all([loadClaims(), load()]);
-    } catch (error) {
-      console.error("업체 수정 권한 요청을 처리하지 못했습니다.", error);
-      alert("업체 수정 권한 요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.");
-      button.disabled = false;
-    }
+      const access = await window.TaranAdminData.context();
+      if (status === "approved") {
+        await window.TaranAdminData.update("providers", {
+          owner_user_id: item.user_id
+        }, { id: `eq.${item.provider_id}` });
+      }
+      await window.TaranAdminData.update("providerClaims", {
+        status,
+        reviewed_by: access.account.id,
+        reviewed_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }, { id: `eq.${item.id}` });
+      await loadClaims();
+    } catch (error) { alert(error.message); button.disabled = false; }
   }
   async function loadClaims() {
     if (!online || !claimTable || !claimSection) return;
     claimSection.hidden = false;
-    const rows = workspace.claims;
+    const rows = await window.TaranAdminData.list("providerClaims", { order: "created_at.asc", limit: 100 });
     claimTable.replaceChildren();
     rows.forEach(item => {
       const row = document.createElement("tr");
@@ -262,12 +210,49 @@
   async function moderateRegistration(item, status, button) {
     button.disabled = true;
     try {
-      await window.TaranApi.rpc("taran_review_provider_registration", {
-        p_registration_id: item.id,
-        p_approve: status === "approved",
-        p_review_note: null
-      });
-      await refreshWorkspace();
+      const access = await window.TaranAdminData.context();
+      if (status === "approved") {
+        const data = item.data || {};
+        const id = safeId(data.id || data.name || data.provider_name || `provider-${item.id}`);
+        const providerData = {
+          name: data.name || data.provider_name,
+          category: data.industry || "업체",
+          address: data.address || data.region || "",
+          eventTypes: data.event_tags || [],
+          minGuests: data.minimum_guests || null,
+          maxGuests: data.maximum_guests || null,
+          minimumGuarantee: data.minimum_guarantee || null,
+          rentalFee: data.rental_fee || null,
+          adultMealPriceMin: data.adult_meal_price_min || null,
+          parkingCount: data.parking_count || null,
+          phone: data.phone || "",
+          website: data.official_link || "",
+          ownerRegistered: true,
+          informationCheckedAt: new Date().toISOString().slice(0, 10)
+        };
+        await window.TaranAdminData.upsert("providers", {
+          id,
+          data: providerData,
+          status: "published",
+          owner_user_id: item.user_id,
+          profile_status: "claimed",
+          event_types: providerData.eventTypes,
+          minimum_guests: providerData.minGuests,
+          maximum_guests: providerData.maxGuests,
+          minimum_guarantee: providerData.minimumGuarantee,
+          adult_meal_price_min: providerData.adultMealPriceMin,
+          rental_fee: providerData.rentalFee,
+          parking_count: providerData.parkingCount,
+          inquiry_enabled: true,
+          updated_at: new Date().toISOString()
+        }, "id");
+      }
+      await window.TaranAdminData.update("providerRegistrations", {
+        status,
+        reviewed_by: access.account.id,
+        reviewed_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }, { id: `eq.${item.id}` });
       await loadRegistrations();
       await load();
     } catch (error) {
@@ -279,7 +264,7 @@
   async function loadRegistrations() {
     if (!online || !registrationTable || !registrationSection) return;
     registrationSection.hidden = false;
-    const rows = workspace.registrations;
+    const rows = await window.TaranAdminData.list("providerRegistrations", { order: "created_at.asc", limit: 200 });
     registrationTable.replaceChildren();
     rows.forEach((item) => {
       const data = item.data || {};
@@ -315,8 +300,10 @@
     online = access.mode === "online";
     if (online) addPageAction("새 업체 등록", () => edit(null));
     form?.addEventListener("submit", event => { event.preventDefault(); page = 1; render(); });
-    if (online) await refreshWorkspace();
-    await Promise.allSettled([load(), loadReviews(), loadClaims(), loadRegistrations()]);
+    await load();
+    await loadReviews();
+    await loadClaims();
+    await loadRegistrations();
   }
   init().catch(error => console.error("업체 관리 목록을 불러오지 못했습니다.", error));
 })();

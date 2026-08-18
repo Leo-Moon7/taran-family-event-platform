@@ -126,10 +126,7 @@ for (const file of htmlFiles) {
     const target = decoded.startsWith("/")
       ? path.join(root, decoded.replace(/^\/+/, ""))
       : path.resolve(path.dirname(file), decoded);
-    const generatedAtBuild = /^articles\/[a-z0-9-]+\.html$/i.test(decoded);
-    if (!fs.existsSync(target) && !generatedAtBuild) {
-      fail(`존재하지 않는 파일 참조: ${relative(file)} → ${reference}`);
-    }
+    if (!fs.existsSync(target)) fail(`존재하지 않는 파일 참조: ${relative(file)} → ${reference}`);
   }
 
   if (/upgrade\.css|styles\.css/i.test(source)) {

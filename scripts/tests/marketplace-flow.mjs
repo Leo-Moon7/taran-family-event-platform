@@ -116,10 +116,7 @@ for (const role of roleRules) {
 
 for (const html of ["index.html", "venues.html", "provider.html", "compare.html", "inquiry.html"]) {
   const source = read(html);
-  const siteNav = source.match(/<nav\b[^>]*class=["'][^"']*\bsite-nav\b[^"']*["'][^>]*>[\s\S]*?<\/nav>/i)?.[0] || "";
-  if (!siteNav) {
-    failures.push(`${html}: 핵심 내비게이션 범위를 확인할 수 없습니다.`);
-  } else if (/href=["']community(?:-post)?\.html/i.test(siteNav)) {
+  if (/href=["']community(?:-post)?\.html/i.test(source)) {
     failures.push(`${html}: 핵심 내비게이션에 커뮤니티 링크가 남아 있습니다.`);
   }
   if (/(?:포인트|리워드)\s*(?:적립|교환|받기)/.test(source)) {
