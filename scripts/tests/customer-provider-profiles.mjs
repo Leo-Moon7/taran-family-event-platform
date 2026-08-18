@@ -37,7 +37,8 @@ const expected = new Map([
   ["NVR-DOL-005", ["서라벌한정식 서초 본점", "서울특별시 서초구 법원로3길 6-9"]],
   ["NVR-DOL-007", ["눈부신일상 강남점", "서울특별시 서초구 양재천로21길 33 치금빌딩"]],
   ["NVR-DOL-008", ["다온재 한옥스튜디오 돌사진 삼청동집", "서울특별시 종로구 북촌로11다길 23"]],
-  ["NVR-DOL-009", ["돌사진 한옥스튜디오 이다한옥 북촌점", "서울특별시 종로구 북촌로15길 56"]]
+  ["NVR-DOL-009", ["돌사진 한옥스튜디오 이다한옥 북촌점", "서울특별시 종로구 북촌로15길 56"]],
+  ["OFF-DOL-001", ["오크우드 프리미어 코엑스 센터", "서울특별시 강남구 테헤란로87길 46"]]
 ]);
 const expectedIntroductions = new Map([
   ["NVR-DOL-001", "도심 전망의 프라이빗 룸과 중식 코스가 있는 돌잔치·가족 모임 레스토랑입니다."],
@@ -46,7 +47,8 @@ const expectedIntroductions = new Map([
   ["NVR-DOL-005", "단독 룸과 한정식 식사를 중심으로 돌잔치·백일 행사를 준비할 수 있는 레스토랑입니다."],
   ["NVR-DOL-007", "백일·돌 촬영과 가족 촬영을 중심으로 하는 아기사진 스튜디오 강남점입니다."],
   ["NVR-DOL-008", "한옥 돌잔치와 돌사진·돌스냅을 함께 준비하는 한옥 스튜디오입니다."],
-  ["NVR-DOL-009", "북촌 한옥에서 돌촬영을 전문으로 하며 한복과 헤어·메이크업을 함께 준비하는 스튜디오입니다."]
+  ["NVR-DOL-009", "북촌 한옥에서 돌촬영을 전문으로 하며 한복과 헤어·메이크업을 함께 준비하는 스튜디오입니다."],
+  ["OFF-DOL-001", "객실에서 가족끼리 첫 생일을 진행하는 공식 돌잔치 패키지를 운영하는 호텔입니다."]
 ]);
 const topLevelKeys = [
   "availability",
@@ -88,14 +90,15 @@ const officialHosts = new Set([
   "seorabol.kr",
   "www.ilsangst.com",
   "www.daonjae.com",
-  "www.edahanok.com"
+  "www.edahanok.com",
+  "www.homehmc.com"
 ]);
 const koreanBusinessPhonePattern = /^(?:0\d{1,2}-\d{3,4}-\d{4}|1\d{3}-\d{4})$/;
 
 assert.ok(Array.isArray(profiles), "projection must be an array");
-assert.equal(profiles.length, 7, "exactly seven profiles must be customer ready");
-assert.equal(new Set(profiles.map(({ id }) => id)).size, 7, "profile IDs must be unique");
-assert.deepEqual([...profiles.map(({ id }) => id)].sort(), [...expected.keys()].sort(), "only the seven audited IDs are allowed");
+assert.equal(profiles.length, 8, "exactly eight profiles must be customer ready");
+assert.equal(new Set(profiles.map(({ id }) => id)).size, 8, "profile IDs must be unique");
+assert.deepEqual([...profiles.map(({ id }) => id)].sort(), [...expected.keys()].sort(), "only the eight audited IDs are allowed");
 assertDeepFrozen(profiles);
 
 for (const profile of profiles) {
@@ -108,7 +111,7 @@ for (const profile of profiles) {
   assert.doesNotMatch(profile.introduction, /안내하는/, `${profile.id}: repetitive wording must be removed`);
   assert.doesNotMatch(profile.introduction, /\d/, `${profile.id}: introduction must not add numeric facts`);
   assert.equal(profile.displayGate, "customer_ready", `${profile.id}: display gate`);
-  assert.equal(profile.updatedAt, "2026-08-14", `${profile.id}: update date`);
+  assert.equal(profile.updatedAt, profile.id === "OFF-DOL-001" ? "2026-08-18" : "2026-08-14", `${profile.id}: update date`);
 
   assert.ok(profile.serviceCategories.length >= 1, `${profile.id}: service category required`);
   assert.ok(profile.services.length >= 2, `${profile.id}: at least two services required`);
@@ -144,7 +147,7 @@ for (const profile of profiles) {
   });
   profile.fieldEvidence.forEach((item) => {
     assert.equal(item.sourceClass, "official_website", `${profile.id}: evidence class`);
-    assert.equal(item.checkedAt, "2026-08-14", `${profile.id}: evidence date`);
+    assert.equal(item.checkedAt, profile.updatedAt, `${profile.id}: evidence date`);
     const url = new URL(item.sourceUrl);
     assert.ok(officialHosts.has(url.hostname), `${profile.id}: evidence host ${url.hostname}`);
   });
@@ -171,7 +174,7 @@ assert.deepEqual(
 });
 
 const priceReady = profiles.filter(({ products }) => products.length > 0);
-assert.deepEqual(plain(priceReady.map(({ id }) => id)), ["NVR-DOL-001", "NVR-DOL-004"], "numeric prices are allowed for exactly two audited providers");
+assert.deepEqual(plain(priceReady.map(({ id }) => id)), ["NVR-DOL-001", "NVR-DOL-004", "OFF-DOL-001"], "numeric prices are allowed for exactly three audited providers");
 
 for (const profile of priceReady) {
   assert.ok(profile.fieldEvidence.some(({ field }) => field === "products"), `${profile.id}: product evidence required`);
@@ -183,7 +186,7 @@ for (const profile of priceReady) {
     assert.equal(item.currency, "KRW", `${profile.id}/${item.name}: currency`);
     assert.ok(item.unit.length > 0, `${profile.id}/${item.name}: unit`);
     assert.ok(item.conditions.length > 0, `${profile.id}/${item.name}: conditions`);
-    assert.equal(item.checkedAt, "2026-08-14", `${profile.id}/${item.name}: checked date`);
+    assert.equal(item.checkedAt, profile.updatedAt, `${profile.id}/${item.name}: checked date`);
     assert.equal(item.evidence.sourceClass, "official_website", `${profile.id}/${item.name}: source class`);
     assert.equal(item.evidence.checkedAt, item.checkedAt, `${profile.id}/${item.name}: evidence date`);
     assert.ok(officialHosts.has(new URL(item.evidence.sourceUrl).hostname), `${profile.id}/${item.name}: source host`);
@@ -195,7 +198,7 @@ assert.equal(profilesWithoutPrice.length, 5, "five profiles must keep prices mis
 assert.deepEqual(
   plain(profilesWithoutPrice.map(({ id }) => id)),
   ["NVR-DOL-003", "NVR-DOL-005", "NVR-DOL-007", "NVR-DOL-008", "NVR-DOL-009"],
-  "only the two directly audited price profiles may expose numeric prices"
+  "only the three directly audited price profiles may expose numeric prices"
 );
 
 const categoryCounts = Object.fromEntries(
@@ -206,8 +209,8 @@ const categoryCounts = Object.fromEntries(
 );
 assert.deepEqual(
   categoryCounts,
-  { "돌잔치 장소·식사": 4, "돌사진·스튜디오": 3 },
-  "the seven profiles must keep the approved 4/3 category split"
+  { "돌잔치 장소·식사": 5, "돌사진·스튜디오": 3 },
+  "the eight profiles must keep the approved 5/3 category split"
 );
 assert.equal(profiles.filter(({ image }) => image.url).length, 0, "provider images must remain empty");
 assert.equal(profiles.filter(({ serviceAreas }) => serviceAreas.length).length, 0, "travel areas must remain empty");

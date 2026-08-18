@@ -145,11 +145,16 @@
       empty.hidden = false;
       return;
     }
-    title.textContent = "참고 메뉴 가격";
+    const packagePrice = profile.products.every((product) => product.unit === "패키지 총액");
+    title.textContent = packagePrice ? "돌잔치 패키지 가격" : "참고 메뉴 가격";
     const lead = document.createElement("strong");
-    lead.textContent = "아래 금액은 성인 1인 코스 가격입니다.";
+    lead.textContent = packagePrice
+      ? "아래 금액은 공식 돌잔치 패키지 총액입니다."
+      : "아래 금액은 성인 1인 코스 가격입니다.";
     const detail = document.createElement("span");
-    detail.textContent = " 돌잔치 행사 구성, 룸 이용 조건 및 추가 비용은 업체에 별도로 문의해 주세요.";
+    detail.textContent = packagePrice
+      ? " 객실 유형과 코스에 따라 달라지며 예약 가능 여부는 업체에 확인해 주세요."
+      : " 돌잔치 행사 구성, 룸 이용 조건 및 추가 비용은 업체에 별도로 문의해 주세요.";
     description.replaceChildren(lead, detail);
     empty.hidden = true;
     profile.products.forEach((product) => {
@@ -227,7 +232,11 @@
     addFact(heroFacts, "주소", customerProfile.location.address);
     addFact(heroFacts, "서비스", customerProfile.services.join(" · "));
     addFact(heroFacts, "이용 방식", customerProfile.serviceMode === "visit" ? "매장 방문" : "업체 문의");
-    addFact(heroFacts, "가격", customerProfile.products.length ? "공식 메뉴·코스 가격은 아래에서 확인" : "업체 문의");
+    const packagePrice = customerProfile.products.length
+      && customerProfile.products.every((product) => product.unit === "패키지 총액");
+    addFact(heroFacts, "가격", customerProfile.products.length
+      ? (packagePrice ? "공식 돌잔치 패키지 가격은 아래에서 확인" : "공식 메뉴·코스 가격은 아래에서 확인")
+      : "업체 문의");
     heroFacts.hidden = false;
 
     const tags = $("#provider-tags");
@@ -259,7 +268,7 @@
     }
 
     setAnchorLinks([
-      ["#provider-products", customerProfile.products.length ? "참고 메뉴 가격" : "가격 안내"],
+      ["#provider-products", customerProfile.products.length ? (packagePrice ? "패키지 가격" : "참고 메뉴 가격") : "가격 안내"],
       ["#provider-before-use", "이용 전 확인"],
       ["#provider-contact", "위치·연락처"]
     ]);

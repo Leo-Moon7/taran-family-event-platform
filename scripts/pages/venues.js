@@ -135,12 +135,15 @@
     price.className = "directory-card__price";
     if (profile.products.length) {
       const product = profile.products[0];
+      const packagePrice = product.unit === "패키지 총액";
       const heading = document.createElement("strong");
-      heading.textContent = `성인 1인 코스 ${formatWon(product.priceMin)}부터`;
+      heading.textContent = packagePrice
+        ? `돌잔치 패키지 ${formatWon(product.priceMin)}부터`
+        : `성인 1인 코스 ${formatWon(product.priceMin)}부터`;
       const unit = document.createElement("span");
       unit.textContent = `${product.name} · ${product.unit} · ${formatDate(product.checkedAt)} 확인`;
       const caution = document.createElement("small");
-      caution.textContent = "돌잔치 전체 비용 별도 문의";
+      caution.textContent = packagePrice ? "객실·코스별 이용 조건 확인 필요" : "돌잔치 전체 비용 별도 문의";
       price.append(heading, unit, caution);
     } else {
       const heading = document.createElement("strong");

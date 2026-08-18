@@ -2,6 +2,7 @@
   "use strict";
 
   const checkedAt = "2026-08-14";
+  const oakwoodCheckedAt = "2026-08-18";
 
   function deepFreeze(value) {
     if (!value || typeof value !== "object" || Object.isFrozen(value)) return value;
@@ -15,6 +16,15 @@
       sourceClass: "official_website",
       sourceUrl,
       checkedAt
+    };
+  }
+
+  function datedEvidence(field, sourceUrl, evidenceCheckedAt) {
+    return {
+      field,
+      sourceClass: "official_website",
+      sourceUrl,
+      checkedAt: evidenceCheckedAt
     };
   }
 
@@ -50,6 +60,7 @@
   const edahanokAboutUrl = "https://www.edahanok.com/about";
   const edahanokProductUrl = "https://www.edahanok.com/product";
   const edahanokContactUrl = "https://www.edahanok.com/contact";
+  const oakwoodFirstBirthdayUrl = "https://www.homehmc.com/ko/special-offers/event-promotions/323/";
 
   const profiles = [
     {
@@ -425,6 +436,72 @@
         evidence("services", edahanokAboutUrl),
         evidence("contact.telephone", edahanokContactUrl),
         evidence("contact.officialLinks", edahanokAboutUrl)
+      ]
+    },
+    {
+      id: "OFF-DOL-001",
+      name: "오크우드 프리미어 코엑스 센터",
+      displayGate: "customer_ready",
+      introduction: "객실에서 가족끼리 첫 생일을 진행하는 공식 돌잔치 패키지를 운영하는 호텔입니다.",
+      serviceCategories: ["돌잔치 장소·식사"],
+      services: ["돌잔치 패키지", "프라이빗 객실", "코스 식사", "기본 돌상·포토 테이블"],
+      location: {
+        province: "서울특별시",
+        district: "강남구",
+        neighborhood: "삼성동",
+        address: "서울특별시 강남구 테헤란로87길 46"
+      },
+      serviceMode: "visit",
+      serviceAreas: [],
+      businessHours: [],
+      contact: {
+        telephone: { display: "02-3466-7205", href: "tel:+82234667205" },
+        officialLinks: [
+          { label: "오크우드 돌잔치 패키지 공식 안내", kind: "website", url: oakwoodFirstBirthdayUrl }
+        ]
+      },
+      image: {
+        url: null,
+        alt: "",
+        rightsVerified: false,
+        fallbackCategory: "돌잔치 장소·식사"
+      },
+      products: [
+        {
+          name: "4베드룸 프리미어 돌잔치 패키지",
+          includedItems: ["4베드룸 프리미어 1박", "8인 코스 식사", "기본 돌상·포토 테이블", "주차 최대 4시간"],
+          priceMin: 3580000,
+          priceMax: 3980000,
+          currency: "KRW",
+          unit: "패키지 총액",
+          conditions: ["A·B 코스 선택", "주말 가족연 전용", "2026.08.01~2026.12.31 공식 안내 기준"],
+          checkedAt: oakwoodCheckedAt,
+          evidence: { sourceClass: "official_website", sourceUrl: oakwoodFirstBirthdayUrl, checkedAt: oakwoodCheckedAt }
+        },
+        {
+          name: "펜트하우스 돌잔치 패키지",
+          includedItems: ["펜트하우스 1박", "10인 코스 식사", "기본 돌상·포토 테이블", "주차 최대 4시간"],
+          priceMin: 6400000,
+          priceMax: 6900000,
+          currency: "KRW",
+          unit: "패키지 총액",
+          conditions: ["A·B 코스 선택", "주말 가족연 전용", "2026.08.01~2026.12.31 공식 안내 기준"],
+          checkedAt: oakwoodCheckedAt,
+          evidence: { sourceClass: "official_website", sourceUrl: oakwoodFirstBirthdayUrl, checkedAt: oakwoodCheckedAt }
+        }
+      ],
+      extraCosts: [],
+      policies: { cancellation: null, setup: null, travel: null },
+      availability: { mode: "contact_required", checkedAt: null },
+      updatedAt: oakwoodCheckedAt,
+      capabilities: { inquiry: false, compare: false, save: false, review: false },
+      fieldEvidence: [
+        datedEvidence("identity", oakwoodFirstBirthdayUrl, oakwoodCheckedAt),
+        datedEvidence("location", oakwoodFirstBirthdayUrl, oakwoodCheckedAt),
+        datedEvidence("services", oakwoodFirstBirthdayUrl, oakwoodCheckedAt),
+        datedEvidence("contact.telephone", oakwoodFirstBirthdayUrl, oakwoodCheckedAt),
+        datedEvidence("contact.officialLinks", oakwoodFirstBirthdayUrl, oakwoodCheckedAt),
+        datedEvidence("products", oakwoodFirstBirthdayUrl, oakwoodCheckedAt)
       ]
     }
   ];
